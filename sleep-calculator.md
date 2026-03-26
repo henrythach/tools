@@ -1,0 +1,1 @@
+A sleep calculator that helps you find optimal sleep and wake times based on 90-minute sleep cycles. Enter a desired wake-up time to see when to fall asleep, or enter a sleep time (or tap "Sleep Now") to see when to set your alarm. Shows 5-6 cycles as recommended, with lower cycle options available. Cycle length and fall-asleep time are customizable via Settings.
