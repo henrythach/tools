@@ -7,3 +7,4 @@ Inspired by [Simon Willison's HTML tools](https://simonwillison.net/2025/Dec/10/
 ## Tools
 
 - [JSON to Table](json-to-table.html) — Paste a JSON array and get a clean, minimal table. Handles nested objects with dot-notation column headers.
+- [Sleep Calculator](sleep-calculator.html) — Calculate optimal sleep and wake times based on 90-minute sleep cycles.
