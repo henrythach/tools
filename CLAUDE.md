@@ -17,6 +17,7 @@ A collection of single-file HTML tools, inspired by [Simon Willison's approach](
 - **Load dependencies from CDNs** (cdnjs, jsDelivr) if needed — never npm.
 - **Copy/paste as primary I/O.** Tools should accept pasted input and provide "Copy" buttons for output.
 - **Minimal, clean UI.** Use system fonts, light styling, and responsive layout. No heavy CSS frameworks.
+- **Support dark mode.** Use CSS custom properties (`--var`) for all colors and a `@media (prefers-color-scheme: dark)` block to redefine them. Never hardcode colors outside of `:root`.
 - **Persist state in the URL hash** when useful (bookmarkable/shareable).
 - **Use localStorage** for secrets (API keys) or larger ephemeral state.
 - **Client-side only.** No server needed — all processing happens in the browser.
