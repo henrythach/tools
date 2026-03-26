@@ -26,7 +26,7 @@ A collection of single-file HTML tools, inspired by [Simon Willison's approach](
 
 1. Create a new `.html` file in the repo root with a descriptive kebab-case name (e.g., `json-to-table.html`).
 2. Include a `<title>` and an `<h1>` matching the tool's purpose.
-3. Add a footer linking back to the GitHub source.
+3. Add a footer with two links: one back to the main tools page (`./`) and one to the source of the HTML file on GitHub (e.g. `https://github.com/henrythach/tools/blob/main/json-to-table.html`).
 4. Create a matching `.md` file with the same base name (e.g., `json-to-table.md`) that briefly describes what the tool does.
 5. Update `README.md` to list the new tool.
 
