@@ -7,5 +7,5 @@ Inspired by [Simon Willison's HTML tools](https://simonwillison.net/2025/Dec/10/
 ## Tools
 
 - [JSON to Table](json-to-table.html) — Paste a JSON array and get a clean, minimal table. Handles nested objects with dot-notation column headers.
-- [JWT Decoder](jwt-decoder.html) — Decode, inspect, and verify JSON Web Tokens. Edit timestamps with human-friendly inputs and keep a history of decoded tokens.
 - [Sleep Calculator](sleep-calculator.html) — Calculate optimal sleep and wake times based on 90-minute sleep cycles.
+- [JWT Decoder](jwt-decoder.html) — Decode, encode, edit, and verify JWTs with inline editing, timestamp pickers, re-signing, and history.

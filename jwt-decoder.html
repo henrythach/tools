@@ -70,9 +70,31 @@
     h1 { font-size: 1.4rem; margin-bottom: 0.25rem; }
     .subtitle { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem; }
 
+    .mode-toggle {
+      display: flex;
+      gap: 0;
+      margin-bottom: 1rem;
+    }
+    .mode-toggle button {
+      flex: 1;
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      background: var(--btn-bg);
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .mode-toggle button:first-child { border-radius: 4px 0 0 4px; }
+    .mode-toggle button:last-child { border-radius: 0 4px 4px 0; border-left: none; }
+    .mode-toggle button.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
     textarea {
       width: 100%;
-      height: 120px;
       font-family: "SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas, monospace;
       font-size: 0.8rem;
       padding: 0.75rem;
@@ -104,15 +126,21 @@
     button:hover { background: var(--btn-hover); }
     button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
     button.primary:hover { background: var(--accent-hover); }
-    button.small {
-      padding: 0.2rem 0.5rem;
-      font-size: 0.7rem;
-    }
+    button.small { padding: 0.2rem 0.5rem; font-size: 0.7rem; }
     button.danger { color: var(--error); }
 
-    .error-msg { color: var(--error); font-size: 0.8rem; margin-top: 0.25rem; }
+    select {
+      padding: 0.4rem 0.6rem;
+      font-size: 0.8rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--input-bg);
+      color: var(--text);
+      cursor: pointer;
+    }
+    select:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
 
-    #output { display: none; margin-top: 1rem; }
+    .error-msg { color: var(--error); font-size: 0.8rem; margin-top: 0.25rem; }
 
     .section-label {
       font-size: 0.75rem;
@@ -160,8 +188,7 @@
       border-radius: 3px;
     }
     .badge.valid { background: var(--success-bg); color: var(--success); }
-    .badge.invalid { background: var(--error-bg); color: var(--error); }
-    .badge.expired { background: var(--error-bg); color: var(--error); }
+    .badge.invalid, .badge.expired { background: var(--error-bg); color: var(--error); }
 
     .claims-table {
       width: 100%;
@@ -180,10 +207,37 @@
       color: var(--claim-label);
       width: 1%;
     }
-    .claims-table td:last-child {
+    .claims-table .claim-value {
       font-family: "SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas, monospace;
       word-break: break-all;
+      cursor: pointer;
     }
+    .claims-table .claim-value:hover { background: var(--btn-hover); }
+    .claims-table .claim-actions { width: 1%; white-space: nowrap; }
+    .claims-table tr.modified td { border-left: 2px solid var(--accent); }
+    .claims-table .edit-input {
+      font-family: "SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas, monospace;
+      font-size: 0.8rem;
+      width: 100%;
+      padding: 0.2rem 0.4rem;
+      border: 1px solid var(--accent);
+      border-radius: 3px;
+      background: var(--input-bg);
+      color: var(--text);
+    }
+    .claims-table .edit-input:focus { outline: 2px solid var(--accent); }
+
+    .add-claim-row td { border-bottom: none; padding-top: 0.5rem; }
+    .add-claim-row input {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.4rem;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      background: var(--input-bg);
+      color: var(--text);
+      width: 100%;
+    }
+    .add-claim-row input:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
 
     .time-editor {
       margin-top: 1rem;
@@ -192,13 +246,8 @@
       border: 1px solid var(--border-subtle);
       border-radius: 4px;
     }
-    .time-editor h3 {
-      font-size: 0.85rem;
-      margin-bottom: 0.5rem;
-    }
-    .time-field {
-      margin-bottom: 0.75rem;
-    }
+    .time-editor h3 { font-size: 0.85rem; margin-bottom: 0.5rem; }
+    .time-field { margin-bottom: 0.75rem; }
     .time-field:last-child { margin-bottom: 0; }
     .time-field-label {
       font-size: 0.75rem;
@@ -230,22 +279,26 @@
       margin-bottom: 0.25rem;
     }
 
-    .modified-section {
+    .resigned-section {
       margin-top: 1rem;
       padding: 0.75rem;
       border: 1px solid var(--border-subtle);
       border-radius: 4px;
+    }
+    .resigned-section.signed {
+      border-left: 3px solid var(--success);
+      background: var(--card-bg);
+    }
+    .resigned-section.unsigned {
       background: var(--warning-bg);
     }
-    .modified-section .warning-label {
+    .resigned-section .resigned-label {
       font-size: 0.75rem;
       font-weight: 600;
-      color: var(--warning-text);
       margin-bottom: 0.5rem;
     }
-    .modified-section pre {
-      background: var(--code-bg);
-    }
+    .resigned-section.signed .resigned-label { color: var(--success); }
+    .resigned-section.unsigned .resigned-label { color: var(--warning-text); }
 
     .verify-row {
       display: flex;
@@ -266,27 +319,49 @@
     }
     .verify-row input:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
 
+    .encode-field { margin-bottom: 0.75rem; }
+    .encode-field label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+    }
+    .encode-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .encode-row input {
+      flex: 1;
+      font-size: 0.8rem;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--input-bg);
+      color: var(--text);
+      font-family: "SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas, monospace;
+    }
+    .encode-row input:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
+
+    .history-section {
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-subtle);
+    }
+    .history-section .section-label { margin-bottom: 0.5rem; }
     .history-entry {
       display: flex;
       gap: 0.5rem;
       align-items: center;
-      padding: 0.4rem 0;
+      padding: 0.5rem 0.4rem;
       border-bottom: 1px solid var(--border-subtle);
       font-size: 0.8rem;
       cursor: pointer;
+      border-radius: 3px;
     }
-    .history-entry:last-child { border-bottom: none; }
     .history-entry:hover { background: var(--btn-hover); }
-    .history-token {
-      font-family: "SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas, monospace;
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      flex-shrink: 0;
-      max-width: 180px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
+    .history-main { flex: 1; min-width: 0; }
     .history-label {
       font-size: 0.75rem;
       padding: 0.15rem 0.35rem;
@@ -294,10 +369,19 @@
       border-radius: 3px;
       background: var(--input-bg);
       color: var(--text);
-      min-width: 60px;
-      flex: 1;
+      width: 100%;
+      max-width: 200px;
     }
     .history-label:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
+    .history-claims {
+      display: block;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
     .history-time {
       font-size: 0.7rem;
       color: var(--text-muted);
@@ -311,8 +395,14 @@
       background: none;
       color: var(--text-muted);
       cursor: pointer;
+      flex-shrink: 0;
     }
     .history-delete:hover { color: var(--error); background: none; }
+    .history-empty {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      padding: 0.5rem 0;
+    }
 
     footer {
       margin-top: 2rem;
@@ -326,68 +416,100 @@
 </head>
 <body>
   <h1>JWT Decoder</h1>
-  <p class="subtitle">Decode, inspect, and verify JSON Web Tokens.</p>
+  <p class="subtitle">Decode, encode, edit, and verify JSON Web Tokens.</p>
 
-  <textarea id="jwt-input" placeholder="Paste a JWT here (eyJhbGciOi...)" spellcheck="false"></textarea>
-  <div id="error" class="error-msg"></div>
-
-  <div class="actions">
-    <button class="primary" id="decode-btn">Decode</button>
-    <button id="copy-payload-btn">Copy Payload</button>
-    <button id="clear-btn">Clear</button>
+  <div class="mode-toggle">
+    <button id="mode-decode" class="active" onclick="setMode('decode')">Decode</button>
+    <button id="mode-encode" onclick="setMode('encode')">Encode</button>
   </div>
 
-  <div id="output">
-    <details id="header-section">
-      <summary>Header (JOSE)</summary>
-      <div class="details-body">
-        <pre id="header-json"></pre>
-      </div>
-    </details>
+  <!-- DECODE MODE -->
+  <div id="decode-mode">
+    <textarea id="jwt-input" rows="5" placeholder="Paste a JWT here (eyJhbGciOi...)" spellcheck="false"></textarea>
+    <div id="decode-error" class="error-msg"></div>
 
-    <div style="margin-top: 1rem;">
-      <div class="section-label">Payload <span id="expiry-badge"></span></div>
-      <pre id="payload-json"></pre>
+    <div class="actions">
+      <button class="primary" id="decode-btn">Decode</button>
+      <button id="copy-payload-btn">Copy Payload</button>
+      <button id="clear-btn">Clear</button>
+    </div>
+
+    <div id="output" style="display:none;">
+      <details id="header-section">
+        <summary>Header (JOSE)</summary>
+        <div class="details-body">
+          <pre id="header-json"></pre>
+        </div>
+      </details>
+
+      <div style="margin-top: 1rem;">
+        <div class="section-label">Payload <span id="expiry-badge"></span></div>
+        <pre id="payload-json"></pre>
+      </div>
+
       <table class="claims-table" id="claims-table"></table>
-    </div>
 
-    <div id="time-editor" class="time-editor" style="display: none;">
-      <h3>Edit Timestamps</h3>
-      <div id="time-fields"></div>
-      <div id="modified-section" class="modified-section" style="display: none;">
-        <div class="warning-label">Modified payload (unsigned &mdash; cannot re-sign without the secret)</div>
-        <pre id="modified-json"></pre>
-        <div class="actions">
-          <button id="copy-modified-btn" class="small">Copy Modified Payload</button>
-        </div>
+      <div id="time-editor" class="time-editor" style="display:none;">
+        <h3>Edit Timestamps</h3>
+        <div id="time-fields"></div>
       </div>
-    </div>
 
-    <details id="verify-section">
-      <summary>Signature Verification (HS256)</summary>
-      <div class="details-body">
-        <div class="verify-row">
-          <input type="password" id="secret-input" placeholder="Shared secret">
-          <button id="toggle-secret-btn" class="small">Show</button>
-          <button id="verify-btn" class="primary small">Verify</button>
-          <span id="verify-result"></span>
+      <div id="resigned-section" style="display:none;"></div>
+
+      <details id="verify-section" style="margin-top: 1rem;">
+        <summary>Signature Verification</summary>
+        <div class="details-body">
+          <div class="verify-row">
+            <select id="algorithm-select"></select>
+            <input type="password" id="secret-input" placeholder="Shared secret">
+            <button id="toggle-secret-btn" class="small">Show</button>
+            <button id="verify-btn" class="primary small">Verify</button>
+            <span id="verify-result"></span>
+          </div>
+          <div id="crypto-warning" class="error-msg" style="display:none;margin-top:0.5rem;">
+            Signature verification requires HTTPS or localhost.
+          </div>
         </div>
-        <div id="crypto-warning" class="error-msg" style="display: none; margin-top: 0.5rem;">
-          Signature verification requires HTTPS or localhost.
-        </div>
-      </div>
-    </details>
+      </details>
+    </div>
   </div>
 
-  <details id="history-section" style="margin-top: 1rem;">
-    <summary id="history-summary">History (0)</summary>
-    <div class="details-body">
-      <div id="history-list"></div>
-      <div class="actions" id="history-actions" style="display: none;">
-        <button id="clear-history-btn" class="small danger">Clear All</button>
+  <!-- ENCODE MODE -->
+  <div id="encode-mode" style="display:none;">
+    <div class="encode-field">
+      <label for="encode-payload">Payload (JSON)</label>
+      <textarea id="encode-payload" rows="10" placeholder='{"sub": "1234567890", "name": "John Doe", "iat": 1516239022}' spellcheck="false"></textarea>
+    </div>
+    <div id="encode-error" class="error-msg"></div>
+
+    <div class="encode-field">
+      <label>Algorithm &amp; Secret</label>
+      <div class="encode-row">
+        <select id="encode-algorithm"></select>
+        <input type="password" id="encode-secret" placeholder="Shared secret">
+        <button id="toggle-encode-secret" class="small">Show</button>
       </div>
     </div>
-  </details>
+
+    <div class="actions">
+      <button class="primary" id="encode-btn">Encode</button>
+      <button id="copy-encoded-btn">Copy Token</button>
+    </div>
+
+    <div id="encode-output" style="display:none;">
+      <div class="section-label">Generated Token</div>
+      <pre id="encoded-jwt"></pre>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <section class="history-section" id="history-section">
+    <div class="section-label">History <span id="history-count">(0)</span></div>
+    <div id="history-list"></div>
+    <div class="actions" id="history-actions" style="display:none;">
+      <button id="clear-history-btn" class="small danger">Clear All</button>
+    </div>
+  </section>
 
   <footer>
     <a href="./">Tools</a> &middot; <a href="https://github.com/henrythach/tools/blob/main/jwt-decoder.html">Source</a>
@@ -397,6 +519,8 @@
     const HISTORY_KEY = 'jwt-decoder-history';
     const SECRET_KEY = 'jwt-decoder-secret';
     const MAX_HISTORY = 50;
+
+    const ALGORITHMS = { HS256: 'SHA-256', HS384: 'SHA-384', HS512: 'SHA-512' };
 
     const KNOWN_CLAIMS = {
       iss: 'Issuer', sub: 'Subject', aud: 'Audience',
@@ -412,26 +536,60 @@
       { label: '+7d', seconds: 7 * 24 * 60 * 60 },
     ];
 
+    let mode = 'decode';
     let currentToken = null;
     let currentDecoded = null;
-    let modifiedPayload = null;
+    let editedPayload = null;
 
     // --- DOM refs ---
-    const inputEl = document.getElementById('jwt-input');
-    const errorEl = document.getElementById('error');
-    const outputEl = document.getElementById('output');
-    const headerJsonEl = document.getElementById('header-json');
-    const payloadJsonEl = document.getElementById('payload-json');
-    const claimsTableEl = document.getElementById('claims-table');
-    const expiryBadgeEl = document.getElementById('expiry-badge');
-    const timeEditorEl = document.getElementById('time-editor');
-    const timeFieldsEl = document.getElementById('time-fields');
-    const modifiedSectionEl = document.getElementById('modified-section');
-    const modifiedJsonEl = document.getElementById('modified-json');
-    const secretInputEl = document.getElementById('secret-input');
-    const verifyResultEl = document.getElementById('verify-result');
+    const $id = (id) => document.getElementById(id);
+    const inputEl = $id('jwt-input');
+    const decodeErrorEl = $id('decode-error');
+    const outputEl = $id('output');
+    const headerJsonEl = $id('header-json');
+    const payloadJsonEl = $id('payload-json');
+    const claimsTableEl = $id('claims-table');
+    const expiryBadgeEl = $id('expiry-badge');
+    const timeEditorEl = $id('time-editor');
+    const timeFieldsEl = $id('time-fields');
+    const resignedSectionEl = $id('resigned-section');
+    const secretInputEl = $id('secret-input');
+    const verifyResultEl = $id('verify-result');
+    const algorithmSelectEl = $id('algorithm-select');
+    const encodePayloadEl = $id('encode-payload');
+    const encodeErrorEl = $id('encode-error');
+    const encodeAlgorithmEl = $id('encode-algorithm');
+    const encodeSecretEl = $id('encode-secret');
+    const encodeOutputEl = $id('encode-output');
+    const encodedJwtEl = $id('encoded-jwt');
 
-    // --- Base64URL decode ---
+    // --- Populate algorithm dropdowns ---
+    const populateAlgorithmSelects = () => {
+      [algorithmSelectEl, encodeAlgorithmEl].forEach(sel => {
+        sel.innerHTML = Object.keys(ALGORITHMS).map(a =>
+          `<option value="${a}"${a === 'HS256' ? ' selected' : ''}>${a}</option>`
+        ).join('');
+      });
+    };
+    populateAlgorithmSelects();
+
+    // Sync algorithm selects
+    algorithmSelectEl.addEventListener('change', () => { encodeAlgorithmEl.value = algorithmSelectEl.value; });
+    encodeAlgorithmEl.addEventListener('change', () => { algorithmSelectEl.value = encodeAlgorithmEl.value; });
+
+    // Sync secret inputs
+    secretInputEl.addEventListener('input', () => {
+      encodeSecretEl.value = secretInputEl.value;
+      localStorage.setItem(SECRET_KEY, secretInputEl.value);
+      if (editedPayload) resignAndShow();
+    });
+    encodeSecretEl.addEventListener('input', () => {
+      secretInputEl.value = encodeSecretEl.value;
+      localStorage.setItem(SECRET_KEY, encodeSecretEl.value);
+      if (editedPayload) resignAndShow();
+    });
+
+    // --- Base64URL ---
     const base64UrlDecode = (str) => {
       let b64 = str.replace(/-/g, '+').replace(/_/g, '/');
       while (b64.length % 4) b64 += '=';
@@ -439,6 +597,12 @@
       const bytes = new Uint8Array(binary.length);
       for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
       return new TextDecoder().decode(bytes);
+    };
+
+    const base64UrlEncode = (str) => {
+      const bytes = new TextEncoder().encode(str);
+      const binary = String.fromCharCode(...bytes);
+      return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
     };
 
     const decodeJwt = (token) => {
@@ -474,10 +638,56 @@
       return `${days}d ago`;
     };
 
-    // --- Decode and render ---
+    const escapeHtml = (str) => {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    };
+
+    // --- HMAC signing/verification ---
+    const signHMAC = async (header, payload, secret, alg) => {
+      const hash = ALGORITHMS[alg];
+      if (!hash) throw new Error(`Unsupported algorithm: ${alg}`);
+      const enc = new TextEncoder();
+      const headerB64 = base64UrlEncode(JSON.stringify(header));
+      const payloadB64 = base64UrlEncode(JSON.stringify(payload));
+      const data = `${headerB64}.${payloadB64}`;
+      const key = await crypto.subtle.importKey(
+        'raw', enc.encode(secret), { name: 'HMAC', hash }, false, ['sign']
+      );
+      const sig = await crypto.subtle.sign('HMAC', key, enc.encode(data));
+      const sigB64 = btoa(String.fromCharCode(...new Uint8Array(sig)))
+        .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      return `${data}.${sigB64}`;
+    };
+
+    const verifyHMAC = async (token, secret, alg) => {
+      const hash = ALGORITHMS[alg];
+      if (!hash) throw new Error(`Unsupported algorithm: ${alg}`);
+      const [headerB64, payloadB64, signatureB64] = token.split('.');
+      const enc = new TextEncoder();
+      const key = await crypto.subtle.importKey(
+        'raw', enc.encode(secret), { name: 'HMAC', hash }, false, ['sign']
+      );
+      const sig = await crypto.subtle.sign('HMAC', key, enc.encode(`${headerB64}.${payloadB64}`));
+      const computed = btoa(String.fromCharCode(...new Uint8Array(sig)))
+        .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      return computed === signatureB64;
+    };
+
+    // --- Mode toggle ---
+    const setMode = (newMode) => {
+      mode = newMode;
+      $id('mode-decode').classList.toggle('active', mode === 'decode');
+      $id('mode-encode').classList.toggle('active', mode === 'encode');
+      $id('decode-mode').style.display = mode === 'decode' ? '' : 'none';
+      $id('encode-mode').style.display = mode === 'encode' ? '' : 'none';
+    };
+
+    // --- Decode ---
     const decode = () => {
       const raw = inputEl.value.trim();
-      errorEl.textContent = '';
+      decodeErrorEl.textContent = '';
       if (!raw) {
         outputEl.style.display = 'none';
         return;
@@ -486,26 +696,37 @@
       try {
         currentToken = raw;
         currentDecoded = decodeJwt(raw);
-        modifiedPayload = null;
+        editedPayload = null;
+
+        // Auto-detect algorithm from header
+        const headerAlg = currentDecoded.header.alg;
+        if (headerAlg && ALGORITHMS[headerAlg]) {
+          algorithmSelectEl.value = headerAlg;
+          encodeAlgorithmEl.value = headerAlg;
+        }
+
         renderOutput();
-        addToHistory(raw, currentDecoded.payload);
+        addToHistory(raw, currentDecoded.payload, 'decode');
+
+        // Update URL hash
+        if (location.hash.slice(1) !== raw) {
+          history.replaceState(null, '', `#${raw}`);
+        }
       } catch (e) {
         outputEl.style.display = 'none';
-        errorEl.textContent = e.message;
+        decodeErrorEl.textContent = e.message;
       }
     };
 
     const renderOutput = () => {
       outputEl.style.display = 'block';
-
-      // Header
       headerJsonEl.textContent = JSON.stringify(currentDecoded.header, null, 2);
 
-      // Payload
-      payloadJsonEl.textContent = JSON.stringify(currentDecoded.payload, null, 2);
+      const payload = editedPayload || currentDecoded.payload;
+      payloadJsonEl.textContent = JSON.stringify(payload, null, 2);
 
       // Expiry badge
-      const { exp } = currentDecoded.payload;
+      const exp = payload.exp;
       if (exp) {
         const isExpired = exp * 1000 < Date.now();
         expiryBadgeEl.innerHTML = `<span class="badge ${isExpired ? 'expired' : 'valid'}">${isExpired ? 'Expired' : 'Valid'}</span>`;
@@ -513,38 +734,132 @@
         expiryBadgeEl.innerHTML = '';
       }
 
-      // Claims table
       renderClaimsTable();
-
-      // Time editor
       renderTimeEditor();
-
-      // Reset verify
+      if (editedPayload) resignAndShow();
+      else resignedSectionEl.style.display = 'none';
       verifyResultEl.innerHTML = '';
     };
 
+    // --- Editable claims table ---
     const renderClaimsTable = () => {
-      const payload = currentDecoded.payload;
-      const rows = Object.entries(payload).map(([key, value]) => {
+      const payload = editedPayload || currentDecoded.payload;
+      const original = currentDecoded.payload;
+
+      let html = '';
+      for (const [key, value] of Object.entries(payload)) {
         const label = KNOWN_CLAIMS[key] || key;
         let display = typeof value === 'object' ? JSON.stringify(value) : String(value);
         if (TIME_CLAIMS.includes(key) && typeof value === 'number') {
           display = `${value} (${formatTimestamp(value)})`;
         }
-        return `<tr><td>${label}</td><td>${escapeHtml(display)}</td></tr>`;
+        const isModified = editedPayload && JSON.stringify(payload[key]) !== JSON.stringify(original[key]);
+        html += `<tr${isModified ? ' class="modified"' : ''} data-claim="${escapeHtml(key)}">
+          <td>${escapeHtml(label)} <span style="font-weight:400;color:var(--text-muted)">(${escapeHtml(key)})</span></td>
+          <td class="claim-value" data-key="${escapeHtml(key)}">${escapeHtml(display)}</td>
+          <td class="claim-actions"><button class="small danger" data-remove="${escapeHtml(key)}" title="Remove">&times;</button></td>
+        </tr>`;
+      }
+
+      // Add claim row
+      html += `<tr class="add-claim-row">
+        <td><input type="text" id="new-claim-key" placeholder="key"></td>
+        <td><input type="text" id="new-claim-value" placeholder="value"></td>
+        <td><button class="small primary" id="add-claim-btn">Add</button></td>
+      </tr>`;
+
+      claimsTableEl.innerHTML = html;
+
+      // Bind inline editing on claim values
+      claimsTableEl.querySelectorAll('.claim-value').forEach(td => {
+        td.addEventListener('click', () => startInlineEdit(td));
       });
-      claimsTableEl.innerHTML = rows.join('');
+
+      // Bind remove buttons
+      claimsTableEl.querySelectorAll('[data-remove]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          removeClaim(btn.dataset.remove);
+        });
+      });
+
+      // Bind add claim
+      const addBtn = $id('add-claim-btn');
+      if (addBtn) {
+        addBtn.addEventListener('click', () => {
+          const keyInput = $id('new-claim-key');
+          const valInput = $id('new-claim-value');
+          const key = keyInput.value.trim();
+          const val = valInput.value.trim();
+          if (key) {
+            addClaim(key, parseValue(val));
+            keyInput.value = '';
+            valInput.value = '';
+          }
+        });
+      }
     };
 
-    const escapeHtml = (str) => {
-      const div = document.createElement('div');
-      div.textContent = str;
-      return div.innerHTML;
+    const startInlineEdit = (td) => {
+      const key = td.dataset.key;
+      const payload = editedPayload || currentDecoded.payload;
+      const currentVal = payload[key];
+
+      // Don't inline-edit time claims — use the time editor instead
+      if (TIME_CLAIMS.includes(key) && typeof currentVal === 'number') return;
+
+      const rawVal = typeof currentVal === 'object' ? JSON.stringify(currentVal) : String(currentVal);
+      td.innerHTML = `<input class="edit-input" type="text" value="${escapeHtml(rawVal)}">`;
+      const input = td.querySelector('.edit-input');
+      input.focus();
+      input.select();
+
+      const commit = () => {
+        const newVal = parseValue(input.value);
+        applyEdit(key, newVal);
+      };
+
+      input.addEventListener('blur', commit);
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); commit(); }
+        if (e.key === 'Escape') { renderClaimsTable(); }
+      });
+    };
+
+    const parseValue = (str) => {
+      if (str === 'true') return true;
+      if (str === 'false') return false;
+      if (str === 'null') return null;
+      if (/^-?\d+$/.test(str)) return parseInt(str, 10);
+      if (/^-?\d+\.\d+$/.test(str)) return parseFloat(str);
+      try {
+        const parsed = JSON.parse(str);
+        if (typeof parsed === 'object') return parsed;
+      } catch { /* not JSON */ }
+      return str;
+    };
+
+    const applyEdit = (key, value) => {
+      if (!editedPayload) editedPayload = { ...currentDecoded.payload };
+      editedPayload[key] = value;
+      renderOutput();
+    };
+
+    const addClaim = (key, value) => {
+      if (!editedPayload) editedPayload = { ...currentDecoded.payload };
+      editedPayload[key] = value;
+      renderOutput();
+    };
+
+    const removeClaim = (key) => {
+      if (!editedPayload) editedPayload = { ...currentDecoded.payload };
+      delete editedPayload[key];
+      renderOutput();
     };
 
     // --- Time editor ---
     const renderTimeEditor = () => {
-      const payload = currentDecoded.payload;
+      const payload = editedPayload || currentDecoded.payload;
       const editableClaims = TIME_CLAIMS.filter(c => typeof payload[c] === 'number');
 
       if (editableClaims.length === 0) {
@@ -553,10 +868,8 @@
       }
 
       timeEditorEl.style.display = '';
-      modifiedSectionEl.style.display = 'none';
-
       timeFieldsEl.innerHTML = editableClaims.map(claim => {
-        const value = modifiedPayload ? modifiedPayload[claim] : payload[claim];
+        const value = payload[claim];
         const label = KNOWN_CLAIMS[claim] || claim;
         return `
           <div class="time-field">
@@ -571,46 +884,102 @@
           </div>`;
       }).join('');
 
-      // Bind events
+      // Bind datetime inputs
       timeFieldsEl.querySelectorAll('input[type="datetime-local"]').forEach(input => {
         input.addEventListener('change', (e) => {
-          const claim = e.target.dataset.claim;
           const ts = fromDatetimeLocalValue(e.target.value);
-          if (!isNaN(ts)) applyTimeChange(claim, ts);
+          if (!isNaN(ts)) applyEdit(e.target.dataset.claim, ts);
         });
       });
 
+      // Bind offset buttons
       timeFieldsEl.querySelectorAll('button[data-claim]').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.preventDefault();
-          const claim = e.target.dataset.claim;
-          const isNow = e.target.dataset.isNow === 'true';
-          const offset = parseInt(e.target.dataset.offset, 10);
-          const base = isNow ? Math.floor(Date.now() / 1000) : (modifiedPayload || currentDecoded.payload)[claim];
-          applyTimeChange(claim, base + (isNow ? 0 : offset));
+          const claim = btn.dataset.claim;
+          const isNow = btn.dataset.isNow === 'true';
+          const offset = parseInt(btn.dataset.offset, 10);
+          const payload = editedPayload || currentDecoded.payload;
+          const base = isNow ? Math.floor(Date.now() / 1000) : payload[claim];
+          applyEdit(claim, base + (isNow ? 0 : offset));
         });
       });
     };
 
-    const applyTimeChange = (claim, newValue) => {
-      if (!modifiedPayload) modifiedPayload = { ...currentDecoded.payload };
-      modifiedPayload[claim] = newValue;
-      renderTimeEditor();
-      modifiedSectionEl.style.display = '';
-      modifiedJsonEl.textContent = JSON.stringify(modifiedPayload, null, 2);
+    // --- Re-sign after edits ---
+    const resignAndShow = async () => {
+      if (!editedPayload || !currentDecoded) return;
+      const secret = secretInputEl.value;
+      const alg = algorithmSelectEl.value;
+
+      if (!secret) {
+        resignedSectionEl.style.display = '';
+        resignedSectionEl.className = 'resigned-section unsigned';
+        const headerB64 = base64UrlEncode(JSON.stringify(currentDecoded.header));
+        const payloadB64 = base64UrlEncode(JSON.stringify(editedPayload));
+        resignedSectionEl.innerHTML = `
+          <div class="resigned-label">Modified token (unsigned &mdash; enter a secret to sign)</div>
+          <pre>${escapeHtml(`${headerB64}.${payloadB64}.`)}</pre>
+          <div class="actions"><button class="small" id="copy-resigned-btn">Copy Token</button></div>`;
+        $id('copy-resigned-btn').addEventListener('click', () => {
+          navigator.clipboard.writeText(`${headerB64}.${payloadB64}.`);
+        });
+        return;
+      }
+
+      try {
+        const header = { ...currentDecoded.header, alg };
+        const token = await signHMAC(header, editedPayload, secret, alg);
+        resignedSectionEl.style.display = '';
+        resignedSectionEl.className = 'resigned-section signed';
+        resignedSectionEl.innerHTML = `
+          <div class="resigned-label">Re-signed Token (${escapeHtml(alg)})</div>
+          <pre>${escapeHtml(token)}</pre>
+          <div class="actions"><button class="small" id="copy-resigned-btn">Copy Token</button></div>`;
+        $id('copy-resigned-btn').addEventListener('click', () => {
+          navigator.clipboard.writeText(token);
+        });
+      } catch (e) {
+        resignedSectionEl.style.display = '';
+        resignedSectionEl.className = 'resigned-section unsigned';
+        resignedSectionEl.innerHTML = `<div class="resigned-label">Error signing: ${escapeHtml(e.message)}</div>`;
+      }
     };
 
-    // --- Signature verification ---
-    const verifyHS256 = async (token, secret) => {
-      const [headerB64, payloadB64, signatureB64] = token.split('.');
-      const encoder = new TextEncoder();
-      const key = await crypto.subtle.importKey(
-        'raw', encoder.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
-      );
-      const sigBuffer = await crypto.subtle.sign('HMAC', key, encoder.encode(`${headerB64}.${payloadB64}`));
-      const computed = btoa(String.fromCharCode(...new Uint8Array(sigBuffer)))
-        .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-      return computed === signatureB64;
+    // --- Encode mode ---
+    const encodeToken = async () => {
+      encodeErrorEl.textContent = '';
+      const jsonStr = encodePayloadEl.value.trim();
+      const secret = encodeSecretEl.value;
+      const alg = encodeAlgorithmEl.value;
+
+      if (!jsonStr) {
+        encodeErrorEl.textContent = 'Enter a JSON payload.';
+        return;
+      }
+      if (!secret) {
+        encodeErrorEl.textContent = 'Enter a secret to sign the token.';
+        return;
+      }
+
+      let payload;
+      try {
+        payload = JSON.parse(jsonStr);
+        if (typeof payload !== 'object' || Array.isArray(payload)) throw new Error();
+      } catch {
+        encodeErrorEl.textContent = 'Invalid JSON. Payload must be a JSON object.';
+        return;
+      }
+
+      try {
+        const header = { alg, typ: 'JWT' };
+        const token = await signHMAC(header, payload, secret, alg);
+        encodedJwtEl.textContent = token;
+        encodeOutputEl.style.display = '';
+        addToHistory(token, payload, 'encode');
+      } catch (e) {
+        encodeErrorEl.textContent = `Signing error: ${e.message}`;
+      }
     };
 
     // --- History ---
@@ -621,10 +990,10 @@
 
     const saveHistory = (entries) => {
       try { localStorage.setItem(HISTORY_KEY, JSON.stringify(entries)); }
-      catch { /* quota exceeded, silently ignore */ }
+      catch { /* quota exceeded */ }
     };
 
-    const addToHistory = (token, payload) => {
+    const addToHistory = (token, payload, source) => {
       const entries = loadHistory();
       const existing = entries.findIndex(e => e.token === token);
       if (existing !== -1) {
@@ -637,7 +1006,10 @@
           token,
           label: '',
           sub: payload.sub || payload.email || '',
+          iss: payload.iss || '',
+          exp: payload.exp || null,
           timestamp: Date.now(),
+          source: source || 'decode',
         });
       }
       if (entries.length > MAX_HISTORY) entries.length = MAX_HISTORY;
@@ -647,40 +1019,48 @@
 
     const renderHistory = () => {
       const entries = loadHistory();
-      const summary = document.getElementById('history-summary');
-      const list = document.getElementById('history-list');
-      const actions = document.getElementById('history-actions');
-
-      summary.textContent = `History (${entries.length})`;
+      $id('history-count').textContent = `(${entries.length})`;
+      const list = $id('history-list');
+      const actions = $id('history-actions');
 
       if (entries.length === 0) {
-        list.innerHTML = '<div style="font-size:0.8rem;color:var(--text-muted);padding:0.5rem 0;">No tokens decoded yet.</div>';
+        list.innerHTML = '<div class="history-empty">No tokens decoded yet.</div>';
         actions.style.display = 'none';
         return;
       }
 
       actions.style.display = '';
-      list.innerHTML = entries.map(e => `
-        <div class="history-entry" data-id="${e.id}">
-          <span class="history-token" title="${escapeHtml(e.token)}">${escapeHtml(e.token.slice(0, 30))}...</span>
-          <input class="history-label" type="text" value="${escapeHtml(e.label)}" placeholder="${escapeHtml(e.sub) || 'label'}" data-id="${e.id}" onclick="event.stopPropagation()">
-          <span class="history-time">${relativeTime(e.timestamp)}</span>
-          <button class="history-delete" data-id="${e.id}" title="Remove" onclick="event.stopPropagation()">&#x2715;</button>
-        </div>
-      `).join('');
+      list.innerHTML = entries.map(e => {
+        const claimParts = [];
+        if (e.sub) claimParts.push(`sub: ${e.sub}`);
+        if (e.iss) claimParts.push(`iss: ${e.iss}`);
+        if (e.exp) claimParts.push(`exp: ${formatTimestamp(e.exp)}`);
+        const claimSummary = claimParts.join(' | ') || 'no standard claims';
+        const placeholder = e.sub || e.iss || 'label';
 
-      // Bind click-to-load
+        return `<div class="history-entry" data-id="${e.id}">
+          <div class="history-main">
+            <input class="history-label" type="text" value="${escapeHtml(e.label)}" placeholder="${escapeHtml(placeholder)}" data-id="${e.id}" onclick="event.stopPropagation()">
+            <span class="history-claims">${escapeHtml(claimSummary)}</span>
+          </div>
+          <span class="history-time">${relativeTime(e.timestamp)}</span>
+          <button class="history-delete" data-id="${e.id}" title="Remove" onclick="event.stopPropagation()">&times;</button>
+        </div>`;
+      }).join('');
+
+      // Click to load
       list.querySelectorAll('.history-entry').forEach(el => {
         el.addEventListener('click', () => {
           const entry = entries.find(e => e.id === el.dataset.id);
           if (entry) {
+            setMode('decode');
             inputEl.value = entry.token;
             decode();
           }
         });
       });
 
-      // Bind label edits
+      // Label edits
       list.querySelectorAll('.history-label').forEach(input => {
         input.addEventListener('change', (e) => {
           const updated = loadHistory();
@@ -692,10 +1072,11 @@
         });
       });
 
-      // Bind delete
+      // Delete
       list.querySelectorAll('.history-delete').forEach(btn => {
         btn.addEventListener('click', (e) => {
-          const updated = loadHistory().filter(h => h.id !== e.target.dataset.id);
+          e.stopPropagation();
+          const updated = loadHistory().filter(h => h.id !== btn.dataset.id);
           saveHistory(updated);
           renderHistory();
         });
@@ -703,26 +1084,22 @@
     };
 
     // --- Event bindings ---
-    document.getElementById('decode-btn').addEventListener('click', decode);
+    $id('decode-btn').addEventListener('click', decode);
 
-    document.getElementById('clear-btn').addEventListener('click', () => {
+    $id('clear-btn').addEventListener('click', () => {
       inputEl.value = '';
       outputEl.style.display = 'none';
-      errorEl.textContent = '';
+      decodeErrorEl.textContent = '';
       currentToken = null;
       currentDecoded = null;
-      modifiedPayload = null;
+      editedPayload = null;
+      history.replaceState(null, '', location.pathname);
       inputEl.focus();
     });
 
-    document.getElementById('copy-payload-btn').addEventListener('click', () => {
-      if (!currentDecoded) return;
-      navigator.clipboard.writeText(JSON.stringify(currentDecoded.payload, null, 2));
-    });
-
-    document.getElementById('copy-modified-btn').addEventListener('click', () => {
-      if (!modifiedPayload) return;
-      navigator.clipboard.writeText(JSON.stringify(modifiedPayload, null, 2));
+    $id('copy-payload-btn').addEventListener('click', () => {
+      const payload = editedPayload || (currentDecoded && currentDecoded.payload);
+      if (payload) navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
     });
 
     // Auto-decode on paste with debounce
@@ -732,26 +1109,31 @@
       debounceTimer = setTimeout(decode, 300);
     });
 
-    // Cmd/Ctrl+Enter to decode
+    // Cmd/Ctrl+Enter
     inputEl.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        decode();
-      }
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); decode(); }
+    });
+    encodePayloadEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); encodeToken(); }
+    });
+
+    // Encode button
+    $id('encode-btn').addEventListener('click', encodeToken);
+    $id('copy-encoded-btn').addEventListener('click', () => {
+      const text = encodedJwtEl.textContent;
+      if (text) navigator.clipboard.writeText(text);
     });
 
     // Signature verification
     const cryptoAvailable = !!(crypto && crypto.subtle);
-    if (!cryptoAvailable) {
-      document.getElementById('crypto-warning').style.display = '';
-    }
+    if (!cryptoAvailable) $id('crypto-warning').style.display = '';
 
-    document.getElementById('verify-btn').addEventListener('click', async () => {
+    $id('verify-btn').addEventListener('click', async () => {
       if (!currentToken || !cryptoAvailable) return;
       const secret = secretInputEl.value;
-      localStorage.setItem(SECRET_KEY, secret);
+      const alg = algorithmSelectEl.value;
       try {
-        const valid = await verifyHS256(currentToken, secret);
+        const valid = await verifyHMAC(currentToken, secret, alg);
         verifyResultEl.innerHTML = valid
           ? '<span class="badge valid">Valid</span>'
           : '<span class="badge invalid">Invalid</span>';
@@ -760,20 +1142,35 @@
       }
     });
 
-    document.getElementById('toggle-secret-btn').addEventListener('click', () => {
+    // Secret toggles
+    $id('toggle-secret-btn').addEventListener('click', () => {
       const isPassword = secretInputEl.type === 'password';
       secretInputEl.type = isPassword ? 'text' : 'password';
-      document.getElementById('toggle-secret-btn').textContent = isPassword ? 'Hide' : 'Show';
+      $id('toggle-secret-btn').textContent = isPassword ? 'Hide' : 'Show';
+    });
+    $id('toggle-encode-secret').addEventListener('click', () => {
+      const isPassword = encodeSecretEl.type === 'password';
+      encodeSecretEl.type = isPassword ? 'text' : 'password';
+      $id('toggle-encode-secret').textContent = isPassword ? 'Hide' : 'Show';
     });
 
-    document.getElementById('clear-history-btn').addEventListener('click', () => {
+    $id('clear-history-btn').addEventListener('click', () => {
       localStorage.removeItem(HISTORY_KEY);
       renderHistory();
     });
 
     // --- Init ---
-    secretInputEl.value = localStorage.getItem(SECRET_KEY) || '';
+    const savedSecret = localStorage.getItem(SECRET_KEY) || '';
+    secretInputEl.value = savedSecret;
+    encodeSecretEl.value = savedSecret;
     renderHistory();
+
+    // Auto-decode from URL hash
+    const hashToken = location.hash.slice(1);
+    if (hashToken && hashToken.startsWith('eyJ')) {
+      inputEl.value = hashToken;
+      decode();
+    }
   </script>
 </body>
 </html>
