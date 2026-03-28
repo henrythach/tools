@@ -1,0 +1,1 @@
+A retirement calculator that projects your savings growth and compares it against what you'll need. Inputs include income, savings, contributions, and retirement budget. Outputs an area chart from current age to life expectancy showing projected savings vs. target balance, with US retirement milestone markers.
