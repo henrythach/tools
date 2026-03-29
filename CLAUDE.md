@@ -29,6 +29,7 @@ A collection of single-file HTML tools, inspired by [Simon Willison's approach](
 3. Add a footer with two links: one back to the main tools page (`./`) and one to the source of the HTML file on GitHub (e.g. `https://github.com/henrythach/tools/blob/main/json-to-table.html`).
 4. Create a matching `.md` file with the same base name (e.g., `json-to-table.md`) that briefly describes what the tool does.
 5. Update `README.md` to list the new tool.
+6. Update `index.html` to add a matching `<a class="tool-card">` entry for the new tool. Keep the tool list in `index.html` in the same order as `README.md`. Any time a tool is added, renamed, removed, or its description changes, both `README.md` and `index.html` must be updated together.
 
 ## Code Style
 
