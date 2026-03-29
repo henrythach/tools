@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interval Timer</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #fff;
+      --text: #1a1a1a;
+      --text-muted: #666;
+      --border: #ccc;
+      --border-subtle: #e0e0e0;
+      --border-footer: #eee;
+      --input-bg: #fff;
+      --btn-bg: #fff;
+      --btn-hover: #f5f5f5;
+      --accent: #4a90d9;
+      --accent-hover: #3a7bc8;
+      --card-bg: #f8f9fa;
+      --danger: #dc2626;
+      --danger-bg: #fee2e2;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1a1a1a;
+        --text: #e8e8e8;
+        --text-muted: #999;
+        --border: #444;
+        --border-subtle: #333;
+        --border-footer: #2e2e2e;
+        --input-bg: #252525;
+        --btn-bg: #2a2a2a;
+        --btn-hover: #333;
+        --accent: #5a9fd4;
+        --accent-hover: #4a8fc4;
+        --card-bg: #252525;
+        --danger: #f87171;
+        --danger-bg: #450a0a;
+      }
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      padding: 1.5rem;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.5;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    body[data-mode="timer"] { overflow: hidden; }
+    body[data-mode="timer"] #setup-view { display: none; }
+
+    /* ------ Setup ------ */
+
+    h1 { font-size: 1.4rem; margin-bottom: 0.25rem; }
+    .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.25rem; }
+
+    .preset-bar {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.25rem;
+    }
+
+    .preset-bar button {
+      font-family: inherit;
+      font-size: 0.8rem;
+      padding: 0.35rem 0.8rem;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      cursor: pointer;
+      background: var(--btn-bg);
+      color: var(--text);
+    }
+
+    .preset-bar button:hover { background: var(--btn-hover); }
+
+    .cycles-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .cycles-row label { font-size: 0.85rem; font-weight: 600; }
+
+    .cycles-row input {
+      font-family: inherit;
+      font-size: 0.9rem;
+      padding: 0.35rem 0.6rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--input-bg);
+      color: var(--text);
+      width: 4.5rem;
+      text-align: center;
+    }
+
+    .cycles-row input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+
+    .intervals-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    #interval-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .interval-row {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--card-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 0.5rem 0.6rem;
+    }
+
+    .interval-row.dragging { opacity: 0.4; outline: 2px dashed var(--accent); }
+    .interval-row.drag-over-top { border-top: 3px solid var(--accent); }
+    .interval-row.drag-over-bottom { border-bottom: 3px solid var(--accent); }
+
+    .drag-handle {
+      cursor: grab;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      padding: 0.2rem 0.3rem;
+      touch-action: none;
+      flex-shrink: 0;
+      user-select: none;
+    }
+
+    .drag-handle:active { cursor: grabbing; }
+
+    .color-swatch {
+      width: 1.4rem;
+      height: 1.4rem;
+      border-radius: 50%;
+      border: 2px solid rgba(0,0,0,0.15);
+      cursor: pointer;
+      flex-shrink: 0;
+      padding: 0;
+      transition: transform 0.1s;
+    }
+
+    .color-swatch:hover { transform: scale(1.2); }
+
+    .iv-name {
+      flex: 1;
+      min-width: 0;
+      font-family: inherit;
+      font-size: 0.875rem;
+      padding: 0.3rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      background: var(--input-bg);
+      color: var(--text);
+    }
+
+    .iv-name:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+
+    .dur-wrap { display: flex; align-items: center; gap: 0.25rem; flex-shrink: 0; }
+
+    .iv-dur {
+      font-family: inherit;
+      font-size: 0.875rem;
+      padding: 0.3rem 0.4rem;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      background: var(--input-bg);
+      color: var(--text);
+      width: 4rem;
+      text-align: center;
+    }
+
+    .iv-dur:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+    .dur-label { font-size: 0.75rem; color: var(--text-muted); }
+
+    .arrow-btns { display: flex; flex-direction: column; gap: 0.1rem; flex-shrink: 0; }
+
+    .arrow-btn {
+      font-family: inherit;
+      font-size: 0.6rem;
+      padding: 0.1rem 0.3rem;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      cursor: pointer;
+      background: var(--btn-bg);
+      color: var(--text);
+      line-height: 1.2;
+    }
+
+    .arrow-btn:hover { background: var(--btn-hover); }
+
+    .del-btn {
+      font-size: 0.9rem;
+      padding: 0.2rem 0.4rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      background: transparent;
+      color: var(--text-muted);
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .del-btn:hover { background: var(--danger-bg); color: var(--danger); }
+
+    .setup-actions { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
+
+    .btn {
+      font-family: inherit;
+      font-size: 0.85rem;
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      background: var(--btn-bg);
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .btn:hover { background: var(--btn-hover); }
+    .btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .btn.primary:hover { background: var(--accent-hover); }
+
+    .start-row { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.5rem; }
+    .start-row .btn.primary { padding: 0.75rem; font-size: 1rem; }
+
+    .error-msg { font-size: 0.8rem; color: var(--danger); display: none; }
+    .error-msg.visible { display: block; }
+
+    footer { padding-top: 1rem; border-top: 1px solid var(--border-footer); font-size: 0.8rem; color: var(--text-muted); }
+    footer a { color: var(--text-muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+
+    /* ------ Color Picker ------ */
+
+    #color-picker {
+      position: fixed;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.4rem;
+      display: none;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.3rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      z-index: 50;
+    }
+
+    #color-picker.open { display: grid; }
+
+    .cp-dot {
+      width: 1.8rem;
+      height: 1.8rem;
+      border-radius: 50%;
+      border: 3px solid transparent;
+      cursor: pointer;
+      padding: 0;
+      transition: transform 0.1s;
+    }
+
+    .cp-dot:hover { transform: scale(1.15); }
+    .cp-dot.selected { border-color: var(--text); }
+
+    /* ------ Timer View ------ */
+
+    #timer-view {
+      display: none;
+      position: fixed;
+      inset: 0;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    body[data-mode="timer"] #timer-view { display: flex; }
+
+    .timer-top {
+      position: absolute;
+      top: 1.5rem;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 2rem;
+      font-size: clamp(0.9rem, 2.5vw, 1.5rem);
+      font-weight: 600;
+      opacity: 0.8;
+    }
+
+    #timer-name {
+      font-size: clamp(1.5rem, 5vw, 4rem);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.9;
+      margin-bottom: 0.1em;
+      text-align: center;
+    }
+
+    #timer-countdown {
+      font-size: clamp(8rem, 38vw, 36rem);
+      font-weight: 700;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      text-align: center;
+    }
+
+    @keyframes timer-pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.35; }
+    }
+
+    #timer-view.warning #timer-countdown {
+      animation: timer-pulse 0.5s ease-in-out infinite;
+    }
+
+    .timer-controls {
+      position: absolute;
+      bottom: 2rem;
+      display: flex;
+      gap: 1rem;
+      opacity: 0.2;
+      transition: opacity 0.2s;
+    }
+
+    .timer-controls:hover,
+    .timer-controls:focus-within { opacity: 1; }
+
+    .timer-btn {
+      font-family: inherit;
+      font-size: clamp(0.8rem, 2vw, 1rem);
+      padding: 0.6rem 1.2rem;
+      border: 2px solid rgba(255,255,255,0.5);
+      border-radius: 6px;
+      cursor: pointer;
+      background: rgba(0,0,0,0.25);
+      color: #fff;
+      white-space: nowrap;
+    }
+
+    .timer-btn:hover { background: rgba(0,0,0,0.45); border-color: #fff; }
+
+    /* ------ Complete Overlay ------ */
+
+    #complete-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+    }
+
+    #complete-overlay.visible { display: flex; }
+
+    .complete-text {
+      font-size: clamp(2rem, 8vw, 6rem);
+      font-weight: 700;
+      color: #fff;
+      text-align: center;
+      padding: 1rem;
+    }
+  </style>
+</head>
+<body data-mode="setup">
+
+  <div id="setup-view">
+    <h1>Interval Timer</h1>
+    <p class="subtitle">Build a workout with timed intervals. Start the timer when ready.</p>
+
+    <div class="preset-bar">
+      <button data-preset="tabata">Tabata</button>
+      <button data-preset="emom">EMOM</button>
+      <button data-preset="amrap">AMRAP</button>
+      <button data-preset="hiit">HIIT</button>
+    </div>
+
+    <div class="cycles-row">
+      <label for="cycles-input">Cycles</label>
+      <input type="number" id="cycles-input" min="1" max="99" value="1">
+    </div>
+
+    <p class="intervals-label">Intervals</p>
+    <div id="interval-list"></div>
+
+    <div class="setup-actions">
+      <button class="btn" id="add-interval-btn">+ Add Interval</button>
+      <button class="btn" id="share-btn">Share</button>
+    </div>
+
+    <div class="start-row">
+      <button class="btn primary" id="start-btn">Start Workout</button>
+      <p class="error-msg" id="error-msg"></p>
+    </div>
+
+    <footer>
+      <a href="./">Tools</a> &middot; <a href="https://github.com/henrythach/tools/blob/main/interval-timer.html">Source</a>
+    </footer>
+  </div>
+
+  <div id="timer-view">
+    <div class="timer-top">
+      <span id="timer-round">Round 1 / 1</span>
+      <span id="timer-pos">1 of 1</span>
+    </div>
+    <div id="timer-name">WORK</div>
+    <div id="timer-countdown">20</div>
+    <div class="timer-controls">
+      <button class="timer-btn" id="pause-btn">&#x23F8; Pause</button>
+      <button class="timer-btn" id="stop-btn">&#9632; Stop</button>
+      <button class="timer-btn" id="fullscreen-btn">&#x26F6; Fullscreen</button>
+    </div>
+  </div>
+
+  <div id="complete-overlay">
+    <div class="complete-text">Workout Complete!</div>
+  </div>
+
+  <div id="color-picker"></div>
+
+  <script>
+    const COLORS = [
+      { name: 'Red',    hex: '#D94045' },
+      { name: 'Blue',   hex: '#3B82F6' },
+      { name: 'Green',  hex: '#16A34A' },
+      { name: 'Orange', hex: '#EA8C28' },
+      { name: 'Yellow', hex: '#CA8A04' },
+      { name: 'Purple', hex: '#8B5CF6' },
+      { name: 'Teal',   hex: '#0D9488' },
+      { name: 'Pink',   hex: '#DB2777' },
+    ];
+
+    const PRESETS = {
+      tabata: { cycles: 8,  intervals: [{ name: 'Work', duration: 20, color: '#D94045' }, { name: 'Rest', duration: 10, color: '#3B82F6' }] },
+      emom:   { cycles: 10, intervals: [{ name: 'Work', duration: 60, color: '#16A34A' }] },
+      amrap:  { cycles: 1,  intervals: [{ name: 'AMRAP', duration: 600, color: '#EA8C28' }] },
+      hiit:   { cycles: 4,  intervals: [{ name: 'Work', duration: 40, color: '#D94045' }, { name: 'Rest', duration: 20, color: '#3B82F6' }] },
+    };
+
+    const LS_KEY = 'interval-timer-config';
+    const $ = id => document.getElementById(id);
+
+    // ---- State ----
+
+    const defaultState = () => ({
+      intervals: [
+        { id: 1, name: 'Work', duration: 20, color: '#D94045' },
+        { id: 2, name: 'Rest', duration: 10, color: '#3B82F6' },
+      ],
+      cycles: 8,
+      nextId: 3,
+    });
+
+    let state = loadState();
+
+    function loadState() {
+      if (location.hash.startsWith('#config=')) {
+        try {
+          const decoded = JSON.parse(atob(location.hash.slice(8)));
+          history.replaceState(null, '', location.pathname);
+          const intervals = (decoded.intervals || []).map((iv, i) => ({ ...iv, id: i + 1 }));
+          return { intervals, cycles: decoded.cycles || 1, nextId: intervals.length + 1 };
+        } catch (e) {}
+      }
+      try {
+        const saved = JSON.parse(localStorage.getItem(LS_KEY));
+        if (saved && Array.isArray(saved.intervals)) return saved;
+      } catch (e) {}
+      return defaultState();
+    }
+
+    function saveState() {
+      localStorage.setItem(LS_KEY, JSON.stringify(state));
+    }
+
+    // ---- Render ----
+
+    function esc(s) {
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function renderIntervalList() {
+      const list = $('interval-list');
+      list.innerHTML = '';
+      state.intervals.forEach((iv, i) => {
+        const row = document.createElement('div');
+        row.className = 'interval-row';
+        row.dataset.index = i;
+        row.innerHTML = `
+          <span class="drag-handle" title="Drag to reorder">&#9776;</span>
+          <button class="color-swatch" style="background:${iv.color}" data-ci="${i}" title="Choose color"></button>
+          <input class="iv-name" type="text" value="${esc(iv.name)}" placeholder="Name" maxlength="30" data-ni="${i}">
+          <div class="dur-wrap">
+            <input class="iv-dur" type="number" value="${iv.duration}" min="1" max="3600" data-di="${i}">
+            <span class="dur-label">s</span>
+          </div>
+          <div class="arrow-btns">
+            <button class="arrow-btn" data-up="${i}" title="Move up">&#9650;</button>
+            <button class="arrow-btn" data-dn="${i}" title="Move down">&#9660;</button>
+          </div>
+          <button class="del-btn" data-del="${i}" title="Remove">&#x2715;</button>
+        `;
+        list.appendChild(row);
+      });
+    }
+
+    // ---- Setup Events ----
+
+    document.querySelectorAll('[data-preset]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const preset = PRESETS[btn.dataset.preset];
+        if (!preset) return;
+        const label = btn.dataset.preset.charAt(0).toUpperCase() + btn.dataset.preset.slice(1);
+        if (state.intervals.length && !confirm(`Load ${label} preset? Current intervals will be replaced.`)) return;
+        state.intervals = preset.intervals.map((iv, i) => ({ ...iv, id: i + 1 }));
+        state.cycles = preset.cycles;
+        state.nextId = preset.intervals.length + 1;
+        saveState();
+        renderIntervalList();
+        $('cycles-input').value = state.cycles;
+      });
+    });
+
+    $('cycles-input').addEventListener('input', () => {
+      const v = Math.max(1, parseInt($('cycles-input').value) || 1);
+      state.cycles = v;
+      saveState();
+    });
+
+    $('interval-list').addEventListener('input', e => {
+      const ni = e.target.dataset.ni;
+      const di = e.target.dataset.di;
+      if (ni !== undefined) { state.intervals[+ni].name = e.target.value; saveState(); }
+      if (di !== undefined) { const v = parseInt(e.target.value); if (v >= 1) { state.intervals[+di].duration = v; saveState(); } }
+    });
+
+    $('interval-list').addEventListener('click', e => {
+      const ci = e.target.dataset.ci;
+      if (ci !== undefined) {
+        e.stopPropagation();
+        const idx = +ci;
+        if (colorPickerTarget === idx && $('color-picker').classList.contains('open')) {
+          closeColorPicker();
+        } else {
+          openColorPicker(idx, e.target);
+        }
+        return;
+      }
+      const up = e.target.dataset.up;
+      if (up !== undefined) {
+        const i = +up;
+        if (i > 0) { [state.intervals[i-1], state.intervals[i]] = [state.intervals[i], state.intervals[i-1]]; saveState(); renderIntervalList(); }
+        return;
+      }
+      const dn = e.target.dataset.dn;
+      if (dn !== undefined) {
+        const i = +dn;
+        if (i < state.intervals.length - 1) { [state.intervals[i], state.intervals[i+1]] = [state.intervals[i+1], state.intervals[i]]; saveState(); renderIntervalList(); }
+        return;
+      }
+      const del = e.target.dataset.del;
+      if (del !== undefined) {
+        state.intervals.splice(+del, 1);
+        saveState();
+        renderIntervalList();
+      }
+    });
+
+    $('add-interval-btn').addEventListener('click', () => {
+      const colorIdx = state.nextId % COLORS.length;
+      state.intervals.push({ id: state.nextId++, name: 'Interval', duration: 30, color: COLORS[colorIdx].hex });
+      saveState();
+      renderIntervalList();
+    });
+
+    $('share-btn').addEventListener('click', () => {
+      const config = { intervals: state.intervals.map(({ name, duration, color }) => ({ name, duration, color })), cycles: state.cycles };
+      const url = location.origin + location.pathname + '#config=' + btoa(JSON.stringify(config));
+      navigator.clipboard.writeText(url).then(() => {
+        const btn = $('share-btn');
+        const orig = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = orig; }, 2000);
+      });
+    });
+
+    // ---- Color Picker ----
+
+    let colorPickerTarget = null;
+
+    function openColorPicker(idx, swatchEl) {
+      colorPickerTarget = idx;
+      const picker = $('color-picker');
+      picker.innerHTML = '';
+      COLORS.forEach(c => {
+        const btn = document.createElement('button');
+        btn.className = 'cp-dot' + (c.hex === state.intervals[idx].color ? ' selected' : '');
+        btn.style.background = c.hex;
+        btn.title = c.name;
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          state.intervals[idx].color = c.hex;
+          saveState();
+          renderIntervalList();
+          closeColorPicker();
+        });
+        picker.appendChild(btn);
+      });
+      const rect = swatchEl.getBoundingClientRect();
+      picker.style.top = Math.min(rect.bottom + 4, window.innerHeight - 110) + 'px';
+      picker.style.left = Math.max(0, Math.min(rect.left, window.innerWidth - 185)) + 'px';
+      picker.classList.add('open');
+    }
+
+    function closeColorPicker() {
+      $('color-picker').classList.remove('open');
+      colorPickerTarget = null;
+    }
+
+    document.addEventListener('click', e => {
+      if (!e.target.closest('#color-picker')) closeColorPicker();
+    });
+
+    // ---- Audio ----
+
+    let audioCtx = null;
+
+    function getAudioCtx() {
+      if (!audioCtx) audioCtx = new AudioContext();
+      return audioCtx;
+    }
+
+    function playBeep(freq, dur, vol = 0.25) {
+      const ctx = getAudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      osc.type = 'square';
+      gain.gain.setValueAtTime(vol, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + dur + 0.01);
+    }
+
+    function playComplete() {
+      const ctx = getAudioCtx();
+      [440, 554, 659].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = freq;
+        osc.type = 'square';
+        const t = ctx.currentTime + i * 0.25;
+        gain.gain.setValueAtTime(0.25, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+        osc.start(t);
+        osc.stop(t + 0.45);
+      });
+    }
+
+    // ---- Timer ----
+
+    let timerRunning = false;
+    let timerPaused = false;
+    let timerCycle = 0;
+    let timerIdx = 0;
+    let timerElapsed = 0;
+    let timerStartTs = 0;
+    let timerDisplayedSec = -1;
+    let timerRafId = null;
+    let wakeLock = null;
+
+    function fmtCountdown(sec) {
+      if (sec < 60) return String(sec);
+      return Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0');
+    }
+
+    function updateTimerInfo() {
+      const iv = state.intervals[timerIdx];
+      $('timer-round').textContent = `Round ${timerCycle + 1} / ${state.cycles}`;
+      $('timer-pos').textContent = `${timerIdx + 1} of ${state.intervals.length}`;
+      $('timer-name').textContent = iv.name;
+      $('timer-view').style.backgroundColor = iv.color;
+    }
+
+    function timerTick() {
+      if (!timerRunning || timerPaused) return;
+      const elapsed = timerElapsed + (Date.now() - timerStartTs);
+      const durationMs = state.intervals[timerIdx].duration * 1000;
+      const remaining = durationMs - elapsed;
+      if (remaining <= 0) { advanceTimer(); return; }
+
+      const sec = Math.ceil(remaining / 1000);
+      if (sec !== timerDisplayedSec) {
+        timerDisplayedSec = sec;
+        $('timer-countdown').textContent = fmtCountdown(sec);
+        $('timer-view').classList.toggle('warning', sec <= 3);
+        if (sec <= 3 && sec > 0) playBeep(sec === 1 ? 880 : 660, 0.12, 0.2);
+      }
+
+      timerRafId = requestAnimationFrame(timerTick);
+    }
+
+    function advanceTimer() {
+      playBeep(440, 0.25);
+      timerIdx++;
+      if (timerIdx >= state.intervals.length) { timerIdx = 0; timerCycle++; }
+      if (timerCycle >= state.cycles) { workoutComplete(); return; }
+      timerElapsed = 0;
+      timerStartTs = Date.now();
+      timerDisplayedSec = -1;
+      $('timer-view').classList.remove('warning');
+      updateTimerInfo();
+      timerRafId = requestAnimationFrame(timerTick);
+    }
+
+    async function startTimer() {
+      if (!state.intervals.length) { showError('Add at least one interval.'); return; }
+      if (state.intervals.some(iv => iv.duration < 1)) { showError('All intervals must be at least 1 second.'); return; }
+      $('error-msg').classList.remove('visible');
+
+      getAudioCtx();
+      try { wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {}
+      if (wakeLock) wakeLock.addEventListener('release', () => { wakeLock = null; });
+
+      timerRunning = true;
+      timerPaused = false;
+      timerCycle = 0;
+      timerIdx = 0;
+      timerElapsed = 0;
+      timerStartTs = Date.now();
+      timerDisplayedSec = -1;
+
+      document.body.dataset.mode = 'timer';
+      $('timer-view').classList.remove('warning');
+      $('fullscreen-btn').style.display = document.fullscreenEnabled ? '' : 'none';
+      $('pause-btn').textContent = '\u23F8 Pause';
+      updateTimerInfo();
+      $('timer-countdown').textContent = fmtCountdown(state.intervals[0].duration);
+
+      timerRafId = requestAnimationFrame(timerTick);
+    }
+
+    function stopTimer() {
+      if (!confirm('Stop the workout?')) return;
+      cleanupTimer();
+    }
+
+    function cleanupTimer() {
+      timerRunning = false;
+      timerPaused = false;
+      if (timerRafId) { cancelAnimationFrame(timerRafId); timerRafId = null; }
+      if (wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; }
+      if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+      document.body.dataset.mode = 'setup';
+    }
+
+    function workoutComplete() {
+      timerRunning = false;
+      if (timerRafId) { cancelAnimationFrame(timerRafId); timerRafId = null; }
+      if (wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; }
+      playComplete();
+      const overlay = $('complete-overlay');
+      overlay.classList.add('visible');
+      setTimeout(() => {
+        overlay.classList.remove('visible');
+        if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+        document.body.dataset.mode = 'setup';
+      }, 3000);
+    }
+
+    function showError(msg) {
+      const el = $('error-msg');
+      el.textContent = msg;
+      el.classList.add('visible');
+    }
+
+    $('start-btn').addEventListener('click', startTimer);
+
+    $('pause-btn').addEventListener('click', () => {
+      if (!timerRunning) return;
+      if (timerPaused) {
+        timerPaused = false;
+        timerStartTs = Date.now();
+        $('pause-btn').textContent = '\u23F8 Pause';
+        timerRafId = requestAnimationFrame(timerTick);
+      } else {
+        timerPaused = true;
+        timerElapsed += Date.now() - timerStartTs;
+        $('pause-btn').textContent = '\u25B6 Resume';
+        if (timerRafId) { cancelAnimationFrame(timerRafId); timerRafId = null; }
+      }
+    });
+
+    $('stop-btn').addEventListener('click', stopTimer);
+
+    $('fullscreen-btn').addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    });
+
+    document.addEventListener('fullscreenchange', () => {
+      $('fullscreen-btn').textContent = document.fullscreenElement ? 'Exit Fullscreen' : '\u26F6 Fullscreen';
+    });
+
+    document.addEventListener('visibilitychange', async () => {
+      if (document.visibilityState === 'visible' && timerRunning && !timerPaused && !wakeLock) {
+        try { wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {}
+      }
+    });
+
+    // ---- Drag and Drop ----
+
+    let dragData = null;
+
+    $('interval-list').addEventListener('pointerdown', e => {
+      if (!e.target.closest('.drag-handle')) return;
+      const row = e.target.closest('.interval-row');
+      if (!row) return;
+      e.preventDefault();
+      row.setPointerCapture(e.pointerId);
+      dragData = { row, index: +row.dataset.index, startY: e.clientY };
+      row.classList.add('dragging');
+    });
+
+    document.addEventListener('pointermove', e => {
+      if (!dragData) return;
+      dragData.row.style.transform = `translateY(${e.clientY - dragData.startY}px)`;
+      const rows = [...document.querySelectorAll('.interval-row')];
+      const target = findDropTarget(e.clientY, rows, dragData.index);
+      rows.forEach((r, i) => {
+        r.classList.remove('drag-over-top', 'drag-over-bottom');
+        if (i === target && i !== dragData.index) r.classList.add(i < dragData.index ? 'drag-over-top' : 'drag-over-bottom');
+      });
+    });
+
+    document.addEventListener('pointerup', e => {
+      if (!dragData) return;
+      const rows = [...document.querySelectorAll('.interval-row')];
+      const target = findDropTarget(e.clientY, rows, dragData.index);
+      dragData.row.style.transform = '';
+      dragData.row.classList.remove('dragging');
+      rows.forEach(r => r.classList.remove('drag-over-top', 'drag-over-bottom'));
+      if (target !== dragData.index) {
+        const [moved] = state.intervals.splice(dragData.index, 1);
+        state.intervals.splice(target, 0, moved);
+        saveState();
+        renderIntervalList();
+      }
+      dragData = null;
+    });
+
+    function findDropTarget(clientY, rows, dragIdx) {
+      for (let i = 0; i < rows.length; i++) {
+        const rect = rows[i].getBoundingClientRect();
+        if (clientY < rect.top + rect.height / 2) return i;
+      }
+      return rows.length - 1;
+    }
+
+    // ---- Init ----
+    renderIntervalList();
+    $('cycles-input').value = state.cycles;
+  </script>
+</body>
+</html>

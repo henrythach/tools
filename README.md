@@ -10,3 +10,4 @@ Inspired by [Simon Willison's HTML tools](https://simonwillison.net/2025/Dec/10/
 - [Sleep Calculator](sleep-calculator.html) — Calculate optimal sleep and wake times based on 90-minute sleep cycles.
 - [JWT Decoder](jwt-decoder.html) — Decode, encode, edit, and verify JWTs with inline editing, timestamp pickers, re-signing, and history.
 - [Retirement Calculator](retirement-calculator.html) — Project your retirement savings growth and see if you're on track with an interactive chart.
+- [Interval Timer](interval-timer.html) — Full-screen workout timer for EMOM, Tabata, AMRAP, and HIIT. Background color changes with each interval for easy at-a-glance visibility.

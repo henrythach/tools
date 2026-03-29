@@ -1,0 +1,1 @@
+A full-screen interval timer for EMOM, Tabata, AMRAP, and HIIT workouts. Build a sequence of named intervals with custom durations and colors. The entire background changes color with each interval so you can read it from across the room. Includes presets, drag-and-drop reordering, audio cues, screen wake lock, and a shareable URL.
