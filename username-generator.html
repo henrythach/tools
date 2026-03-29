@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Username Generator</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #fff;
+      --text: #1a1a1a;
+      --text-muted: #666;
+      --border: #ccc;
+      --border-subtle: #e0e0e0;
+      --border-footer: #eee;
+      --input-bg: #fff;
+      --btn-bg: #fff;
+      --btn-hover: #f5f5f5;
+      --accent: #4a90d9;
+      --accent-hover: #3a7bc8;
+      --card-bg: #f8f9fa;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1a1a1a;
+        --text: #e8e8e8;
+        --text-muted: #999;
+        --border: #444;
+        --border-subtle: #333;
+        --border-footer: #2e2e2e;
+        --input-bg: #252525;
+        --btn-bg: #2a2a2a;
+        --btn-hover: #333;
+        --accent: #5a9fd4;
+        --accent-hover: #4a8fc4;
+        --card-bg: #252525;
+      }
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      padding: 1.5rem;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.5;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    h1 { font-size: 1.4rem; margin-bottom: 0.25rem; }
+    .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+
+    .section {
+      margin-bottom: 1rem;
+    }
+
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    /* Checkboxes */
+    .checkbox-group {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .checkbox-label input[type="checkbox"] {
+      width: 1rem;
+      height: 1rem;
+      cursor: pointer;
+      accent-color: var(--accent);
+    }
+
+    /* Segmented toggles */
+    .seg-toggle {
+      display: inline-flex;
+    }
+
+    .seg-toggle button {
+      font-family: inherit;
+      font-size: 0.82rem;
+      padding: 0.4rem 0.75rem;
+      border: 1px solid var(--border);
+      background: var(--btn-bg);
+      color: var(--text);
+      cursor: pointer;
+      border-radius: 0;
+      border-right: none;
+    }
+
+    .seg-toggle button:first-child { border-radius: 6px 0 0 6px; }
+    .seg-toggle button:last-child  { border-radius: 0 6px 6px 0; border-right: 1px solid var(--border); }
+
+    .seg-toggle button.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .seg-toggle button:not(.active):hover { background: var(--btn-hover); }
+
+    /* Options row */
+    .options-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .option-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    /* Number suffix toggle */
+    .suffix-label {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+      user-select: none;
+      padding: 0.4rem 0;
+    }
+
+    .suffix-label input[type="checkbox"] {
+      width: 1rem;
+      height: 1rem;
+      cursor: pointer;
+      accent-color: var(--accent);
+    }
+
+    /* Action buttons */
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    button.primary {
+      font-family: inherit;
+      font-size: 0.85rem;
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      background: var(--accent);
+      color: #fff;
+      cursor: pointer;
+    }
+
+    button.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+    button.primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    button.secondary {
+      font-family: inherit;
+      font-size: 0.85rem;
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--btn-bg);
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    button.secondary:hover { background: var(--btn-hover); }
+    button.secondary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .no-categories-hint {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      align-self: center;
+    }
+
+    /* Results grid */
+    .results {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .username-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 0.4rem 0.75rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+      user-select: none;
+      transition: border-color 0.1s, background 0.1s;
+      position: relative;
+    }
+
+    .username-card:hover {
+      border-color: var(--accent);
+    }
+
+    .username-card.copied {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    footer {
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-footer);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    footer a { color: var(--text-muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+  <h1>Username Generator</h1>
+  <p class="subtitle">Generate random usernames from words you choose.</p>
+
+  <div class="section">
+    <div class="section-label">Categories</div>
+    <div class="checkbox-group" id="category-checkboxes"></div>
+  </div>
+
+  <div class="options-row">
+    <div class="option-group">
+      <div class="section-label">Count</div>
+      <div class="seg-toggle" id="count-toggle"></div>
+    </div>
+    <div class="option-group">
+      <div class="section-label">Style</div>
+      <div class="seg-toggle" id="style-toggle"></div>
+    </div>
+    <div class="option-group">
+      <div class="section-label">Options</div>
+      <label class="suffix-label">
+        <input type="checkbox" id="suffix-toggle"> Add number suffix
+      </label>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="primary" id="generate-btn">Generate</button>
+    <button class="secondary" id="copy-all-btn" disabled>Copy All</button>
+    <span class="no-categories-hint" id="no-categories-hint" style="display:none">Select at least one category.</span>
+  </div>
+
+  <div class="results" id="results"></div>
+
+  <footer>
+    <a href="./">Tools</a> &middot; <a href="https://github.com/henrythach/tools/blob/main/username-generator.html">Source</a>
+  </footer>
+
+  <script>
+    // ─── Word lists ───────────────────────────────────────────────────────────
+    // To add/remove words, edit the arrays below.
+    // To add a new category, add a new key here — the UI auto-builds from this object.
+    const WORDS = {
+      adjective: [
+        'Brave', 'Calm', 'Clever', 'Daring', 'Eager', 'Fancy', 'Gentle',
+        'Happy', 'Jolly', 'Kind', 'Lively', 'Mighty', 'Noble', 'Proud',
+        'Quick', 'Quirky', 'Radiant', 'Shiny', 'Silent', 'Sleek', 'Sneaky',
+        'Snowy', 'Speedy', 'Spicy', 'Stoic', 'Swift', 'Tiny', 'Valiant',
+        'Vibrant', 'Wandering', 'Wild', 'Witty', 'Zesty',
+      ],
+      color: [
+        'Amber', 'Azure', 'Black', 'Blue', 'Bronze', 'Cobalt', 'Coral',
+        'Crimson', 'Cyan', 'Emerald', 'Fuchsia', 'Golden', 'Gray', 'Green',
+        'Indigo', 'Ivory', 'Jade', 'Lavender', 'Magenta', 'Maroon', 'Navy',
+        'Ochre', 'Olive', 'Orange', 'Pink', 'Plum', 'Purple', 'Red',
+        'Rose', 'Ruby', 'Sage', 'Scarlet', 'Silver', 'Teal', 'Violet',
+        'White', 'Yellow',
+      ],
+      animal: [
+        'Badger', 'Bear', 'Bison', 'Bobcat', 'Cobra', 'Condor', 'Coyote',
+        'Crane', 'Crow', 'Deer', 'Dingo', 'Dolphin', 'Eagle', 'Falcon',
+        'Ferret', 'Fox', 'Gecko', 'Hawk', 'Hedgehog', 'Heron', 'Ibex',
+        'Jackal', 'Jaguar', 'Kestrel', 'Lemur', 'Lynx', 'Magpie', 'Marten',
+        'Mink', 'Moose', 'Narwhal', 'Otter', 'Owl', 'Panda', 'Panther',
+        'Penguin', 'Puma', 'Raven', 'Salamander', 'Shark', 'Skunk', 'Sloth',
+        'Sparrow', 'Stallion', 'Tiger', 'Viper', 'Weasel', 'Wolf', 'Wolverine',
+      ],
+    };
+
+    // ─── Config ───────────────────────────────────────────────────────────────
+    const COUNTS = [10, 25, 50, 100];
+    const STYLES = [
+      { label: 'PascalCase', value: 'pascal' },
+      { label: 'camelCase',  value: 'camel'  },
+      { label: 'snake_case', value: 'snake'  },
+      { label: 'kebab-case', value: 'kebab'  },
+    ];
+
+    // ─── State ────────────────────────────────────────────────────────────────
+    let selectedCount = COUNTS[0];
+    let selectedStyle = STYLES[0].value;
+
+    // ─── DOM refs ─────────────────────────────────────────────────────────────
+    const categoryCheckboxesEl = document.getElementById('category-checkboxes');
+    const countToggleEl        = document.getElementById('count-toggle');
+    const styleToggleEl        = document.getElementById('style-toggle');
+    const suffixToggleEl       = document.getElementById('suffix-toggle');
+    const generateBtn          = document.getElementById('generate-btn');
+    const copyAllBtn           = document.getElementById('copy-all-btn');
+    const noCategoriesHint     = document.getElementById('no-categories-hint');
+    const resultsEl            = document.getElementById('results');
+
+    // ─── Build category checkboxes ────────────────────────────────────────────
+    Object.keys(WORDS).forEach(category => {
+      const label = document.createElement('label');
+      label.className = 'checkbox-label';
+
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.value = category;
+      cb.checked = true;
+      cb.addEventListener('change', updateGenerateState);
+
+      const span = document.createElement('span');
+      span.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+
+      label.appendChild(cb);
+      label.appendChild(span);
+      categoryCheckboxesEl.appendChild(label);
+    });
+
+    // ─── Build count toggle ───────────────────────────────────────────────────
+    COUNTS.forEach(count => {
+      const btn = document.createElement('button');
+      btn.textContent = count;
+      btn.className = count === selectedCount ? 'active' : '';
+      btn.addEventListener('click', () => {
+        selectedCount = count;
+        countToggleEl.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+      countToggleEl.appendChild(btn);
+    });
+
+    // ─── Build style toggle ───────────────────────────────────────────────────
+    STYLES.forEach(style => {
+      const btn = document.createElement('button');
+      btn.textContent = style.label;
+      btn.className = style.value === selectedStyle ? 'active' : '';
+      btn.addEventListener('click', () => {
+        selectedStyle = style.value;
+        styleToggleEl.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+      styleToggleEl.appendChild(btn);
+    });
+
+    // ─── Helpers ──────────────────────────────────────────────────────────────
+    function getSelectedCategories() {
+      return Array.from(categoryCheckboxesEl.querySelectorAll('input[type="checkbox"]:checked'))
+        .map(cb => cb.value);
+    }
+
+    function pick(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function formatUsername(words, style) {
+      const lower = words.map(w => w.toLowerCase());
+      switch (style) {
+        case 'pascal': return words.map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join('');
+        case 'camel':  return lower[0] + words.slice(1).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join('');
+        case 'snake':  return lower.join('_');
+        case 'kebab':  return lower.join('-');
+      }
+    }
+
+    function generateOne(categories) {
+      const words = categories.map(cat => pick(WORDS[cat]));
+      let username = formatUsername(words, selectedStyle);
+      if (suffixToggleEl.checked) {
+        username += Math.floor(Math.random() * 9999) + 1;
+      }
+      return username;
+    }
+
+    function updateGenerateState() {
+      const hasCategories = getSelectedCategories().length > 0;
+      generateBtn.disabled = !hasCategories;
+      copyAllBtn.disabled = !hasCategories || resultsEl.children.length === 0;
+      noCategoriesHint.style.display = hasCategories ? 'none' : 'inline';
+    }
+
+    function generate() {
+      const categories = getSelectedCategories();
+      if (categories.length === 0) return;
+
+      resultsEl.innerHTML = '';
+      for (let i = 0; i < selectedCount; i++) {
+        const username = generateOne(categories);
+        const card = document.createElement('div');
+        card.className = 'username-card';
+        card.textContent = username;
+        card.title = 'Click to copy';
+        card.addEventListener('click', () => copyUsername(card, username));
+        resultsEl.appendChild(card);
+      }
+
+      copyAllBtn.disabled = false;
+    }
+
+    function copyUsername(card, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        card.textContent = 'Copied!';
+        card.classList.add('copied');
+        setTimeout(() => {
+          card.textContent = text;
+          card.classList.remove('copied');
+        }, 1000);
+      });
+    }
+
+    function copyAll() {
+      const usernames = Array.from(resultsEl.querySelectorAll('.username-card'))
+        .map(card => card.textContent)
+        .join('\n');
+      navigator.clipboard.writeText(usernames).then(() => {
+        const original = copyAllBtn.textContent;
+        copyAllBtn.textContent = 'Copied!';
+        setTimeout(() => { copyAllBtn.textContent = original; }, 1200);
+      });
+    }
+
+    // ─── Events ───────────────────────────────────────────────────────────────
+    generateBtn.addEventListener('click', generate);
+    copyAllBtn.addEventListener('click', copyAll);
+
+    // ─── Init ─────────────────────────────────────────────────────────────────
+    generate();
+  </script>
+</body>
+</html>

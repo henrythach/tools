@@ -1,0 +1,1 @@
+Generate random usernames by combining words from selectable categories: adjective, color, and animal. Supports multiple casing styles (PascalCase, camelCase, snake_case, kebab-case), optional number suffix, and batch generation of 10–100 usernames at a time.
