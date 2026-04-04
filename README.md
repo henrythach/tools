@@ -12,3 +12,4 @@ Inspired by [Simon Willison's HTML tools](https://simonwillison.net/2025/Dec/10/
 - [Retirement Calculator](retirement-calculator.html) — Project your retirement savings growth and see if you're on track with an interactive chart.
 - [Interval Timer](interval-timer.html) — Full-screen workout timer for EMOM, Tabata, AMRAP, and HIIT. Background color changes with each interval for easy at-a-glance visibility.
 - [Username Generator](username-generator.html) — Generate random usernames from adjectives, colors, and animals. Supports multiple casing styles and optional number suffix.
+- [Measurement Sense](measurement-learning.html) — Build intuition for metric units through vivid real-world anchors and a slider-based quiz with spaced repetition. No math required.
