@@ -1,0 +1,702 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Meeting Talk Time Tracker</title>
+    <style>
+      :root {
+        --bg: #fff;
+        --text: #1a1a1a;
+        --text-muted: #666;
+        --border: #ccc;
+        --border-subtle: #e0e0e0;
+        --border-footer: #eee;
+        --input-bg: #fff;
+        --btn-bg: #fff;
+        --btn-hover: #f5f5f5;
+        --accent: #4a90d9;
+        --accent-hover: #3a7bc8;
+        --card-bg: #f8f9fa;
+        --muted-bg: #f0f0f0;
+        --error: #c0392b;
+        --error-bg: #f8d7da;
+        --danger: #dc2626;
+        --danger-bg: #fee2e2;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #1a1a1a;
+          --text: #e8e8e8;
+          --text-muted: #999;
+          --border: #444;
+          --border-subtle: #333;
+          --border-footer: #2e2e2e;
+          --input-bg: #252525;
+          --btn-bg: #2a2a2a;
+          --btn-hover: #333;
+          --accent: #5a9fd4;
+          --accent-hover: #4a8fc4;
+          --card-bg: #252525;
+          --muted-bg: #222;
+          --error: #e05c4b;
+          --error-bg: #3a1a1a;
+          --danger: #f87171;
+          --danger-bg: #450a0a;
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+        padding: 1.5rem;
+        color: var(--text);
+        background: var(--bg);
+        line-height: 1.5;
+        max-width: 700px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        font-size: 1.4rem;
+        margin-bottom: 0.25rem;
+      }
+      .subtitle {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        margin-bottom: 1.25rem;
+      }
+
+      button {
+        font-family: inherit;
+        font-size: 0.85rem;
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--btn-bg);
+        color: var(--text);
+        cursor: pointer;
+      }
+      button:hover {
+        background: var(--btn-hover);
+      }
+      button.primary {
+        background: var(--accent);
+        color: #fff;
+        border-color: var(--accent);
+      }
+      button.primary:hover {
+        background: var(--accent-hover);
+      }
+      button.danger {
+        color: var(--danger);
+        border-color: var(--danger);
+      }
+      button.danger:hover {
+        background: var(--danger-bg);
+      }
+
+      textarea,
+      input[type="text"] {
+        font-family: inherit;
+        font-size: 0.85rem;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--input-bg);
+        color: var(--text);
+        width: 100%;
+      }
+      textarea:focus,
+      input:focus {
+        outline: 2px solid var(--accent);
+        outline-offset: -1px;
+      }
+
+      footer {
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-footer);
+        font-size: 0.8rem;
+        color: var(--text-muted);
+      }
+      footer a {
+        color: var(--text-muted);
+        text-decoration: none;
+      }
+      footer a:hover {
+        color: var(--text);
+      }
+
+      .screen {
+        display: none;
+      }
+      .screen.active {
+        display: block;
+      }
+
+      /* ── Setup ── */
+      .setup-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .error-msg {
+        color: var(--error);
+        background: var(--error-bg);
+        padding: 0.5rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+      }
+
+      .hint {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        line-height: 1.7;
+      }
+
+      kbd {
+        font-family: inherit;
+        font-size: 0.75rem;
+        background: var(--muted-bg);
+        border: 1px solid var(--border);
+        border-radius: 3px;
+        padding: 0.1em 0.35em;
+      }
+
+      /* ── Speaker banner ── */
+      .speaker-banner {
+        border-radius: 8px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        min-height: 5rem;
+        transition:
+          background 0.15s,
+          color 0.15s;
+      }
+      .speaker-banner.active {
+        background: var(--accent);
+        color: #fff;
+      }
+      .speaker-banner.paused {
+        background: #e8a020;
+        color: #fff;
+      }
+      .speaker-banner.idle {
+        background: var(--card-bg);
+        color: var(--text-muted);
+        border: 1px solid var(--border-subtle);
+      }
+
+      .banner-name {
+        font-size: 1.4rem;
+        font-weight: 600;
+      }
+      .banner-timer {
+        font-size: 2.2rem;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.02em;
+      }
+
+      /* ── Prefix indicator ── */
+      .prefix-box {
+        min-height: 2.25rem;
+        padding: 0.4rem 0.75rem;
+        border-radius: 6px;
+        background: var(--card-bg);
+        border: 1px solid var(--border-subtle);
+        font-size: 0.85rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-muted);
+      }
+
+      .prefix-typed {
+        font-family: "SF Mono", "Fira Code", Menlo, monospace;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--text);
+        background: var(--border-subtle);
+        padding: 0.1em 0.4em;
+        border-radius: 3px;
+      }
+
+      /* ── Leaderboard ── */
+      .leaderboard {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        margin-bottom: 1.25rem;
+      }
+
+      .lb-row {
+        display: grid;
+        grid-template-columns: 1fr 62px 44px 100px;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: 6px;
+        background: var(--card-bg);
+        border: 1px solid var(--border-subtle);
+      }
+
+      .lb-row.is-active {
+        border-color: var(--accent);
+        border-width: 2px;
+      }
+
+      .lb-name {
+        font-size: 0.9rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .lb-time {
+        font-size: 0.85rem;
+        font-variant-numeric: tabular-nums;
+        text-align: right;
+      }
+      .lb-pct {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-align: right;
+      }
+      .lb-bar-wrap {
+        background: var(--border-subtle);
+        border-radius: 3px;
+        height: 6px;
+        overflow: hidden;
+      }
+      .lb-bar {
+        height: 100%;
+        background: var(--accent);
+        border-radius: 3px;
+      }
+
+      /* ── Session controls ── */
+      .session-controls {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+      }
+
+      /* ── Summary ── */
+      .summary-stat {
+        font-size: 1rem;
+        color: var(--text-muted);
+        margin-bottom: 1.25rem;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- SETUP -->
+    <div id="screen-setup" class="screen active">
+      <h1>Meeting Talk Time Tracker</h1>
+      <p class="subtitle">Keyboard-driven talk time tracker for any meeting.</p>
+      <div class="setup-form">
+        <div>
+          <label
+            style="
+              font-size: 0.85rem;
+              font-weight: 600;
+              display: block;
+              margin-bottom: 0.4rem;
+            "
+          >
+            Participants — one per line
+          </label>
+          <textarea
+            id="names-input"
+            rows="7"
+            placeholder="Alice&#10;Bob&#10;Carol&#10;Diana"
+          ></textarea>
+        </div>
+        <div id="setup-error" class="error-msg" style="display: none"></div>
+        <div>
+          <button class="primary" id="start-btn">Start Meeting</button>
+        </div>
+        <p class="hint">
+          During the meeting: type letters to switch speaker (prefix-match) ·
+          <kbd>Space</kbd> pause/resume · <kbd>Ctrl+Z</kbd> undo last switch ·
+          <kbd>Esc</kbd> end meeting
+        </p>
+      </div>
+      <footer>
+        <a href="./">← All tools</a> &nbsp;·&nbsp;
+        <a
+          href="https://github.com/henrythach/tools/blob/main/meeting-talk-time.html"
+          >Source</a
+        >
+      </footer>
+    </div>
+
+    <!-- SESSION -->
+    <div id="screen-session" class="screen">
+      <div id="speaker-banner" class="speaker-banner idle">
+        <div class="banner-name" id="banner-name">No active speaker</div>
+        <div class="banner-timer" id="banner-timer">0:00</div>
+      </div>
+      <div class="prefix-box" id="prefix-box">
+        <span>Type a name prefix to switch speaker</span>
+      </div>
+      <div class="leaderboard" id="session-leaderboard"></div>
+      <div class="session-controls">
+        <button id="pause-btn">⏸ Pause</button>
+        <button class="danger" id="end-btn">End Meeting</button>
+        <span class="hint" style="margin-left: 0.25rem"
+          >or press <kbd>Space</kbd> / <kbd>Esc</kbd></span
+        >
+      </div>
+      <footer>
+        <a href="./">← All tools</a> &nbsp;·&nbsp;
+        <a
+          href="https://github.com/henrythach/tools/blob/main/meeting-talk-time.html"
+          >Source</a
+        >
+      </footer>
+    </div>
+
+    <!-- SUMMARY -->
+    <div id="screen-summary" class="screen">
+      <h1>Meeting Summary</h1>
+      <p class="summary-stat" id="summary-total"></p>
+      <div class="leaderboard" id="summary-leaderboard"></div>
+      <button class="primary" id="new-meeting-btn" style="margin-bottom: 1rem">
+        New Meeting
+      </button>
+      <footer>
+        <a href="./">← All tools</a> &nbsp;·&nbsp;
+        <a
+          href="https://github.com/henrythach/tools/blob/main/meeting-talk-time.html"
+          >Source</a
+        >
+      </footer>
+    </div>
+
+    <script>
+      // ── State ──────────────────────────────────────────────────
+      let appState = "setup"; // setup | running | paused | ended
+      let participants = []; // [{name, totalMs}]
+      let currentSpeaker = null; // index | null
+      let turnStart = null; // Date.now() when current turn began
+      let meetingStart = null;
+      let meetingEnd = null;
+      let prefix = "";
+      let undoSnapshot = null; // {prevSpeaker, prevTotals}
+      let rafId = null;
+
+      // ── Helpers ────────────────────────────────────────────────
+      const $ = (id) => document.getElementById(id);
+
+      function showScreen(name) {
+        ["setup", "session", "summary"].forEach((n) =>
+          $(`screen-${n}`).classList.remove("active"),
+        );
+        $(`screen-${name}`).classList.add("active");
+      }
+
+      function fmt(ms) {
+        const s = Math.floor(ms / 1000);
+        return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+      }
+
+      function esc(s) {
+        return s
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      // Live ms for participant i (includes current ongoing turn)
+      function liveMs(i) {
+        let ms = participants[i].totalMs;
+        if (
+          appState === "running" &&
+          currentSpeaker === i &&
+          turnStart !== null
+        ) {
+          ms += Date.now() - turnStart;
+        }
+        return ms;
+      }
+
+      function currentTurnMs() {
+        if (
+          appState !== "running" ||
+          currentSpeaker === null ||
+          turnStart === null
+        )
+          return 0;
+        return Date.now() - turnStart;
+      }
+
+      function totalElapsed() {
+        if (!meetingStart) return 0;
+        return (meetingEnd || Date.now()) - meetingStart;
+      }
+
+      // Commit the current speaker's elapsed turn time into their total
+      function commitSpeaker() {
+        if (currentSpeaker !== null && turnStart !== null) {
+          participants[currentSpeaker].totalMs += Date.now() - turnStart;
+          turnStart = null;
+        }
+      }
+
+      // ── Core actions ───────────────────────────────────────────
+      function switchTo(idx) {
+        undoSnapshot = {
+          prevSpeaker: currentSpeaker,
+          prevTotals: participants.map((p) => p.totalMs),
+        };
+        commitSpeaker();
+        currentSpeaker = idx;
+        turnStart = Date.now();
+      }
+
+      function undoSwitch() {
+        if (!undoSnapshot) return;
+        participants.forEach((p, i) => {
+          p.totalMs = undoSnapshot.prevTotals[i];
+        });
+        currentSpeaker = undoSnapshot.prevSpeaker;
+        turnStart = currentSpeaker !== null ? Date.now() : null;
+        undoSnapshot = null;
+      }
+
+      function togglePause() {
+        if (appState === "running") {
+          commitSpeaker();
+          appState = "paused";
+          $("pause-btn").textContent = "▶ Resume";
+        } else if (appState === "paused") {
+          appState = "running";
+          if (currentSpeaker !== null) turnStart = Date.now();
+          $("pause-btn").textContent = "⏸ Pause";
+        }
+      }
+
+      function endMeeting() {
+        if (appState === "running") commitSpeaker();
+        meetingEnd = Date.now();
+        appState = "ended";
+        cancelAnimationFrame(rafId);
+        renderSummary();
+        showScreen("summary");
+      }
+
+      // ── Keyboard ───────────────────────────────────────────────
+      document.addEventListener("keydown", (e) => {
+        if (appState === "setup" || appState === "ended") return;
+
+        // Ctrl/Cmd+Z — undo
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
+          e.preventDefault();
+          undoSwitch();
+          prefix = "";
+          return;
+        }
+
+        // Escape — end meeting
+        if (e.key === "Escape") {
+          e.preventDefault();
+          endMeeting();
+          return;
+        }
+
+        // Space — pause/resume
+        if (e.key === " ") {
+          e.preventDefault();
+          togglePause();
+          return;
+        }
+
+        // Backspace — trim prefix
+        if (e.key === "Backspace" && !e.ctrlKey && !e.metaKey) {
+          e.preventDefault();
+          prefix = prefix.slice(0, -1);
+          return;
+        }
+
+        // Typing while paused is blocked
+        if (appState === "paused") return;
+
+        // Letter/digit/space key — prefix matching
+        if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+          const candidate = prefix + e.key;
+          const matches = participants
+            .map((p, i) => ({ p, i }))
+            .filter(({ p }) =>
+              p.name.toLowerCase().startsWith(candidate.toLowerCase()),
+            );
+
+          if (matches.length === 0) return; // no-op — don't update prefix
+
+          if (matches.length === 1) {
+            switchTo(matches[0].i);
+            prefix = "";
+          } else {
+            prefix = candidate;
+          }
+        }
+      });
+
+      // ── Rendering ──────────────────────────────────────────────
+      function renderBanner() {
+        const banner = $("speaker-banner");
+        const nameEl = $("banner-name");
+        const timerEl = $("banner-timer");
+
+        banner.className = "speaker-banner";
+
+        if (appState === "paused") {
+          banner.classList.add("paused");
+          nameEl.textContent =
+            currentSpeaker !== null
+              ? `⏸ ${participants[currentSpeaker].name}`
+              : "⏸ Paused";
+          timerEl.textContent = "";
+        } else if (currentSpeaker !== null) {
+          banner.classList.add("active");
+          nameEl.textContent = participants[currentSpeaker].name;
+          timerEl.textContent = fmt(currentTurnMs());
+        } else {
+          banner.classList.add("idle");
+          nameEl.textContent = "No active speaker";
+          timerEl.textContent = "0:00";
+        }
+      }
+
+      function renderPrefix() {
+        const box = $("prefix-box");
+        if (!prefix) {
+          box.innerHTML = "<span>Type a name prefix to switch speaker</span>";
+          return;
+        }
+        const candidates = participants
+          .filter((p) => p.name.toLowerCase().startsWith(prefix.toLowerCase()))
+          .map((p) => esc(p.name))
+          .join(", ");
+        box.innerHTML = `<span class="prefix-typed">${esc(prefix)}</span><span>${candidates}</span>`;
+      }
+
+      function renderLeaderboard(containerId, isFinal) {
+        const container = $(containerId);
+        const elapsed = totalElapsed();
+        const rows = participants
+          .map((p, i) => ({
+            name: p.name,
+            ms: isFinal ? p.totalMs : liveMs(i),
+            i,
+          }))
+          .sort((a, b) => b.ms - a.ms);
+        const maxMs = rows.length > 0 ? rows[0].ms : 0;
+
+        container.innerHTML = rows
+          .map(({ name, ms, i }) => {
+            const pct = elapsed > 0 ? Math.round((ms / elapsed) * 100) : 0;
+            const barW = maxMs > 0 ? Math.round((ms / maxMs) * 100) : 0;
+            const active = !isFinal && i === currentSpeaker;
+            return `<div class="lb-row${active ? " is-active" : ""}">
+            <div class="lb-name">${esc(name)}</div>
+            <div class="lb-time">${fmt(ms)}</div>
+            <div class="lb-pct">${pct}%</div>
+            <div class="lb-bar-wrap"><div class="lb-bar" style="width:${barW}%"></div></div>
+          </div>`;
+          })
+          .join("");
+      }
+
+      function renderSummary() {
+        $("summary-total").textContent =
+          `Total meeting time: ${fmt(totalElapsed())}`;
+        renderLeaderboard("summary-leaderboard", true);
+      }
+
+      // Single rAF loop — runs until meeting ends
+      function tick() {
+        if (appState === "ended") return;
+        renderBanner();
+        renderPrefix();
+        renderLeaderboard("session-leaderboard", false);
+        rafId = requestAnimationFrame(tick);
+      }
+
+      // ── Setup button ───────────────────────────────────────────
+      $("start-btn").addEventListener("click", () => {
+        const raw = $("names-input").value;
+        const names = raw
+          .split("\n")
+          .map((n) => n.trim())
+          .filter(Boolean);
+        const errEl = $("setup-error");
+
+        if (names.length < 2) {
+          errEl.textContent = "Enter at least 2 participants.";
+          errEl.style.display = "block";
+          return;
+        }
+
+        const lower = names.map((n) => n.toLowerCase());
+        const dupes = names.filter(
+          (n, i) => lower.indexOf(n.toLowerCase()) !== i,
+        );
+        if (dupes.length > 0) {
+          errEl.textContent = `Duplicate names: ${[...new Set(dupes)].join(", ")}. Please disambiguate (e.g. add a last initial).`;
+          errEl.style.display = "block";
+          return;
+        }
+
+        errEl.style.display = "none";
+        participants = names.map((name) => ({ name, totalMs: 0 }));
+        currentSpeaker = null;
+        turnStart = null;
+        prefix = "";
+        undoSnapshot = null;
+        meetingStart = Date.now();
+        meetingEnd = null;
+        appState = "running";
+        $("pause-btn").textContent = "⏸ Pause";
+
+        renderLeaderboard("session-leaderboard", false);
+        showScreen("session");
+        rafId = requestAnimationFrame(tick);
+      });
+
+      $("pause-btn").addEventListener("click", togglePause);
+      $("end-btn").addEventListener("click", endMeeting);
+
+      $("new-meeting-btn").addEventListener("click", () => {
+        cancelAnimationFrame(rafId);
+        participants = [];
+        currentSpeaker = null;
+        turnStart = null;
+        prefix = "";
+        undoSnapshot = null;
+        meetingStart = null;
+        meetingEnd = null;
+        appState = "setup";
+        $("names-input").value = "";
+        showScreen("setup");
+      });
+    </script>
+  </body>
+</html>

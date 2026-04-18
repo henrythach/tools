@@ -1,0 +1,1 @@
+Track how long each participant speaks during a meeting. Entirely keyboard-driven: type a name prefix to switch the active speaker, Space to pause/resume, Ctrl+Z to undo a mis-switch, and Esc to end. Live leaderboard shows total time and share-of-meeting for each participant.

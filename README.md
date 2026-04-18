@@ -14,3 +14,4 @@ Inspired by [Simon Willison's HTML tools](https://simonwillison.net/2025/Dec/10/
 - [Username Generator](username-generator.html) — Generate random usernames from adjectives, colors, and animals. Supports multiple casing styles and optional number suffix.
 - [Measurement Sense](measurement-learning.html) — Build intuition for metric units through vivid real-world anchors and a slider-based quiz with spaced repetition. No math required.
 - [Party Host](party-host.html) — Manage turn order and scoring for party games. Randomly picks who goes first, then rotates. Tap +1/−1 to keep score.
+- [Meeting Talk Time Tracker](meeting-talk-time.html) — Track how long each participant speaks. Keyboard-driven prefix matching to switch speakers, live leaderboard with share-of-meeting bars.
