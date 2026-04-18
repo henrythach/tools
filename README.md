@@ -13,3 +13,4 @@ Inspired by [Simon Willison's HTML tools](https://simonwillison.net/2025/Dec/10/
 - [Interval Timer](interval-timer.html) — Full-screen workout timer for EMOM, Tabata, AMRAP, and HIIT. Background color changes with each interval for easy at-a-glance visibility.
 - [Username Generator](username-generator.html) — Generate random usernames from adjectives, colors, and animals. Supports multiple casing styles and optional number suffix.
 - [Measurement Sense](measurement-learning.html) — Build intuition for metric units through vivid real-world anchors and a slider-based quiz with spaced repetition. No math required.
+- [Party Host](party-host.html) — Manage turn order and scoring for party games. Randomly picks who goes first, then rotates. Tap +1/−1 to keep score.
