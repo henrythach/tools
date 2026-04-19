@@ -27,9 +27,8 @@ A collection of single-file HTML tools, inspired by [Simon Willison's approach](
 1. Create a new `.html` file in the repo root with a descriptive kebab-case name (e.g., `json-to-table.html`).
 2. Include a `<title>` and an `<h1>` matching the tool's purpose.
 3. Add a footer with two links: one back to the main tools page (`./`) and one to the source of the HTML file on GitHub (e.g. `https://github.com/henrythach/tools/blob/main/json-to-table.html`).
-4. Create a matching `.md` file with the same base name (e.g., `json-to-table.md`) that briefly describes what the tool does.
-5. Update `README.md` to list the new tool.
-6. Update `index.html` to add a matching `<a class="tool-card">` entry for the new tool. Keep the tool list in `index.html` in the same order as `README.md`. Any time a tool is added, renamed, removed, or its description changes, both `README.md` and `index.html` must be updated together.
+4. Create a matching `.md` file with the same base name (e.g., `json-to-table.md`) that briefly describes what the tool does. The first line (or first paragraph after an H1) becomes the card description in `index.html` and the one-liner in `README.md`.
+5. Run `node generate.js` to regenerate `README.md` and `index.html`. Both files are generated outputs — never edit them by hand.
 
 ## CSS Theming
 
