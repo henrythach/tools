@@ -1,0 +1,1 @@
+Calculate your Total Daily Energy Expenditure using the Mifflin-St Jeor equation. Enter your sex, age, height, weight, and activity level to instantly see your BMR, TDEE, and calorie targets for cutting, maintenance, and bulking — in imperial or metric.

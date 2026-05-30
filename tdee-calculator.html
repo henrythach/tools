@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TDEE Calculator</title>
+  <style>
+    :root {
+      --bg: #fff;
+      --text: #1a1a1a;
+      --text-muted: #666;
+      --border: #ccc;
+      --border-subtle: #e0e0e0;
+      --border-footer: #eee;
+      --input-bg: #fff;
+      --btn-bg: #fff;
+      --btn-hover: #f5f5f5;
+      --accent: #4a90d9;
+      --accent-hover: #3a7bc8;
+      --tr-hover: #f8f8f8;
+      --th-bg: #fff;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1a1a1a;
+        --text: #e8e8e8;
+        --text-muted: #999;
+        --border: #444;
+        --border-subtle: #333;
+        --border-footer: #2e2e2e;
+        --input-bg: #252525;
+        --btn-bg: #2a2a2a;
+        --btn-hover: #333;
+        --accent: #5a9fd4;
+        --accent-hover: #4a8fc4;
+        --tr-hover: #242424;
+        --th-bg: #1a1a1a;
+      }
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      padding: 1.5rem;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.5;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    h1 { font-size: 1.4rem; margin-bottom: 0.25rem; }
+    .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+
+    .section { margin-bottom: 1.25rem; }
+    .field-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+    }
+
+    .toggle { display: flex; }
+    .toggle button {
+      flex: 1;
+      font-family: inherit;
+      font-size: 0.85rem;
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border);
+      background: var(--btn-bg);
+      color: var(--text);
+      cursor: pointer;
+    }
+    .toggle button:first-child { border-radius: 6px 0 0 6px; border-right: none; }
+    .toggle button:last-child  { border-radius: 0 6px 6px 0; }
+    .toggle button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .toggle button:not(.active):hover { background: var(--btn-hover); }
+
+    .input-row { display: flex; align-items: center; gap: 0.5rem; }
+    .input-group { display: flex; align-items: center; gap: 0.4rem; }
+
+    input[type="number"] {
+      font-family: inherit;
+      font-size: 0.85rem;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--input-bg);
+      color: var(--text);
+      width: 80px;
+    }
+    input[type="number"]:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+
+    .unit-label { font-size: 0.8rem; color: var(--text-muted); }
+
+    .activity-options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .activity-option {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .activity-name { font-weight: 500; }
+    .activity-desc { color: var(--text-muted); font-size: 0.8rem; }
+
+    #results {
+      display: none;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 1.25rem;
+      margin-top: 0.5rem;
+    }
+
+    .stat-line { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.2rem; }
+    .stat-line strong { color: var(--text); }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 0.75rem; }
+    th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      background: var(--th-bg);
+    }
+    td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border-subtle); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--tr-hover); }
+    tr.maintenance td { font-weight: 600; }
+
+    .formula-note {
+      margin-top: 1rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    .formula-note a { color: var(--text-muted); }
+    .formula-note a:hover { color: var(--text); }
+
+    footer {
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-footer);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    footer a { color: var(--text-muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+
+<h1>TDEE Calculator</h1>
+<p class="subtitle">Your daily calorie baseline for weight goals.</p>
+
+<div class="section">
+  <label class="field-label">Units</label>
+  <div class="toggle" id="units-toggle">
+    <button class="active" onclick="setUnits('imperial')">Imperial</button>
+    <button onclick="setUnits('metric')">Metric</button>
+  </div>
+</div>
+
+<div class="section">
+  <label class="field-label">Sex</label>
+  <div class="toggle" id="sex-toggle">
+    <button class="active" onclick="setSex('male')">Male</button>
+    <button onclick="setSex('female')">Female</button>
+  </div>
+</div>
+
+<div class="section">
+  <label class="field-label">Age</label>
+  <div class="input-row">
+    <input type="number" id="age" min="15" max="100" placeholder="30" oninput="saveAndCalc()">
+    <span class="unit-label">years</span>
+  </div>
+</div>
+
+<div class="section">
+  <label class="field-label">Height</label>
+  <div class="input-row" id="height-imperial">
+    <div class="input-group">
+      <input type="number" id="height-ft" min="3" max="8" placeholder="5" oninput="saveAndCalc()">
+      <span class="unit-label">ft</span>
+    </div>
+    <div class="input-group">
+      <input type="number" id="height-in" min="0" max="11" placeholder="10" oninput="saveAndCalc()">
+      <span class="unit-label">in</span>
+    </div>
+  </div>
+  <div class="input-row" id="height-metric" style="display:none">
+    <input type="number" id="height-cm" min="100" max="250" placeholder="178" oninput="saveAndCalc()">
+    <span class="unit-label">cm</span>
+  </div>
+</div>
+
+<div class="section">
+  <label class="field-label">Weight</label>
+  <div class="input-row" id="weight-imperial">
+    <input type="number" id="weight-lbs" min="50" max="700" placeholder="175" oninput="saveAndCalc()">
+    <span class="unit-label">lbs</span>
+  </div>
+  <div class="input-row" id="weight-metric" style="display:none">
+    <input type="number" id="weight-kg" min="20" max="320" placeholder="80" oninput="saveAndCalc()">
+    <span class="unit-label">kg</span>
+  </div>
+</div>
+
+<div class="section">
+  <label class="field-label">Activity Level</label>
+  <div class="activity-options">
+    <label class="activity-option">
+      <input type="radio" name="activity" value="1.2" onchange="saveAndCalc()">
+      <span><span class="activity-name">Sedentary</span> <span class="activity-desc">— desk job, little or no exercise</span></span>
+    </label>
+    <label class="activity-option">
+      <input type="radio" name="activity" value="1.375" onchange="saveAndCalc()">
+      <span><span class="activity-name">Lightly active</span> <span class="activity-desc">— light exercise 1–3 days/week</span></span>
+    </label>
+    <label class="activity-option">
+      <input type="radio" name="activity" value="1.55" onchange="saveAndCalc()">
+      <span><span class="activity-name">Moderately active</span> <span class="activity-desc">— moderate exercise 3–5 days/week</span></span>
+    </label>
+    <label class="activity-option">
+      <input type="radio" name="activity" value="1.725" onchange="saveAndCalc()">
+      <span><span class="activity-name">Very active</span> <span class="activity-desc">— hard exercise 6–7 days/week</span></span>
+    </label>
+    <label class="activity-option">
+      <input type="radio" name="activity" value="1.9" onchange="saveAndCalc()">
+      <span><span class="activity-name">Extra active</span> <span class="activity-desc">— physical job + hard training, or twice-daily workouts</span></span>
+    </label>
+  </div>
+</div>
+
+<div id="results">
+  <p class="stat-line">BMR: <strong id="bmr-val"></strong></p>
+  <p class="stat-line">TDEE: <strong id="tdee-val"></strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Goal</th>
+        <th>Calories/day</th>
+        <th>Weekly change</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Aggressive cut</td><td id="g-cut2"></td><td id="wc-cut2"></td></tr>
+      <tr><td>Cut</td><td id="g-cut1"></td><td id="wc-cut1"></td></tr>
+      <tr class="maintenance"><td>Maintenance</td><td id="g-maint"></td><td>—</td></tr>
+      <tr><td>Lean bulk</td><td id="g-bulk1"></td><td id="wc-bulk1"></td></tr>
+      <tr><td>Bulk</td><td id="g-bulk2"></td><td id="wc-bulk2"></td></tr>
+    </tbody>
+  </table>
+  <p class="formula-note">
+    Calculated using the <a href="https://pubmed.ncbi.nlm.nih.gov/2305711/" target="_blank" rel="noopener">Mifflin-St Jeor equation</a> (BMR) × activity multiplier (PAL).
+  </p>
+</div>
+
+<footer>
+  <a href="./">← All tools</a> &nbsp;·&nbsp;
+  <a href="https://github.com/henrythach/tools/blob/main/tdee-calculator.html">Source</a>
+</footer>
+
+<script>
+  const state = { units: 'imperial', sex: 'male' };
+
+  function fmt(n) { return Math.round(n).toLocaleString(); }
+
+  function applyUnitsUI(u) {
+    const imp = u === 'imperial';
+    document.querySelectorAll('#units-toggle button').forEach((b, i) => b.classList.toggle('active', imp ? i === 0 : i === 1));
+    document.getElementById('height-imperial').style.display = imp ? '' : 'none';
+    document.getElementById('height-metric').style.display   = imp ? 'none' : '';
+    document.getElementById('weight-imperial').style.display = imp ? '' : 'none';
+    document.getElementById('weight-metric').style.display   = imp ? 'none' : '';
+  }
+
+  function applySexUI(s) {
+    document.querySelectorAll('#sex-toggle button').forEach((b, i) => b.classList.toggle('active', s === 'male' ? i === 0 : i === 1));
+  }
+
+  function setUnits(u) {
+    state.units = u;
+    applyUnitsUI(u);
+    saveAndCalc();
+  }
+
+  function setSex(s) {
+    state.sex = s;
+    applySexUI(s);
+    saveAndCalc();
+  }
+
+  function getInputs() {
+    const age = parseFloat(document.getElementById('age').value);
+    const actEl = document.querySelector('input[name="activity"]:checked');
+    if (!actEl) return null;
+    const activity = parseFloat(actEl.value);
+
+    let weightKg, heightCm;
+    if (state.units === 'imperial') {
+      const ft  = parseFloat(document.getElementById('height-ft').value);
+      const ins = parseFloat(document.getElementById('height-in').value);
+      const lbs = parseFloat(document.getElementById('weight-lbs').value);
+      if (isNaN(ft) || isNaN(ins) || isNaN(lbs)) return null;
+      heightCm = (ft * 12 + ins) * 2.54;
+      weightKg = lbs * 0.453592;
+    } else {
+      const cm = parseFloat(document.getElementById('height-cm').value);
+      const kg = parseFloat(document.getElementById('weight-kg').value);
+      if (isNaN(cm) || isNaN(kg)) return null;
+      heightCm = cm;
+      weightKg = kg;
+    }
+
+    if (isNaN(age) || isNaN(activity)) return null;
+    return { age, activity, weightKg, heightCm };
+  }
+
+  function calc() {
+    const inputs = getInputs();
+    const resultsEl = document.getElementById('results');
+    if (!inputs) { resultsEl.style.display = 'none'; return; }
+
+    const { age, activity, weightKg, heightCm } = inputs;
+    const sexAdj = state.sex === 'male' ? 5 : -161;
+    const bmr  = 10 * weightKg + 6.25 * heightCm - 5 * age + sexAdj;
+    const tdee = bmr * activity;
+    const imp  = state.units === 'imperial';
+
+    document.getElementById('bmr-val').textContent  = `${fmt(bmr)} kcal/day`;
+    document.getElementById('tdee-val').textContent = `${fmt(tdee)} kcal/day`;
+
+    const goals = [
+      { gId: 'cut2',  delta: -1000, wc: imp ? '−2 lb'   : '−0.9 kg' },
+      { gId: 'cut1',  delta: -500,  wc: imp ? '−1 lb'   : '−0.5 kg' },
+      { gId: 'maint', delta: 0,     wc: null },
+      { gId: 'bulk1', delta: 250,   wc: imp ? '+0.5 lb' : '+0.2 kg' },
+      { gId: 'bulk2', delta: 500,   wc: imp ? '+1 lb'   : '+0.5 kg' },
+    ];
+
+    goals.forEach(({ gId, delta, wc }) => {
+      document.getElementById(`g-${gId}`).textContent = `${fmt(tdee + delta)} kcal`;
+      const wcEl = document.getElementById(`wc-${gId}`);
+      if (wcEl) wcEl.textContent = wc;
+    });
+
+    resultsEl.style.display = 'block';
+  }
+
+  function saveAndCalc() {
+    localStorage.setItem('tdee-calculator', JSON.stringify({
+      units:     state.units,
+      sex:       state.sex,
+      age:       document.getElementById('age').value,
+      heightFt:  document.getElementById('height-ft').value,
+      heightIn:  document.getElementById('height-in').value,
+      heightCm:  document.getElementById('height-cm').value,
+      weightLbs: document.getElementById('weight-lbs').value,
+      weightKg:  document.getElementById('weight-kg').value,
+      activity:  document.querySelector('input[name="activity"]:checked')?.value ?? '',
+    }));
+    calc();
+  }
+
+  function loadState() {
+    const raw = localStorage.getItem('tdee-calculator');
+    if (!raw) return;
+    try {
+      const d = JSON.parse(raw);
+      if (d.units) { state.units = d.units; applyUnitsUI(d.units); }
+      if (d.sex)   { state.sex   = d.sex;   applySexUI(d.sex); }
+      if (d.age)       document.getElementById('age').value        = d.age;
+      if (d.heightFt)  document.getElementById('height-ft').value  = d.heightFt;
+      if (d.heightIn)  document.getElementById('height-in').value  = d.heightIn;
+      if (d.heightCm)  document.getElementById('height-cm').value  = d.heightCm;
+      if (d.weightLbs) document.getElementById('weight-lbs').value = d.weightLbs;
+      if (d.weightKg)  document.getElementById('weight-kg').value  = d.weightKg;
+      if (d.activity) {
+        const r = document.querySelector(`input[name="activity"][value="${d.activity}"]`);
+        if (r) r.checked = true;
+      }
+    } catch {}
+    calc();
+  }
+
+  loadState();
+</script>
+
+</body>
+</html>
