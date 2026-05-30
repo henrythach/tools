@@ -1,1044 +1,1177 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JWT Decoder</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JWT Decoder</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-    :root {
-      --bg: #fff;
-      --text: #1a1a1a;
-      --text-muted: #666;
-      --border: #ccc;
-      --border-strong: #ccc;
-      --border-subtle: #e0e0e0;
-      --border-footer: #eee;
-      --input-bg: #fff;
-      --btn-bg: #fff;
-      --btn-hover: #f5f5f5;
-      --accent: #4a90d9;
-      --accent-hover: #3a7bc8;
-      --card-bg: #f8f9fa;
-      --error: #c0392b;
-      --success: #27ae60;
-      --success-bg: #d4edda;
-      --error-bg: #f8d7da;
-      --warning-bg: #fff3cd;
-      --warning-text: #856404;
-      --code-bg: #f5f5f5;
-      --claim-label: #888;
-    }
-
-    @media (prefers-color-scheme: dark) {
       :root {
-        --bg: #1a1a1a;
-        --text: #e8e8e8;
-        --text-muted: #999;
-        --border: #444;
-        --border-strong: #555;
-        --border-subtle: #333;
-        --border-footer: #2e2e2e;
-        --input-bg: #252525;
-        --btn-bg: #2a2a2a;
-        --btn-hover: #333;
-        --accent: #5a9fd4;
-        --accent-hover: #4a8fc4;
-        --card-bg: #222;
-        --error: #e05c4b;
-        --success: #2ecc71;
-        --success-bg: #1a3a2a;
-        --error-bg: #3a1a1a;
-        --warning-bg: #3a3520;
-        --warning-text: #f0d060;
-        --code-bg: #2a2a2a;
-        --claim-label: #777;
+        --bg: #fff;
+        --text: #1a1a1a;
+        --text-muted: #666;
+        --border: #ccc;
+        --border-strong: #ccc;
+        --border-subtle: #e0e0e0;
+        --border-footer: #eee;
+        --input-bg: #fff;
+        --btn-bg: #fff;
+        --btn-hover: #f5f5f5;
+        --accent: #4a90d9;
+        --accent-hover: #3a7bc8;
+        --card-bg: #f8f9fa;
+        --error: #c0392b;
+        --success: #27ae60;
+        --success-bg: #d4edda;
+        --error-bg: #f8d7da;
+        --warning-bg: #fff3cd;
+        --warning-text: #856404;
+        --code-bg: #f5f5f5;
+        --claim-label: #888;
       }
-    }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      padding: 1.5rem;
-      color: var(--text);
-      background: var(--bg);
-      line-height: 1.5;
-      max-width: 700px;
-      margin: 0 auto;
-    }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #1a1a1a;
+          --text: #e8e8e8;
+          --text-muted: #999;
+          --border: #444;
+          --border-strong: #555;
+          --border-subtle: #333;
+          --border-footer: #2e2e2e;
+          --input-bg: #252525;
+          --btn-bg: #2a2a2a;
+          --btn-hover: #333;
+          --accent: #5a9fd4;
+          --accent-hover: #4a8fc4;
+          --card-bg: #222;
+          --error: #e05c4b;
+          --success: #2ecc71;
+          --success-bg: #1a3a2a;
+          --error-bg: #3a1a1a;
+          --warning-bg: #3a3520;
+          --warning-text: #f0d060;
+          --code-bg: #2a2a2a;
+          --claim-label: #777;
+        }
+      }
 
-    h1 { font-size: 1.4rem; margin-bottom: 0.25rem; }
-    .subtitle { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem; }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        padding: 1.5rem;
+        color: var(--text);
+        background: var(--bg);
+        line-height: 1.5;
+        max-width: 700px;
+        margin: 0 auto;
+      }
 
-    .mode-toggle {
-      display: flex;
-      gap: 0;
-      margin-bottom: 1rem;
-    }
-    .mode-toggle button {
-      flex: 1;
-      padding: 0.5rem 1rem;
-      font-size: 0.85rem;
-      font-weight: 600;
-      border: 1px solid var(--border);
-      background: var(--btn-bg);
-      color: var(--text-muted);
-      cursor: pointer;
-    }
-    .mode-toggle button:first-child { border-radius: 4px 0 0 4px; }
-    .mode-toggle button:last-child { border-radius: 0 4px 4px 0; border-left: none; }
-    .mode-toggle button.active {
-      background: var(--accent);
-      color: #fff;
-      border-color: var(--accent);
-    }
+      h1 {
+        font-size: 1.4rem;
+        margin-bottom: 0.25rem;
+      }
+      .subtitle {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        margin-bottom: 1rem;
+      }
 
-    textarea {
-      width: 100%;
-      font-family: "SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas, monospace;
-      font-size: 0.8rem;
-      padding: 0.75rem;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      resize: vertical;
-      background: var(--input-bg);
-      color: var(--text);
-    }
-    textarea:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
+      .mode-toggle {
+        display: flex;
+        gap: 0;
+        margin-bottom: 1rem;
+      }
+      .mode-toggle button {
+        flex: 1;
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border: 1px solid var(--border);
+        background: var(--btn-bg);
+        color: var(--text-muted);
+        cursor: pointer;
+      }
+      .mode-toggle button:first-child {
+        border-radius: 4px 0 0 4px;
+      }
+      .mode-toggle button:last-child {
+        border-radius: 0 4px 4px 0;
+        border-left: none;
+      }
+      .mode-toggle button.active {
+        background: var(--accent);
+        color: #fff;
+        border-color: var(--accent);
+      }
 
-    .actions {
-      display: flex;
-      gap: 0.5rem;
-      margin: 0.75rem 0;
-      align-items: center;
-      flex-wrap: wrap;
-    }
+      textarea {
+        width: 100%;
+        font-family: "SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas, monospace;
+        font-size: 0.8rem;
+        padding: 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        resize: vertical;
+        background: var(--input-bg);
+        color: var(--text);
+      }
+      textarea:focus {
+        outline: 2px solid var(--accent);
+        border-color: var(--accent);
+      }
 
-    button {
-      padding: 0.4rem 0.9rem;
-      font-size: 0.8rem;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      background: var(--btn-bg);
-      color: var(--text);
-      cursor: pointer;
-    }
-    button:hover { background: var(--btn-hover); }
-    button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-    button.primary:hover { background: var(--accent-hover); }
-    button.small { padding: 0.2rem 0.5rem; font-size: 0.7rem; }
-    button.danger { color: var(--error); }
+      .actions {
+        display: flex;
+        gap: 0.5rem;
+        margin: 0.75rem 0;
+        align-items: center;
+        flex-wrap: wrap;
+      }
 
-    select {
-      padding: 0.4rem 0.6rem;
-      font-size: 0.8rem;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      background: var(--input-bg);
-      color: var(--text);
-      cursor: pointer;
-    }
-    select:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
+      button {
+        padding: 0.4rem 0.9rem;
+        font-size: 0.8rem;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        background: var(--btn-bg);
+        color: var(--text);
+        cursor: pointer;
+      }
+      button:hover {
+        background: var(--btn-hover);
+      }
+      button.primary {
+        background: var(--accent);
+        color: #fff;
+        border-color: var(--accent);
+      }
+      button.primary:hover {
+        background: var(--accent-hover);
+      }
+      button.small {
+        padding: 0.2rem 0.5rem;
+        font-size: 0.7rem;
+      }
+      button.danger {
+        color: var(--error);
+      }
 
-    .error-msg { color: var(--error); font-size: 0.8rem; margin-top: 0.25rem; }
+      select {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.8rem;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        background: var(--input-bg);
+        color: var(--text);
+        cursor: pointer;
+      }
+      select:focus {
+        outline: 2px solid var(--accent);
+        border-color: var(--accent);
+      }
 
-    .section-label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 0.35rem;
-    }
+      .error-msg {
+        color: var(--error);
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+      }
 
-    pre {
-      font-family: "SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas, monospace;
-      font-size: 0.8rem;
-      background: var(--code-bg);
-      border: 1px solid var(--border-subtle);
-      border-radius: 4px;
-      padding: 0.75rem;
-      overflow-x: auto;
-      white-space: pre-wrap;
-      word-break: break-all;
-    }
+      .section-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.35rem;
+      }
 
-    details {
-      margin-top: 1rem;
-      border: 1px solid var(--border-subtle);
-      border-radius: 4px;
-    }
-    details summary {
-      padding: 0.5rem 0.75rem;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      color: var(--text-muted);
-      background: var(--card-bg);
-      border-radius: 4px;
-    }
-    details[open] summary { border-radius: 4px 4px 0 0; border-bottom: 1px solid var(--border-subtle); }
-    details .details-body { padding: 0.75rem; }
+      pre {
+        font-family: "SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas, monospace;
+        font-size: 0.8rem;
+        background: var(--code-bg);
+        border: 1px solid var(--border-subtle);
+        border-radius: 4px;
+        padding: 0.75rem;
+        overflow-x: auto;
+        white-space: pre-wrap;
+        word-break: break-all;
+      }
 
-    .badge {
-      display: inline-block;
-      font-size: 0.7rem;
-      font-weight: 600;
-      padding: 0.15rem 0.5rem;
-      border-radius: 3px;
-    }
-    .badge.valid { background: var(--success-bg); color: var(--success); }
-    .badge.invalid, .badge.expired { background: var(--error-bg); color: var(--error); }
+      details {
+        margin-top: 1rem;
+        border: 1px solid var(--border-subtle);
+        border-radius: 4px;
+      }
+      details summary {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        color: var(--text-muted);
+        background: var(--card-bg);
+        border-radius: 4px;
+      }
+      details[open] summary {
+        border-radius: 4px 4px 0 0;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+      details .details-body {
+        padding: 0.75rem;
+      }
 
-    .claims-table {
-      width: 100%;
-      font-size: 0.8rem;
-      border-collapse: collapse;
-      margin-top: 0.5rem;
-    }
-    .claims-table td {
-      padding: 0.3rem 0.5rem;
-      border-bottom: 1px solid var(--border-subtle);
-      vertical-align: top;
-    }
-    .claims-table td:first-child {
-      font-weight: 600;
-      white-space: nowrap;
-      color: var(--claim-label);
-      width: 1%;
-    }
-    .claims-table .claim-value {
-      font-family: "SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas, monospace;
-      word-break: break-all;
-      cursor: pointer;
-    }
-    .claims-table .claim-value:hover { background: var(--btn-hover); }
-    .claims-table .claim-actions { width: 1%; white-space: nowrap; }
-    .claims-table tr.modified td { border-left: 2px solid var(--accent); }
-    .claims-table .edit-input {
-      font-family: "SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas, monospace;
-      font-size: 0.8rem;
-      width: 100%;
-      padding: 0.2rem 0.4rem;
-      border: 1px solid var(--accent);
-      border-radius: 3px;
-      background: var(--input-bg);
-      color: var(--text);
-    }
-    .claims-table .edit-input:focus { outline: 2px solid var(--accent); }
+      .badge {
+        display: inline-block;
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 0.15rem 0.5rem;
+        border-radius: 3px;
+      }
+      .badge.valid {
+        background: var(--success-bg);
+        color: var(--success);
+      }
+      .badge.invalid,
+      .badge.expired {
+        background: var(--error-bg);
+        color: var(--error);
+      }
 
-    .add-claim-row td { border-bottom: none; padding-top: 0.5rem; }
-    .add-claim-row input {
-      font-size: 0.75rem;
-      padding: 0.25rem 0.4rem;
-      border: 1px solid var(--border);
-      border-radius: 3px;
-      background: var(--input-bg);
-      color: var(--text);
-      width: 100%;
-    }
-    .add-claim-row input:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
+      .claims-table {
+        width: 100%;
+        font-size: 0.8rem;
+        border-collapse: collapse;
+        margin-top: 0.5rem;
+      }
+      .claims-table td {
+        padding: 0.3rem 0.5rem;
+        border-bottom: 1px solid var(--border-subtle);
+        vertical-align: top;
+      }
+      .claims-table td:first-child {
+        font-weight: 600;
+        white-space: nowrap;
+        color: var(--claim-label);
+        width: 1%;
+      }
+      .claims-table .claim-value {
+        font-family: "SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas, monospace;
+        word-break: break-all;
+        cursor: pointer;
+      }
+      .claims-table .claim-value:hover {
+        background: var(--btn-hover);
+      }
+      .claims-table .claim-actions {
+        width: 1%;
+        white-space: nowrap;
+      }
+      .claims-table tr.modified td {
+        border-left: 2px solid var(--accent);
+      }
+      .claims-table .edit-input {
+        font-family: "SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas, monospace;
+        font-size: 0.8rem;
+        width: 100%;
+        padding: 0.2rem 0.4rem;
+        border: 1px solid var(--accent);
+        border-radius: 3px;
+        background: var(--input-bg);
+        color: var(--text);
+      }
+      .claims-table .edit-input:focus {
+        outline: 2px solid var(--accent);
+      }
 
-    .time-editor {
-      margin-top: 1rem;
-      padding: 0.75rem;
-      background: var(--card-bg);
-      border: 1px solid var(--border-subtle);
-      border-radius: 4px;
-    }
-    .time-editor h3 { font-size: 0.85rem; margin-bottom: 0.5rem; }
-    .time-field { margin-bottom: 0.75rem; }
-    .time-field:last-child { margin-bottom: 0; }
-    .time-field-label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      margin-bottom: 0.25rem;
-    }
-    .time-field-row {
-      display: flex;
-      gap: 0.4rem;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    .time-field input[type="datetime-local"] {
-      font-size: 0.8rem;
-      padding: 0.3rem 0.5rem;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      background: var(--input-bg);
-      color: var(--text);
-    }
-    .time-field input[type="datetime-local"]:focus {
-      outline: 2px solid var(--accent);
-      border-color: var(--accent);
-    }
-    .time-field .current-value {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      margin-bottom: 0.25rem;
-    }
+      .add-claim-row td {
+        border-bottom: none;
+        padding-top: 0.5rem;
+      }
+      .add-claim-row input {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.4rem;
+        border: 1px solid var(--border);
+        border-radius: 3px;
+        background: var(--input-bg);
+        color: var(--text);
+        width: 100%;
+      }
+      .add-claim-row input:focus {
+        outline: 2px solid var(--accent);
+        border-color: var(--accent);
+      }
 
-    .resigned-section {
-      margin-top: 1rem;
-      padding: 0.75rem;
-      border: 1px solid var(--border-subtle);
-      border-radius: 4px;
-    }
-    .resigned-section.signed {
-      border-left: 3px solid var(--success);
-      background: var(--card-bg);
-    }
-    .resigned-section.unsigned {
-      background: var(--warning-bg);
-    }
-    .resigned-section .resigned-label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-    }
-    .resigned-section.signed .resigned-label { color: var(--success); }
-    .resigned-section.unsigned .resigned-label { color: var(--warning-text); }
+      .time-editor {
+        margin-top: 1rem;
+        padding: 0.75rem;
+        background: var(--card-bg);
+        border: 1px solid var(--border-subtle);
+        border-radius: 4px;
+      }
+      .time-editor h3 {
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+      }
+      .time-field {
+        margin-bottom: 0.75rem;
+      }
+      .time-field:last-child {
+        margin-bottom: 0;
+      }
+      .time-field-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-bottom: 0.25rem;
+      }
+      .time-field-row {
+        display: flex;
+        gap: 0.4rem;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .time-field input[type="datetime-local"] {
+        font-size: 0.8rem;
+        padding: 0.3rem 0.5rem;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        background: var(--input-bg);
+        color: var(--text);
+      }
+      .time-field input[type="datetime-local"]:focus {
+        outline: 2px solid var(--accent);
+        border-color: var(--accent);
+      }
+      .time-field .current-value {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-bottom: 0.25rem;
+      }
 
-    .verify-row {
-      display: flex;
-      gap: 0.5rem;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    .verify-row input {
-      flex: 1;
-      min-width: 150px;
-      font-size: 0.8rem;
-      padding: 0.4rem 0.6rem;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      background: var(--input-bg);
-      color: var(--text);
-      font-family: "SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas, monospace;
-    }
-    .verify-row input:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
+      .resigned-section {
+        margin-top: 1rem;
+        padding: 0.75rem;
+        border: 1px solid var(--border-subtle);
+        border-radius: 4px;
+      }
+      .resigned-section.signed {
+        border-left: 3px solid var(--success);
+        background: var(--card-bg);
+      }
+      .resigned-section.unsigned {
+        background: var(--warning-bg);
+      }
+      .resigned-section .resigned-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+      .resigned-section.signed .resigned-label {
+        color: var(--success);
+      }
+      .resigned-section.unsigned .resigned-label {
+        color: var(--warning-text);
+      }
 
-    .encode-field { margin-bottom: 0.75rem; }
-    .encode-field label {
-      display: block;
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      margin-bottom: 0.25rem;
-    }
-    .encode-row {
-      display: flex;
-      gap: 0.5rem;
-      align-items: center;
-    }
-    .encode-row input {
-      flex: 1;
-      font-size: 0.8rem;
-      padding: 0.4rem 0.6rem;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      background: var(--input-bg);
-      color: var(--text);
-      font-family: "SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas, monospace;
-    }
-    .encode-row input:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
+      .verify-row {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .verify-row input {
+        flex: 1;
+        min-width: 150px;
+        font-size: 0.8rem;
+        padding: 0.4rem 0.6rem;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        background: var(--input-bg);
+        color: var(--text);
+        font-family: "SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas, monospace;
+      }
+      .verify-row input:focus {
+        outline: 2px solid var(--accent);
+        border-color: var(--accent);
+      }
 
-    .history-section {
-      margin-top: 1.5rem;
-      padding-top: 1rem;
-      border-top: 1px solid var(--border-subtle);
-    }
-    .history-section .section-label { margin-bottom: 0.5rem; }
-    .history-entry {
-      display: flex;
-      gap: 0.5rem;
-      align-items: center;
-      padding: 0.5rem 0.4rem;
-      border-bottom: 1px solid var(--border-subtle);
-      font-size: 0.8rem;
-      cursor: pointer;
-      border-radius: 3px;
-    }
-    .history-entry:hover { background: var(--btn-hover); }
-    .history-main { flex: 1; min-width: 0; }
-    .history-label {
-      font-size: 0.75rem;
-      padding: 0.15rem 0.35rem;
-      border: 1px solid var(--border-subtle);
-      border-radius: 3px;
-      background: var(--input-bg);
-      color: var(--text);
-      width: 100%;
-      max-width: 200px;
-    }
-    .history-label:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
-    .history-claims {
-      display: block;
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      margin-top: 0.15rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .history-time {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-    .history-delete {
-      padding: 0.15rem 0.35rem;
-      font-size: 0.65rem;
-      border: none;
-      background: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-    .history-delete:hover { color: var(--error); background: none; }
-    .history-empty {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      padding: 0.5rem 0;
-    }
+      .encode-field {
+        margin-bottom: 0.75rem;
+      }
+      .encode-field label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-bottom: 0.25rem;
+      }
+      .encode-row {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
+      .encode-row input {
+        flex: 1;
+        font-size: 0.8rem;
+        padding: 0.4rem 0.6rem;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        background: var(--input-bg);
+        color: var(--text);
+        font-family: "SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas, monospace;
+      }
+      .encode-row input:focus {
+        outline: 2px solid var(--accent);
+        border-color: var(--accent);
+      }
 
-    footer {
-      margin-top: 2rem;
-      padding-top: 1rem;
-      border-top: 1px solid var(--border-footer);
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
-    footer a { color: var(--text-muted); }
-  </style>
-</head>
-<body>
-  <h1>JWT Decoder</h1>
-  <p class="subtitle">Decode, encode, edit, and verify JSON Web Tokens.</p>
+      .history-section {
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-subtle);
+      }
+      .history-section .section-label {
+        margin-bottom: 0.5rem;
+      }
+      .history-entry {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        padding: 0.5rem 0.4rem;
+        border-bottom: 1px solid var(--border-subtle);
+        font-size: 0.8rem;
+        cursor: pointer;
+        border-radius: 3px;
+      }
+      .history-entry:hover {
+        background: var(--btn-hover);
+      }
+      .history-main {
+        flex: 1;
+        min-width: 0;
+      }
+      .history-label {
+        font-size: 0.75rem;
+        padding: 0.15rem 0.35rem;
+        border: 1px solid var(--border-subtle);
+        border-radius: 3px;
+        background: var(--input-bg);
+        color: var(--text);
+        width: 100%;
+        max-width: 200px;
+      }
+      .history-label:focus {
+        outline: 2px solid var(--accent);
+        border-color: var(--accent);
+      }
+      .history-claims {
+        display: block;
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        margin-top: 0.15rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .history-time {
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .history-delete {
+        padding: 0.15rem 0.35rem;
+        font-size: 0.65rem;
+        border: none;
+        background: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+      .history-delete:hover {
+        color: var(--error);
+        background: none;
+      }
+      .history-empty {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        padding: 0.5rem 0;
+      }
 
-  <div class="mode-toggle">
-    <button id="mode-decode" class="active" onclick="setMode('decode')">Decode</button>
-    <button id="mode-encode" onclick="setMode('encode')">Encode</button>
-  </div>
+      footer {
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-footer);
+        font-size: 0.75rem;
+        color: var(--text-muted);
+      }
+      footer a {
+        color: var(--text-muted);
+      }
+    </style>
+  </head>
+  <body>
+    <h1>JWT Decoder</h1>
+    <p class="subtitle">Decode, encode, edit, and verify JSON Web Tokens.</p>
 
-  <!-- DECODE MODE -->
-  <div id="decode-mode">
-    <textarea id="jwt-input" rows="5" placeholder="Paste a JWT here (eyJhbGciOi...)" spellcheck="false"></textarea>
-    <div id="decode-error" class="error-msg"></div>
-
-    <div class="actions">
-      <button class="primary" id="decode-btn">Decode</button>
-      <button id="copy-payload-btn">Copy Payload</button>
-      <button id="clear-btn">Clear</button>
+    <div class="mode-toggle">
+      <button id="mode-decode" class="active" onclick="setMode('decode')">Decode</button>
+      <button id="mode-encode" onclick="setMode('encode')">Encode</button>
     </div>
 
-    <div id="output" style="display:none;">
-      <details id="header-section">
-        <summary>Header (JOSE)</summary>
-        <div class="details-body">
-          <pre id="header-json"></pre>
-        </div>
-      </details>
+    <!-- DECODE MODE -->
+    <div id="decode-mode">
+      <textarea id="jwt-input" rows="5" placeholder="Paste a JWT here (eyJhbGciOi...)" spellcheck="false"></textarea>
+      <div id="decode-error" class="error-msg"></div>
 
-      <div style="margin-top: 1rem;">
-        <div class="section-label">Payload <span id="expiry-badge"></span></div>
-        <pre id="payload-json"></pre>
+      <div class="actions">
+        <button class="primary" id="decode-btn">Decode</button>
+        <button id="copy-payload-btn">Copy Payload</button>
+        <button id="clear-btn">Clear</button>
       </div>
 
-      <table class="claims-table" id="claims-table"></table>
-
-      <div id="time-editor" class="time-editor" style="display:none;">
-        <h3>Edit Timestamps</h3>
-        <div id="time-fields"></div>
-      </div>
-
-      <div id="resigned-section" style="display:none;"></div>
-
-      <details id="verify-section" style="margin-top: 1rem;">
-        <summary>Signature Verification</summary>
-        <div class="details-body">
-          <div class="verify-row">
-            <select id="algorithm-select"></select>
-            <input type="password" id="secret-input" placeholder="Shared secret">
-            <button id="toggle-secret-btn" class="small">Show</button>
-            <button id="verify-btn" class="primary small">Verify</button>
-            <span id="verify-result"></span>
+      <div id="output" style="display: none">
+        <details id="header-section">
+          <summary>Header (JOSE)</summary>
+          <div class="details-body">
+            <pre id="header-json"></pre>
           </div>
-          <div id="crypto-warning" class="error-msg" style="display:none;margin-top:0.5rem;">
-            Signature verification requires HTTPS or localhost.
-          </div>
+        </details>
+
+        <div style="margin-top: 1rem">
+          <div class="section-label">Payload <span id="expiry-badge"></span></div>
+          <pre id="payload-json"></pre>
         </div>
-      </details>
-    </div>
-  </div>
 
-  <!-- ENCODE MODE -->
-  <div id="encode-mode" style="display:none;">
-    <div class="encode-field">
-      <label for="encode-payload">Payload (JSON)</label>
-      <textarea id="encode-payload" rows="10" placeholder='{"sub": "1234567890", "name": "John Doe", "iat": 1516239022}' spellcheck="false"></textarea>
-    </div>
-    <div id="encode-error" class="error-msg"></div>
+        <table class="claims-table" id="claims-table"></table>
 
-    <div class="encode-field">
-      <label>Algorithm &amp; Secret</label>
-      <div class="encode-row">
-        <select id="encode-algorithm"></select>
-        <input type="password" id="encode-secret" placeholder="Shared secret">
-        <button id="toggle-encode-secret" class="small">Show</button>
+        <div id="time-editor" class="time-editor" style="display: none">
+          <h3>Edit Timestamps</h3>
+          <div id="time-fields"></div>
+        </div>
+
+        <div id="resigned-section" style="display: none"></div>
+
+        <details id="verify-section" style="margin-top: 1rem">
+          <summary>Signature Verification</summary>
+          <div class="details-body">
+            <div class="verify-row">
+              <select id="algorithm-select"></select>
+              <input type="password" id="secret-input" placeholder="Shared secret" />
+              <button id="toggle-secret-btn" class="small">Show</button>
+              <button id="verify-btn" class="primary small">Verify</button>
+              <span id="verify-result"></span>
+            </div>
+            <div id="crypto-warning" class="error-msg" style="display: none; margin-top: 0.5rem">
+              Signature verification requires HTTPS or localhost.
+            </div>
+          </div>
+        </details>
       </div>
     </div>
 
-    <div class="actions">
-      <button class="primary" id="encode-btn">Encode</button>
-      <button id="copy-encoded-btn">Copy Token</button>
+    <!-- ENCODE MODE -->
+    <div id="encode-mode" style="display: none">
+      <div class="encode-field">
+        <label for="encode-payload">Payload (JSON)</label>
+        <textarea
+          id="encode-payload"
+          rows="10"
+          placeholder='{"sub": "1234567890", "name": "John Doe", "iat": 1516239022}'
+          spellcheck="false"
+        ></textarea>
+      </div>
+      <div id="encode-error" class="error-msg"></div>
+
+      <div class="encode-field">
+        <label>Algorithm &amp; Secret</label>
+        <div class="encode-row">
+          <select id="encode-algorithm"></select>
+          <input type="password" id="encode-secret" placeholder="Shared secret" />
+          <button id="toggle-encode-secret" class="small">Show</button>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="primary" id="encode-btn">Encode</button>
+        <button id="copy-encoded-btn">Copy Token</button>
+      </div>
+
+      <div id="encode-output" style="display: none">
+        <div class="section-label">Generated Token</div>
+        <pre id="encoded-jwt"></pre>
+      </div>
     </div>
 
-    <div id="encode-output" style="display:none;">
-      <div class="section-label">Generated Token</div>
-      <pre id="encoded-jwt"></pre>
-    </div>
-  </div>
+    <!-- HISTORY -->
+    <section class="history-section" id="history-section">
+      <div class="section-label">History <span id="history-count">(0)</span></div>
+      <div id="history-list"></div>
+      <div class="actions" id="history-actions" style="display: none">
+        <button id="clear-history-btn" class="small danger">Clear All</button>
+      </div>
+    </section>
 
-  <!-- HISTORY -->
-  <section class="history-section" id="history-section">
-    <div class="section-label">History <span id="history-count">(0)</span></div>
-    <div id="history-list"></div>
-    <div class="actions" id="history-actions" style="display:none;">
-      <button id="clear-history-btn" class="small danger">Clear All</button>
-    </div>
-  </section>
+    <footer>
+      <a href="./">Tools</a> &middot;
+      <a href="https://github.com/henrythach/tools/blob/main/jwt-decoder.html">Source</a>
+    </footer>
 
-  <footer>
-    <a href="./">Tools</a> &middot; <a href="https://github.com/henrythach/tools/blob/main/jwt-decoder.html">Source</a>
-  </footer>
+    <script>
+      const HISTORY_KEY = "jwt-decoder-history";
+      const SECRET_KEY = "jwt-decoder-secret";
+      const MAX_HISTORY = 50;
 
-  <script>
-    const HISTORY_KEY = 'jwt-decoder-history';
-    const SECRET_KEY = 'jwt-decoder-secret';
-    const MAX_HISTORY = 50;
+      const ALGORITHMS = { HS256: "SHA-256", HS384: "SHA-384", HS512: "SHA-512" };
 
-    const ALGORITHMS = { HS256: 'SHA-256', HS384: 'SHA-384', HS512: 'SHA-512' };
-
-    const KNOWN_CLAIMS = {
-      iss: 'Issuer', sub: 'Subject', aud: 'Audience',
-      exp: 'Expiration', nbf: 'Not Before', iat: 'Issued At',
-      jti: 'JWT ID', azp: 'Authorized Party', scope: 'Scope',
-    };
-    const TIME_CLAIMS = ['iat', 'exp', 'nbf'];
-    const TIME_OFFSETS = [
-      { label: 'Now', seconds: 0, isNow: true },
-      { label: '+30m', seconds: 30 * 60 },
-      { label: '+1h', seconds: 60 * 60 },
-      { label: '+1d', seconds: 24 * 60 * 60 },
-      { label: '+7d', seconds: 7 * 24 * 60 * 60 },
-    ];
-
-    let mode = 'decode';
-    let currentToken = null;
-    let currentDecoded = null;
-    let editedPayload = null;
-
-    // --- DOM refs ---
-    const $id = (id) => document.getElementById(id);
-    const inputEl = $id('jwt-input');
-    const decodeErrorEl = $id('decode-error');
-    const outputEl = $id('output');
-    const headerJsonEl = $id('header-json');
-    const payloadJsonEl = $id('payload-json');
-    const claimsTableEl = $id('claims-table');
-    const expiryBadgeEl = $id('expiry-badge');
-    const timeEditorEl = $id('time-editor');
-    const timeFieldsEl = $id('time-fields');
-    const resignedSectionEl = $id('resigned-section');
-    const secretInputEl = $id('secret-input');
-    const verifyResultEl = $id('verify-result');
-    const algorithmSelectEl = $id('algorithm-select');
-    const encodePayloadEl = $id('encode-payload');
-    const encodeErrorEl = $id('encode-error');
-    const encodeAlgorithmEl = $id('encode-algorithm');
-    const encodeSecretEl = $id('encode-secret');
-    const encodeOutputEl = $id('encode-output');
-    const encodedJwtEl = $id('encoded-jwt');
-
-    // --- Populate algorithm dropdowns ---
-    const populateAlgorithmSelects = () => {
-      [algorithmSelectEl, encodeAlgorithmEl].forEach(sel => {
-        sel.innerHTML = Object.keys(ALGORITHMS).map(a =>
-          `<option value="${a}"${a === 'HS256' ? ' selected' : ''}>${a}</option>`
-        ).join('');
-      });
-    };
-    populateAlgorithmSelects();
-
-    // Sync algorithm selects
-    algorithmSelectEl.addEventListener('change', () => { encodeAlgorithmEl.value = algorithmSelectEl.value; });
-    encodeAlgorithmEl.addEventListener('change', () => { algorithmSelectEl.value = encodeAlgorithmEl.value; });
-
-    // Sync secret inputs
-    secretInputEl.addEventListener('input', () => {
-      encodeSecretEl.value = secretInputEl.value;
-      localStorage.setItem(SECRET_KEY, secretInputEl.value);
-      if (editedPayload) resignAndShow();
-    });
-    encodeSecretEl.addEventListener('input', () => {
-      secretInputEl.value = encodeSecretEl.value;
-      localStorage.setItem(SECRET_KEY, encodeSecretEl.value);
-      if (editedPayload) resignAndShow();
-    });
-
-    // --- Base64URL ---
-    const base64UrlDecode = (str) => {
-      let b64 = str.replace(/-/g, '+').replace(/_/g, '/');
-      while (b64.length % 4) b64 += '=';
-      const binary = atob(b64);
-      const bytes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-      return new TextDecoder().decode(bytes);
-    };
-
-    const base64UrlEncode = (str) => {
-      const bytes = new TextEncoder().encode(str);
-      const binary = String.fromCharCode(...bytes);
-      return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-    };
-
-    const decodeJwt = (token) => {
-      const parts = token.trim().split('.');
-      if (parts.length !== 3) throw new Error('Invalid JWT: expected 3 dot-separated parts');
-      return {
-        header: JSON.parse(base64UrlDecode(parts[0])),
-        payload: JSON.parse(base64UrlDecode(parts[1])),
-        signature: parts[2],
-        raw: { header: parts[0], payload: parts[1], signature: parts[2] },
+      const KNOWN_CLAIMS = {
+        iss: "Issuer",
+        sub: "Subject",
+        aud: "Audience",
+        exp: "Expiration",
+        nbf: "Not Before",
+        iat: "Issued At",
+        jti: "JWT ID",
+        azp: "Authorized Party",
+        scope: "Scope",
       };
-    };
+      const TIME_CLAIMS = ["iat", "exp", "nbf"];
+      const TIME_OFFSETS = [
+        { label: "Now", seconds: 0, isNow: true },
+        { label: "+30m", seconds: 30 * 60 },
+        { label: "+1h", seconds: 60 * 60 },
+        { label: "+1d", seconds: 24 * 60 * 60 },
+        { label: "+7d", seconds: 7 * 24 * 60 * 60 },
+      ];
 
-    // --- Formatting ---
-    const formatTimestamp = (ts) => new Date(ts * 1000).toLocaleString();
+      let mode = "decode";
+      let currentToken = null;
+      let currentDecoded = null;
+      let editedPayload = null;
 
-    const toDatetimeLocalValue = (ts) => {
-      const d = new Date(ts * 1000);
-      const pad = (n) => String(n).padStart(2, '0');
-      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-    };
+      // --- DOM refs ---
+      const $id = (id) => document.getElementById(id);
+      const inputEl = $id("jwt-input");
+      const decodeErrorEl = $id("decode-error");
+      const outputEl = $id("output");
+      const headerJsonEl = $id("header-json");
+      const payloadJsonEl = $id("payload-json");
+      const claimsTableEl = $id("claims-table");
+      const expiryBadgeEl = $id("expiry-badge");
+      const timeEditorEl = $id("time-editor");
+      const timeFieldsEl = $id("time-fields");
+      const resignedSectionEl = $id("resigned-section");
+      const secretInputEl = $id("secret-input");
+      const verifyResultEl = $id("verify-result");
+      const algorithmSelectEl = $id("algorithm-select");
+      const encodePayloadEl = $id("encode-payload");
+      const encodeErrorEl = $id("encode-error");
+      const encodeAlgorithmEl = $id("encode-algorithm");
+      const encodeSecretEl = $id("encode-secret");
+      const encodeOutputEl = $id("encode-output");
+      const encodedJwtEl = $id("encoded-jwt");
 
-    const fromDatetimeLocalValue = (str) => Math.floor(new Date(str).getTime() / 1000);
+      // --- Populate algorithm dropdowns ---
+      const populateAlgorithmSelects = () => {
+        [algorithmSelectEl, encodeAlgorithmEl].forEach((sel) => {
+          sel.innerHTML = Object.keys(ALGORITHMS)
+            .map((a) => `<option value="${a}"${a === "HS256" ? " selected" : ""}>${a}</option>`)
+            .join("");
+        });
+      };
+      populateAlgorithmSelects();
 
-    const relativeTime = (ms) => {
-      const seconds = Math.floor((Date.now() - ms) / 1000);
-      if (seconds < 60) return 'just now';
-      const minutes = Math.floor(seconds / 60);
-      if (minutes < 60) return `${minutes}m ago`;
-      const hours = Math.floor(minutes / 60);
-      if (hours < 24) return `${hours}h ago`;
-      const days = Math.floor(hours / 24);
-      return `${days}d ago`;
-    };
+      // Sync algorithm selects
+      algorithmSelectEl.addEventListener("change", () => {
+        encodeAlgorithmEl.value = algorithmSelectEl.value;
+      });
+      encodeAlgorithmEl.addEventListener("change", () => {
+        algorithmSelectEl.value = encodeAlgorithmEl.value;
+      });
 
-    const escapeHtml = (str) => {
-      const div = document.createElement('div');
-      div.textContent = str;
-      return div.innerHTML;
-    };
+      // Sync secret inputs
+      secretInputEl.addEventListener("input", () => {
+        encodeSecretEl.value = secretInputEl.value;
+        localStorage.setItem(SECRET_KEY, secretInputEl.value);
+        if (editedPayload) resignAndShow();
+      });
+      encodeSecretEl.addEventListener("input", () => {
+        secretInputEl.value = encodeSecretEl.value;
+        localStorage.setItem(SECRET_KEY, encodeSecretEl.value);
+        if (editedPayload) resignAndShow();
+      });
 
-    // --- HMAC signing/verification ---
-    const signHMAC = async (header, payload, secret, alg) => {
-      const hash = ALGORITHMS[alg];
-      if (!hash) throw new Error(`Unsupported algorithm: ${alg}`);
-      const enc = new TextEncoder();
-      const headerB64 = base64UrlEncode(JSON.stringify(header));
-      const payloadB64 = base64UrlEncode(JSON.stringify(payload));
-      const data = `${headerB64}.${payloadB64}`;
-      const key = await crypto.subtle.importKey(
-        'raw', enc.encode(secret), { name: 'HMAC', hash }, false, ['sign']
-      );
-      const sig = await crypto.subtle.sign('HMAC', key, enc.encode(data));
-      const sigB64 = btoa(String.fromCharCode(...new Uint8Array(sig)))
-        .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-      return `${data}.${sigB64}`;
-    };
+      // --- Base64URL ---
+      const base64UrlDecode = (str) => {
+        let b64 = str.replace(/-/g, "+").replace(/_/g, "/");
+        while (b64.length % 4) b64 += "=";
+        const binary = atob(b64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        return new TextDecoder().decode(bytes);
+      };
 
-    const verifyHMAC = async (token, secret, alg) => {
-      const hash = ALGORITHMS[alg];
-      if (!hash) throw new Error(`Unsupported algorithm: ${alg}`);
-      const [headerB64, payloadB64, signatureB64] = token.split('.');
-      const enc = new TextEncoder();
-      const key = await crypto.subtle.importKey(
-        'raw', enc.encode(secret), { name: 'HMAC', hash }, false, ['sign']
-      );
-      const sig = await crypto.subtle.sign('HMAC', key, enc.encode(`${headerB64}.${payloadB64}`));
-      const computed = btoa(String.fromCharCode(...new Uint8Array(sig)))
-        .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-      return computed === signatureB64;
-    };
+      const base64UrlEncode = (str) => {
+        const bytes = new TextEncoder().encode(str);
+        const binary = String.fromCharCode(...bytes);
+        return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+      };
 
-    // --- Mode toggle ---
-    const setMode = (newMode) => {
-      mode = newMode;
-      $id('mode-decode').classList.toggle('active', mode === 'decode');
-      $id('mode-encode').classList.toggle('active', mode === 'encode');
-      $id('decode-mode').style.display = mode === 'decode' ? '' : 'none';
-      $id('encode-mode').style.display = mode === 'encode' ? '' : 'none';
-    };
+      const decodeJwt = (token) => {
+        const parts = token.trim().split(".");
+        if (parts.length !== 3) throw new Error("Invalid JWT: expected 3 dot-separated parts");
+        return {
+          header: JSON.parse(base64UrlDecode(parts[0])),
+          payload: JSON.parse(base64UrlDecode(parts[1])),
+          signature: parts[2],
+          raw: { header: parts[0], payload: parts[1], signature: parts[2] },
+        };
+      };
 
-    // --- Decode ---
-    const decode = () => {
-      const raw = inputEl.value.trim();
-      decodeErrorEl.textContent = '';
-      if (!raw) {
-        outputEl.style.display = 'none';
-        return;
-      }
+      // --- Formatting ---
+      const formatTimestamp = (ts) => new Date(ts * 1000).toLocaleString();
 
-      try {
-        currentToken = raw;
-        currentDecoded = decodeJwt(raw);
-        editedPayload = null;
+      const toDatetimeLocalValue = (ts) => {
+        const d = new Date(ts * 1000);
+        const pad = (n) => String(n).padStart(2, "0");
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      };
 
-        // Auto-detect algorithm from header
-        const headerAlg = currentDecoded.header.alg;
-        if (headerAlg && ALGORITHMS[headerAlg]) {
-          algorithmSelectEl.value = headerAlg;
-          encodeAlgorithmEl.value = headerAlg;
+      const fromDatetimeLocalValue = (str) => Math.floor(new Date(str).getTime() / 1000);
+
+      const relativeTime = (ms) => {
+        const seconds = Math.floor((Date.now() - ms) / 1000);
+        if (seconds < 60) return "just now";
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return `${minutes}m ago`;
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `${hours}h ago`;
+        const days = Math.floor(hours / 24);
+        return `${days}d ago`;
+      };
+
+      const escapeHtml = (str) => {
+        const div = document.createElement("div");
+        div.textContent = str;
+        return div.innerHTML;
+      };
+
+      // --- HMAC signing/verification ---
+      const signHMAC = async (header, payload, secret, alg) => {
+        const hash = ALGORITHMS[alg];
+        if (!hash) throw new Error(`Unsupported algorithm: ${alg}`);
+        const enc = new TextEncoder();
+        const headerB64 = base64UrlEncode(JSON.stringify(header));
+        const payloadB64 = base64UrlEncode(JSON.stringify(payload));
+        const data = `${headerB64}.${payloadB64}`;
+        const key = await crypto.subtle.importKey("raw", enc.encode(secret), { name: "HMAC", hash }, false, ["sign"]);
+        const sig = await crypto.subtle.sign("HMAC", key, enc.encode(data));
+        const sigB64 = btoa(String.fromCharCode(...new Uint8Array(sig)))
+          .replace(/\+/g, "-")
+          .replace(/\//g, "_")
+          .replace(/=+$/, "");
+        return `${data}.${sigB64}`;
+      };
+
+      const verifyHMAC = async (token, secret, alg) => {
+        const hash = ALGORITHMS[alg];
+        if (!hash) throw new Error(`Unsupported algorithm: ${alg}`);
+        const [headerB64, payloadB64, signatureB64] = token.split(".");
+        const enc = new TextEncoder();
+        const key = await crypto.subtle.importKey("raw", enc.encode(secret), { name: "HMAC", hash }, false, ["sign"]);
+        const sig = await crypto.subtle.sign("HMAC", key, enc.encode(`${headerB64}.${payloadB64}`));
+        const computed = btoa(String.fromCharCode(...new Uint8Array(sig)))
+          .replace(/\+/g, "-")
+          .replace(/\//g, "_")
+          .replace(/=+$/, "");
+        return computed === signatureB64;
+      };
+
+      // --- Mode toggle ---
+      const setMode = (newMode) => {
+        mode = newMode;
+        $id("mode-decode").classList.toggle("active", mode === "decode");
+        $id("mode-encode").classList.toggle("active", mode === "encode");
+        $id("decode-mode").style.display = mode === "decode" ? "" : "none";
+        $id("encode-mode").style.display = mode === "encode" ? "" : "none";
+      };
+
+      // --- Decode ---
+      const decode = () => {
+        const raw = inputEl.value.trim();
+        decodeErrorEl.textContent = "";
+        if (!raw) {
+          outputEl.style.display = "none";
+          return;
         }
 
-        renderOutput();
-        addToHistory(raw, currentDecoded.payload, 'decode');
+        try {
+          currentToken = raw;
+          currentDecoded = decodeJwt(raw);
+          editedPayload = null;
 
-        // Update URL hash
-        if (location.hash.slice(1) !== raw) {
-          history.replaceState(null, '', `#${raw}`);
+          // Auto-detect algorithm from header
+          const headerAlg = currentDecoded.header.alg;
+          if (headerAlg && ALGORITHMS[headerAlg]) {
+            algorithmSelectEl.value = headerAlg;
+            encodeAlgorithmEl.value = headerAlg;
+          }
+
+          renderOutput();
+          addToHistory(raw, currentDecoded.payload, "decode");
+
+          // Update URL hash
+          if (location.hash.slice(1) !== raw) {
+            history.replaceState(null, "", `#${raw}`);
+          }
+        } catch (e) {
+          outputEl.style.display = "none";
+          decodeErrorEl.textContent = e.message;
         }
-      } catch (e) {
-        outputEl.style.display = 'none';
-        decodeErrorEl.textContent = e.message;
-      }
-    };
+      };
 
-    const renderOutput = () => {
-      outputEl.style.display = 'block';
-      headerJsonEl.textContent = JSON.stringify(currentDecoded.header, null, 2);
+      const renderOutput = () => {
+        outputEl.style.display = "block";
+        headerJsonEl.textContent = JSON.stringify(currentDecoded.header, null, 2);
 
-      const payload = editedPayload || currentDecoded.payload;
-      payloadJsonEl.textContent = JSON.stringify(payload, null, 2);
+        const payload = editedPayload || currentDecoded.payload;
+        payloadJsonEl.textContent = JSON.stringify(payload, null, 2);
 
-      // Expiry badge
-      const exp = payload.exp;
-      if (exp) {
-        const isExpired = exp * 1000 < Date.now();
-        expiryBadgeEl.innerHTML = `<span class="badge ${isExpired ? 'expired' : 'valid'}">${isExpired ? 'Expired' : 'Valid'}</span>`;
-      } else {
-        expiryBadgeEl.innerHTML = '';
-      }
-
-      renderClaimsTable();
-      renderTimeEditor();
-      if (editedPayload) resignAndShow();
-      else resignedSectionEl.style.display = 'none';
-      verifyResultEl.innerHTML = '';
-    };
-
-    // --- Editable claims table ---
-    const renderClaimsTable = () => {
-      const payload = editedPayload || currentDecoded.payload;
-      const original = currentDecoded.payload;
-
-      let html = '';
-      for (const [key, value] of Object.entries(payload)) {
-        const label = KNOWN_CLAIMS[key] || key;
-        let display = typeof value === 'object' ? JSON.stringify(value) : String(value);
-        if (TIME_CLAIMS.includes(key) && typeof value === 'number') {
-          display = `${value} (${formatTimestamp(value)})`;
+        // Expiry badge
+        const exp = payload.exp;
+        if (exp) {
+          const isExpired = exp * 1000 < Date.now();
+          expiryBadgeEl.innerHTML = `<span class="badge ${isExpired ? "expired" : "valid"}">${isExpired ? "Expired" : "Valid"}</span>`;
+        } else {
+          expiryBadgeEl.innerHTML = "";
         }
-        const isModified = editedPayload && JSON.stringify(payload[key]) !== JSON.stringify(original[key]);
-        html += `<tr${isModified ? ' class="modified"' : ''} data-claim="${escapeHtml(key)}">
+
+        renderClaimsTable();
+        renderTimeEditor();
+        if (editedPayload) resignAndShow();
+        else resignedSectionEl.style.display = "none";
+        verifyResultEl.innerHTML = "";
+      };
+
+      // --- Editable claims table ---
+      const renderClaimsTable = () => {
+        const payload = editedPayload || currentDecoded.payload;
+        const original = currentDecoded.payload;
+
+        let html = "";
+        for (const [key, value] of Object.entries(payload)) {
+          const label = KNOWN_CLAIMS[key] || key;
+          let display = typeof value === "object" ? JSON.stringify(value) : String(value);
+          if (TIME_CLAIMS.includes(key) && typeof value === "number") {
+            display = `${value} (${formatTimestamp(value)})`;
+          }
+          const isModified = editedPayload && JSON.stringify(payload[key]) !== JSON.stringify(original[key]);
+          html += `<tr${isModified ? ' class="modified"' : ""} data-claim="${escapeHtml(key)}">
           <td>${escapeHtml(label)} <span style="font-weight:400;color:var(--text-muted)">(${escapeHtml(key)})</span></td>
           <td class="claim-value" data-key="${escapeHtml(key)}">${escapeHtml(display)}</td>
           <td class="claim-actions"><button class="small danger" data-remove="${escapeHtml(key)}" title="Remove">&times;</button></td>
         </tr>`;
-      }
+        }
 
-      // Add claim row
-      html += `<tr class="add-claim-row">
+        // Add claim row
+        html += `<tr class="add-claim-row">
         <td><input type="text" id="new-claim-key" placeholder="key"></td>
         <td><input type="text" id="new-claim-value" placeholder="value"></td>
         <td><button class="small primary" id="add-claim-btn">Add</button></td>
       </tr>`;
 
-      claimsTableEl.innerHTML = html;
+        claimsTableEl.innerHTML = html;
 
-      // Bind inline editing on claim values
-      claimsTableEl.querySelectorAll('.claim-value').forEach(td => {
-        td.addEventListener('click', () => startInlineEdit(td));
-      });
-
-      // Bind remove buttons
-      claimsTableEl.querySelectorAll('[data-remove]').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          removeClaim(btn.dataset.remove);
+        // Bind inline editing on claim values
+        claimsTableEl.querySelectorAll(".claim-value").forEach((td) => {
+          td.addEventListener("click", () => startInlineEdit(td));
         });
-      });
 
-      // Bind add claim
-      const addBtn = $id('add-claim-btn');
-      if (addBtn) {
-        addBtn.addEventListener('click', () => {
-          const keyInput = $id('new-claim-key');
-          const valInput = $id('new-claim-value');
-          const key = keyInput.value.trim();
-          const val = valInput.value.trim();
-          if (key) {
-            addClaim(key, parseValue(val));
-            keyInput.value = '';
-            valInput.value = '';
-          }
+        // Bind remove buttons
+        claimsTableEl.querySelectorAll("[data-remove]").forEach((btn) => {
+          btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            removeClaim(btn.dataset.remove);
+          });
         });
-      }
-    };
 
-    const startInlineEdit = (td) => {
-      const key = td.dataset.key;
-      const payload = editedPayload || currentDecoded.payload;
-      const currentVal = payload[key];
-
-      // Don't inline-edit time claims — use the time editor instead
-      if (TIME_CLAIMS.includes(key) && typeof currentVal === 'number') return;
-
-      const rawVal = typeof currentVal === 'object' ? JSON.stringify(currentVal) : String(currentVal);
-      td.innerHTML = `<input class="edit-input" type="text" value="${escapeHtml(rawVal)}">`;
-      const input = td.querySelector('.edit-input');
-      input.focus();
-      input.select();
-
-      const commit = () => {
-        const newVal = parseValue(input.value);
-        applyEdit(key, newVal);
+        // Bind add claim
+        const addBtn = $id("add-claim-btn");
+        if (addBtn) {
+          addBtn.addEventListener("click", () => {
+            const keyInput = $id("new-claim-key");
+            const valInput = $id("new-claim-value");
+            const key = keyInput.value.trim();
+            const val = valInput.value.trim();
+            if (key) {
+              addClaim(key, parseValue(val));
+              keyInput.value = "";
+              valInput.value = "";
+            }
+          });
+        }
       };
 
-      input.addEventListener('blur', commit);
-      input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); commit(); }
-        if (e.key === 'Escape') { renderClaimsTable(); }
-      });
-    };
+      const startInlineEdit = (td) => {
+        const key = td.dataset.key;
+        const payload = editedPayload || currentDecoded.payload;
+        const currentVal = payload[key];
 
-    const parseValue = (str) => {
-      if (str === 'true') return true;
-      if (str === 'false') return false;
-      if (str === 'null') return null;
-      if (/^-?\d+$/.test(str)) return parseInt(str, 10);
-      if (/^-?\d+\.\d+$/.test(str)) return parseFloat(str);
-      try {
-        const parsed = JSON.parse(str);
-        if (typeof parsed === 'object') return parsed;
-      } catch { /* not JSON */ }
-      return str;
-    };
+        // Don't inline-edit time claims — use the time editor instead
+        if (TIME_CLAIMS.includes(key) && typeof currentVal === "number") return;
 
-    const applyEdit = (key, value) => {
-      if (!editedPayload) editedPayload = { ...currentDecoded.payload };
-      editedPayload[key] = value;
-      renderOutput();
-    };
+        const rawVal = typeof currentVal === "object" ? JSON.stringify(currentVal) : String(currentVal);
+        td.innerHTML = `<input class="edit-input" type="text" value="${escapeHtml(rawVal)}">`;
+        const input = td.querySelector(".edit-input");
+        input.focus();
+        input.select();
 
-    const addClaim = (key, value) => {
-      if (!editedPayload) editedPayload = { ...currentDecoded.payload };
-      editedPayload[key] = value;
-      renderOutput();
-    };
+        const commit = () => {
+          const newVal = parseValue(input.value);
+          applyEdit(key, newVal);
+        };
 
-    const removeClaim = (key) => {
-      if (!editedPayload) editedPayload = { ...currentDecoded.payload };
-      delete editedPayload[key];
-      renderOutput();
-    };
+        input.addEventListener("blur", commit);
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            commit();
+          }
+          if (e.key === "Escape") {
+            renderClaimsTable();
+          }
+        });
+      };
 
-    // --- Time editor ---
-    const renderTimeEditor = () => {
-      const payload = editedPayload || currentDecoded.payload;
-      const editableClaims = TIME_CLAIMS.filter(c => typeof payload[c] === 'number');
+      const parseValue = (str) => {
+        if (str === "true") return true;
+        if (str === "false") return false;
+        if (str === "null") return null;
+        if (/^-?\d+$/.test(str)) return parseInt(str, 10);
+        if (/^-?\d+\.\d+$/.test(str)) return parseFloat(str);
+        try {
+          const parsed = JSON.parse(str);
+          if (typeof parsed === "object") return parsed;
+        } catch {
+          /* not JSON */
+        }
+        return str;
+      };
 
-      if (editableClaims.length === 0) {
-        timeEditorEl.style.display = 'none';
-        return;
-      }
+      const applyEdit = (key, value) => {
+        if (!editedPayload) editedPayload = { ...currentDecoded.payload };
+        editedPayload[key] = value;
+        renderOutput();
+      };
 
-      timeEditorEl.style.display = '';
-      timeFieldsEl.innerHTML = editableClaims.map(claim => {
-        const value = payload[claim];
-        const label = KNOWN_CLAIMS[claim] || claim;
-        return `
+      const addClaim = (key, value) => {
+        if (!editedPayload) editedPayload = { ...currentDecoded.payload };
+        editedPayload[key] = value;
+        renderOutput();
+      };
+
+      const removeClaim = (key) => {
+        if (!editedPayload) editedPayload = { ...currentDecoded.payload };
+        delete editedPayload[key];
+        renderOutput();
+      };
+
+      // --- Time editor ---
+      const renderTimeEditor = () => {
+        const payload = editedPayload || currentDecoded.payload;
+        const editableClaims = TIME_CLAIMS.filter((c) => typeof payload[c] === "number");
+
+        if (editableClaims.length === 0) {
+          timeEditorEl.style.display = "none";
+          return;
+        }
+
+        timeEditorEl.style.display = "";
+        timeFieldsEl.innerHTML = editableClaims
+          .map((claim) => {
+            const value = payload[claim];
+            const label = KNOWN_CLAIMS[claim] || claim;
+            return `
           <div class="time-field">
             <div class="time-field-label">${label} (${claim})</div>
             <div class="current-value">${value} &mdash; ${formatTimestamp(value)}</div>
             <div class="time-field-row">
               <input type="datetime-local" data-claim="${claim}" value="${toDatetimeLocalValue(value)}">
-              ${TIME_OFFSETS.map(o =>
-                `<button class="small" data-claim="${claim}" data-offset="${o.seconds}" data-is-now="${o.isNow || false}">${o.label}</button>`
-              ).join('')}
+              ${TIME_OFFSETS.map(
+                (o) =>
+                  `<button class="small" data-claim="${claim}" data-offset="${o.seconds}" data-is-now="${o.isNow || false}">${o.label}</button>`,
+              ).join("")}
             </div>
           </div>`;
-      }).join('');
+          })
+          .join("");
 
-      // Bind datetime inputs
-      timeFieldsEl.querySelectorAll('input[type="datetime-local"]').forEach(input => {
-        input.addEventListener('change', (e) => {
-          const ts = fromDatetimeLocalValue(e.target.value);
-          if (!isNaN(ts)) applyEdit(e.target.dataset.claim, ts);
+        // Bind datetime inputs
+        timeFieldsEl.querySelectorAll('input[type="datetime-local"]').forEach((input) => {
+          input.addEventListener("change", (e) => {
+            const ts = fromDatetimeLocalValue(e.target.value);
+            if (!isNaN(ts)) applyEdit(e.target.dataset.claim, ts);
+          });
         });
-      });
 
-      // Bind offset buttons
-      timeFieldsEl.querySelectorAll('button[data-claim]').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.preventDefault();
-          const claim = btn.dataset.claim;
-          const isNow = btn.dataset.isNow === 'true';
-          const offset = parseInt(btn.dataset.offset, 10);
-          const payload = editedPayload || currentDecoded.payload;
-          const base = isNow ? Math.floor(Date.now() / 1000) : payload[claim];
-          applyEdit(claim, base + (isNow ? 0 : offset));
+        // Bind offset buttons
+        timeFieldsEl.querySelectorAll("button[data-claim]").forEach((btn) => {
+          btn.addEventListener("click", (e) => {
+            e.preventDefault();
+            const claim = btn.dataset.claim;
+            const isNow = btn.dataset.isNow === "true";
+            const offset = parseInt(btn.dataset.offset, 10);
+            const payload = editedPayload || currentDecoded.payload;
+            const base = isNow ? Math.floor(Date.now() / 1000) : payload[claim];
+            applyEdit(claim, base + (isNow ? 0 : offset));
+          });
         });
-      });
-    };
+      };
 
-    // --- Re-sign after edits ---
-    const resignAndShow = async () => {
-      if (!editedPayload || !currentDecoded) return;
-      const secret = secretInputEl.value;
-      const alg = algorithmSelectEl.value;
+      // --- Re-sign after edits ---
+      const resignAndShow = async () => {
+        if (!editedPayload || !currentDecoded) return;
+        const secret = secretInputEl.value;
+        const alg = algorithmSelectEl.value;
 
-      if (!secret) {
-        resignedSectionEl.style.display = '';
-        resignedSectionEl.className = 'resigned-section unsigned';
-        const headerB64 = base64UrlEncode(JSON.stringify(currentDecoded.header));
-        const payloadB64 = base64UrlEncode(JSON.stringify(editedPayload));
-        resignedSectionEl.innerHTML = `
+        if (!secret) {
+          resignedSectionEl.style.display = "";
+          resignedSectionEl.className = "resigned-section unsigned";
+          const headerB64 = base64UrlEncode(JSON.stringify(currentDecoded.header));
+          const payloadB64 = base64UrlEncode(JSON.stringify(editedPayload));
+          resignedSectionEl.innerHTML = `
           <div class="resigned-label">Modified token (unsigned &mdash; enter a secret to sign)</div>
           <pre>${escapeHtml(`${headerB64}.${payloadB64}.`)}</pre>
           <div class="actions"><button class="small" id="copy-resigned-btn">Copy Token</button></div>`;
-        $id('copy-resigned-btn').addEventListener('click', () => {
-          navigator.clipboard.writeText(`${headerB64}.${payloadB64}.`);
-        });
-        return;
-      }
+          $id("copy-resigned-btn").addEventListener("click", () => {
+            navigator.clipboard.writeText(`${headerB64}.${payloadB64}.`);
+          });
+          return;
+        }
 
-      try {
-        const header = { ...currentDecoded.header, alg };
-        const token = await signHMAC(header, editedPayload, secret, alg);
-        resignedSectionEl.style.display = '';
-        resignedSectionEl.className = 'resigned-section signed';
-        resignedSectionEl.innerHTML = `
+        try {
+          const header = { ...currentDecoded.header, alg };
+          const token = await signHMAC(header, editedPayload, secret, alg);
+          resignedSectionEl.style.display = "";
+          resignedSectionEl.className = "resigned-section signed";
+          resignedSectionEl.innerHTML = `
           <div class="resigned-label">Re-signed Token (${escapeHtml(alg)})</div>
           <pre>${escapeHtml(token)}</pre>
           <div class="actions"><button class="small" id="copy-resigned-btn">Copy Token</button></div>`;
-        $id('copy-resigned-btn').addEventListener('click', () => {
-          navigator.clipboard.writeText(token);
-        });
-      } catch (e) {
-        resignedSectionEl.style.display = '';
-        resignedSectionEl.className = 'resigned-section unsigned';
-        resignedSectionEl.innerHTML = `<div class="resigned-label">Error signing: ${escapeHtml(e.message)}</div>`;
-      }
-    };
+          $id("copy-resigned-btn").addEventListener("click", () => {
+            navigator.clipboard.writeText(token);
+          });
+        } catch (e) {
+          resignedSectionEl.style.display = "";
+          resignedSectionEl.className = "resigned-section unsigned";
+          resignedSectionEl.innerHTML = `<div class="resigned-label">Error signing: ${escapeHtml(e.message)}</div>`;
+        }
+      };
 
-    // --- Encode mode ---
-    const encodeToken = async () => {
-      encodeErrorEl.textContent = '';
-      const jsonStr = encodePayloadEl.value.trim();
-      const secret = encodeSecretEl.value;
-      const alg = encodeAlgorithmEl.value;
+      // --- Encode mode ---
+      const encodeToken = async () => {
+        encodeErrorEl.textContent = "";
+        const jsonStr = encodePayloadEl.value.trim();
+        const secret = encodeSecretEl.value;
+        const alg = encodeAlgorithmEl.value;
 
-      if (!jsonStr) {
-        encodeErrorEl.textContent = 'Enter a JSON payload.';
-        return;
-      }
-      if (!secret) {
-        encodeErrorEl.textContent = 'Enter a secret to sign the token.';
-        return;
-      }
+        if (!jsonStr) {
+          encodeErrorEl.textContent = "Enter a JSON payload.";
+          return;
+        }
+        if (!secret) {
+          encodeErrorEl.textContent = "Enter a secret to sign the token.";
+          return;
+        }
 
-      let payload;
-      try {
-        payload = JSON.parse(jsonStr);
-        if (typeof payload !== 'object' || Array.isArray(payload)) throw new Error();
-      } catch {
-        encodeErrorEl.textContent = 'Invalid JSON. Payload must be a JSON object.';
-        return;
-      }
+        let payload;
+        try {
+          payload = JSON.parse(jsonStr);
+          if (typeof payload !== "object" || Array.isArray(payload)) throw new Error();
+        } catch {
+          encodeErrorEl.textContent = "Invalid JSON. Payload must be a JSON object.";
+          return;
+        }
 
-      try {
-        const header = { alg, typ: 'JWT' };
-        const token = await signHMAC(header, payload, secret, alg);
-        encodedJwtEl.textContent = token;
-        encodeOutputEl.style.display = '';
-        addToHistory(token, payload, 'encode');
-      } catch (e) {
-        encodeErrorEl.textContent = `Signing error: ${e.message}`;
-      }
-    };
+        try {
+          const header = { alg, typ: "JWT" };
+          const token = await signHMAC(header, payload, secret, alg);
+          encodedJwtEl.textContent = token;
+          encodeOutputEl.style.display = "";
+          addToHistory(token, payload, "encode");
+        } catch (e) {
+          encodeErrorEl.textContent = `Signing error: ${e.message}`;
+        }
+      };
 
-    // --- History ---
-    const loadHistory = () => {
-      try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); }
-      catch { return []; }
-    };
+      // --- History ---
+      const loadHistory = () => {
+        try {
+          return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+        } catch {
+          return [];
+        }
+      };
 
-    const saveHistory = (entries) => {
-      try { localStorage.setItem(HISTORY_KEY, JSON.stringify(entries)); }
-      catch { /* quota exceeded */ }
-    };
+      const saveHistory = (entries) => {
+        try {
+          localStorage.setItem(HISTORY_KEY, JSON.stringify(entries));
+        } catch {
+          /* quota exceeded */
+        }
+      };
 
-    const addToHistory = (token, payload, source) => {
-      const entries = loadHistory();
-      const existing = entries.findIndex(e => e.token === token);
-      if (existing !== -1) {
-        entries[existing].timestamp = Date.now();
-        const [entry] = entries.splice(existing, 1);
-        entries.unshift(entry);
-      } else {
-        entries.unshift({
-          id: crypto.randomUUID(),
-          token,
-          label: '',
-          sub: payload.sub || payload.email || '',
-          iss: payload.iss || '',
-          exp: payload.exp || null,
-          timestamp: Date.now(),
-          source: source || 'decode',
-        });
-      }
-      if (entries.length > MAX_HISTORY) entries.length = MAX_HISTORY;
-      saveHistory(entries);
-      renderHistory();
-    };
+      const addToHistory = (token, payload, source) => {
+        const entries = loadHistory();
+        const existing = entries.findIndex((e) => e.token === token);
+        if (existing !== -1) {
+          entries[existing].timestamp = Date.now();
+          const [entry] = entries.splice(existing, 1);
+          entries.unshift(entry);
+        } else {
+          entries.unshift({
+            id: crypto.randomUUID(),
+            token,
+            label: "",
+            sub: payload.sub || payload.email || "",
+            iss: payload.iss || "",
+            exp: payload.exp || null,
+            timestamp: Date.now(),
+            source: source || "decode",
+          });
+        }
+        if (entries.length > MAX_HISTORY) entries.length = MAX_HISTORY;
+        saveHistory(entries);
+        renderHistory();
+      };
 
-    const renderHistory = () => {
-      const entries = loadHistory();
-      $id('history-count').textContent = `(${entries.length})`;
-      const list = $id('history-list');
-      const actions = $id('history-actions');
+      const renderHistory = () => {
+        const entries = loadHistory();
+        $id("history-count").textContent = `(${entries.length})`;
+        const list = $id("history-list");
+        const actions = $id("history-actions");
 
-      if (entries.length === 0) {
-        list.innerHTML = '<div class="history-empty">No tokens decoded yet.</div>';
-        actions.style.display = 'none';
-        return;
-      }
+        if (entries.length === 0) {
+          list.innerHTML = '<div class="history-empty">No tokens decoded yet.</div>';
+          actions.style.display = "none";
+          return;
+        }
 
-      actions.style.display = '';
-      list.innerHTML = entries.map(e => {
-        const claimParts = [];
-        if (e.sub) claimParts.push(`sub: ${e.sub}`);
-        if (e.iss) claimParts.push(`iss: ${e.iss}`);
-        if (e.exp) claimParts.push(`exp: ${formatTimestamp(e.exp)}`);
-        const claimSummary = claimParts.join(' | ') || 'no standard claims';
-        const placeholder = e.sub || e.iss || 'label';
+        actions.style.display = "";
+        list.innerHTML = entries
+          .map((e) => {
+            const claimParts = [];
+            if (e.sub) claimParts.push(`sub: ${e.sub}`);
+            if (e.iss) claimParts.push(`iss: ${e.iss}`);
+            if (e.exp) claimParts.push(`exp: ${formatTimestamp(e.exp)}`);
+            const claimSummary = claimParts.join(" | ") || "no standard claims";
+            const placeholder = e.sub || e.iss || "label";
 
-        return `<div class="history-entry" data-id="${e.id}">
+            return `<div class="history-entry" data-id="${e.id}">
           <div class="history-main">
             <input class="history-label" type="text" value="${escapeHtml(e.label)}" placeholder="${escapeHtml(placeholder)}" data-id="${e.id}" onclick="event.stopPropagation()">
             <span class="history-claims">${escapeHtml(claimSummary)}</span>
@@ -1046,131 +1179,138 @@
           <span class="history-time">${relativeTime(e.timestamp)}</span>
           <button class="history-delete" data-id="${e.id}" title="Remove" onclick="event.stopPropagation()">&times;</button>
         </div>`;
-      }).join('');
+          })
+          .join("");
 
-      // Click to load
-      list.querySelectorAll('.history-entry').forEach(el => {
-        el.addEventListener('click', () => {
-          const entry = entries.find(e => e.id === el.dataset.id);
-          if (entry) {
-            setMode('decode');
-            inputEl.value = entry.token;
-            decode();
-          }
+        // Click to load
+        list.querySelectorAll(".history-entry").forEach((el) => {
+          el.addEventListener("click", () => {
+            const entry = entries.find((e) => e.id === el.dataset.id);
+            if (entry) {
+              setMode("decode");
+              inputEl.value = entry.token;
+              decode();
+            }
+          });
         });
-      });
 
-      // Label edits
-      list.querySelectorAll('.history-label').forEach(input => {
-        input.addEventListener('change', (e) => {
-          const updated = loadHistory();
-          const entry = updated.find(h => h.id === e.target.dataset.id);
-          if (entry) {
-            entry.label = e.target.value;
+        // Label edits
+        list.querySelectorAll(".history-label").forEach((input) => {
+          input.addEventListener("change", (e) => {
+            const updated = loadHistory();
+            const entry = updated.find((h) => h.id === e.target.dataset.id);
+            if (entry) {
+              entry.label = e.target.value;
+              saveHistory(updated);
+            }
+          });
+        });
+
+        // Delete
+        list.querySelectorAll(".history-delete").forEach((btn) => {
+          btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const updated = loadHistory().filter((h) => h.id !== btn.dataset.id);
             saveHistory(updated);
-          }
+            renderHistory();
+          });
         });
+      };
+
+      // --- Event bindings ---
+      $id("decode-btn").addEventListener("click", decode);
+
+      $id("clear-btn").addEventListener("click", () => {
+        inputEl.value = "";
+        outputEl.style.display = "none";
+        decodeErrorEl.textContent = "";
+        currentToken = null;
+        currentDecoded = null;
+        editedPayload = null;
+        history.replaceState(null, "", location.pathname);
+        inputEl.focus();
       });
 
-      // Delete
-      list.querySelectorAll('.history-delete').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const updated = loadHistory().filter(h => h.id !== btn.dataset.id);
-          saveHistory(updated);
-          renderHistory();
-        });
+      $id("copy-payload-btn").addEventListener("click", () => {
+        const payload = editedPayload || (currentDecoded && currentDecoded.payload);
+        if (payload) navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
       });
-    };
 
-    // --- Event bindings ---
-    $id('decode-btn').addEventListener('click', decode);
+      // Auto-decode on paste with debounce
+      let debounceTimer;
+      inputEl.addEventListener("input", () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(decode, 300);
+      });
 
-    $id('clear-btn').addEventListener('click', () => {
-      inputEl.value = '';
-      outputEl.style.display = 'none';
-      decodeErrorEl.textContent = '';
-      currentToken = null;
-      currentDecoded = null;
-      editedPayload = null;
-      history.replaceState(null, '', location.pathname);
-      inputEl.focus();
-    });
+      // Cmd/Ctrl+Enter
+      inputEl.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+          e.preventDefault();
+          decode();
+        }
+      });
+      encodePayloadEl.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+          e.preventDefault();
+          encodeToken();
+        }
+      });
 
-    $id('copy-payload-btn').addEventListener('click', () => {
-      const payload = editedPayload || (currentDecoded && currentDecoded.payload);
-      if (payload) navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
-    });
+      // Encode button
+      $id("encode-btn").addEventListener("click", encodeToken);
+      $id("copy-encoded-btn").addEventListener("click", () => {
+        const text = encodedJwtEl.textContent;
+        if (text) navigator.clipboard.writeText(text);
+      });
 
-    // Auto-decode on paste with debounce
-    let debounceTimer;
-    inputEl.addEventListener('input', () => {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(decode, 300);
-    });
+      // Signature verification
+      const cryptoAvailable = !!(crypto && crypto.subtle);
+      if (!cryptoAvailable) $id("crypto-warning").style.display = "";
 
-    // Cmd/Ctrl+Enter
-    inputEl.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); decode(); }
-    });
-    encodePayloadEl.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); encodeToken(); }
-    });
+      $id("verify-btn").addEventListener("click", async () => {
+        if (!currentToken || !cryptoAvailable) return;
+        const secret = secretInputEl.value;
+        const alg = algorithmSelectEl.value;
+        try {
+          const valid = await verifyHMAC(currentToken, secret, alg);
+          verifyResultEl.innerHTML = valid
+            ? '<span class="badge valid">Valid</span>'
+            : '<span class="badge invalid">Invalid</span>';
+        } catch {
+          verifyResultEl.innerHTML = '<span class="badge invalid">Error</span>';
+        }
+      });
 
-    // Encode button
-    $id('encode-btn').addEventListener('click', encodeToken);
-    $id('copy-encoded-btn').addEventListener('click', () => {
-      const text = encodedJwtEl.textContent;
-      if (text) navigator.clipboard.writeText(text);
-    });
+      // Secret toggles
+      $id("toggle-secret-btn").addEventListener("click", () => {
+        const isPassword = secretInputEl.type === "password";
+        secretInputEl.type = isPassword ? "text" : "password";
+        $id("toggle-secret-btn").textContent = isPassword ? "Hide" : "Show";
+      });
+      $id("toggle-encode-secret").addEventListener("click", () => {
+        const isPassword = encodeSecretEl.type === "password";
+        encodeSecretEl.type = isPassword ? "text" : "password";
+        $id("toggle-encode-secret").textContent = isPassword ? "Hide" : "Show";
+      });
 
-    // Signature verification
-    const cryptoAvailable = !!(crypto && crypto.subtle);
-    if (!cryptoAvailable) $id('crypto-warning').style.display = '';
+      $id("clear-history-btn").addEventListener("click", () => {
+        localStorage.removeItem(HISTORY_KEY);
+        renderHistory();
+      });
 
-    $id('verify-btn').addEventListener('click', async () => {
-      if (!currentToken || !cryptoAvailable) return;
-      const secret = secretInputEl.value;
-      const alg = algorithmSelectEl.value;
-      try {
-        const valid = await verifyHMAC(currentToken, secret, alg);
-        verifyResultEl.innerHTML = valid
-          ? '<span class="badge valid">Valid</span>'
-          : '<span class="badge invalid">Invalid</span>';
-      } catch {
-        verifyResultEl.innerHTML = '<span class="badge invalid">Error</span>';
-      }
-    });
-
-    // Secret toggles
-    $id('toggle-secret-btn').addEventListener('click', () => {
-      const isPassword = secretInputEl.type === 'password';
-      secretInputEl.type = isPassword ? 'text' : 'password';
-      $id('toggle-secret-btn').textContent = isPassword ? 'Hide' : 'Show';
-    });
-    $id('toggle-encode-secret').addEventListener('click', () => {
-      const isPassword = encodeSecretEl.type === 'password';
-      encodeSecretEl.type = isPassword ? 'text' : 'password';
-      $id('toggle-encode-secret').textContent = isPassword ? 'Hide' : 'Show';
-    });
-
-    $id('clear-history-btn').addEventListener('click', () => {
-      localStorage.removeItem(HISTORY_KEY);
+      // --- Init ---
+      const savedSecret = localStorage.getItem(SECRET_KEY) || "";
+      secretInputEl.value = savedSecret;
+      encodeSecretEl.value = savedSecret;
       renderHistory();
-    });
 
-    // --- Init ---
-    const savedSecret = localStorage.getItem(SECRET_KEY) || '';
-    secretInputEl.value = savedSecret;
-    encodeSecretEl.value = savedSecret;
-    renderHistory();
-
-    // Auto-decode from URL hash
-    const hashToken = location.hash.slice(1);
-    if (hashToken && hashToken.startsWith('eyJ')) {
-      inputEl.value = hashToken;
-      decode();
-    }
-  </script>
-</body>
+      // Auto-decode from URL hash
+      const hashToken = location.hash.slice(1);
+      if (hashToken && hashToken.startsWith("eyJ")) {
+        inputEl.value = hashToken;
+        decode();
+      }
+    </script>
+  </body>
 </html>

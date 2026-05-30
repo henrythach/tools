@@ -54,9 +54,7 @@
       }
 
       body {
-        font-family:
-          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
-          Arial, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         padding: 1.5rem;
         color: var(--text);
         background: var(--bg);
@@ -312,21 +310,10 @@
       <p class="subtitle">Keyboard-driven talk time tracker for any meeting.</p>
       <div class="setup-form">
         <div>
-          <label
-            style="
-              font-size: 0.85rem;
-              font-weight: 600;
-              display: block;
-              margin-bottom: 0.4rem;
-            "
-          >
+          <label style="font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 0.4rem">
             Participants — one per line
           </label>
-          <textarea
-            id="names-input"
-            rows="7"
-            placeholder="Alice&#10;Bob&#10;Carol&#10;Diana"
-          ></textarea>
+          <textarea id="names-input" rows="7" placeholder="Alice&#10;Bob&#10;Carol&#10;Diana"></textarea>
         </div>
         <div id="setup-error" class="error-msg" style="display: none"></div>
         <div>
@@ -334,16 +321,12 @@
         </div>
         <p class="hint">
           During the meeting: type letters to switch speaker (prefix-match) ·
-          <kbd>Space</kbd> pause/resume · <kbd>Ctrl+Z</kbd> undo last switch ·
-          <kbd>Esc</kbd> end meeting
+          <kbd>Space</kbd> pause/resume · <kbd>Ctrl+Z</kbd> undo last switch · <kbd>Esc</kbd> end meeting
         </p>
       </div>
       <footer>
         <a href="./">← All tools</a> &nbsp;·&nbsp;
-        <a
-          href="https://github.com/henrythach/tools/blob/main/meeting-talk-time.html"
-          >Source</a
-        >
+        <a href="https://github.com/henrythach/tools/blob/main/meeting-talk-time.html">Source</a>
       </footer>
     </div>
 
@@ -360,16 +343,11 @@
       <div class="session-controls">
         <button id="pause-btn">⏸ Pause</button>
         <button class="danger" id="end-btn">End Meeting</button>
-        <span class="hint" style="margin-left: 0.25rem"
-          >or press <kbd>Space</kbd> / <kbd>Esc</kbd></span
-        >
+        <span class="hint" style="margin-left: 0.25rem">or press <kbd>Space</kbd> / <kbd>Esc</kbd></span>
       </div>
       <footer>
         <a href="./">← All tools</a> &nbsp;·&nbsp;
-        <a
-          href="https://github.com/henrythach/tools/blob/main/meeting-talk-time.html"
-          >Source</a
-        >
+        <a href="https://github.com/henrythach/tools/blob/main/meeting-talk-time.html">Source</a>
       </footer>
     </div>
 
@@ -378,15 +356,10 @@
       <h1>Meeting Summary</h1>
       <p class="summary-stat" id="summary-total"></p>
       <div class="leaderboard" id="summary-leaderboard"></div>
-      <button class="primary" id="new-meeting-btn" style="margin-bottom: 1rem">
-        New Meeting
-      </button>
+      <button class="primary" id="new-meeting-btn" style="margin-bottom: 1rem">New Meeting</button>
       <footer>
         <a href="./">← All tools</a> &nbsp;·&nbsp;
-        <a
-          href="https://github.com/henrythach/tools/blob/main/meeting-talk-time.html"
-          >Source</a
-        >
+        <a href="https://github.com/henrythach/tools/blob/main/meeting-talk-time.html">Source</a>
       </footer>
     </div>
 
@@ -406,9 +379,7 @@
       const $ = (id) => document.getElementById(id);
 
       function showScreen(name) {
-        ["setup", "session", "summary"].forEach((n) =>
-          $(`screen-${n}`).classList.remove("active"),
-        );
+        ["setup", "session", "summary"].forEach((n) => $(`screen-${n}`).classList.remove("active"));
         $(`screen-${name}`).classList.add("active");
       }
 
@@ -418,33 +389,20 @@
       }
 
       function esc(s) {
-        return s
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")
-          .replace(/"/g, "&quot;");
+        return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
       }
 
       // Live ms for participant i (includes current ongoing turn)
       function liveMs(i) {
         let ms = participants[i].totalMs;
-        if (
-          appState === "running" &&
-          currentSpeaker === i &&
-          turnStart !== null
-        ) {
+        if (appState === "running" && currentSpeaker === i && turnStart !== null) {
           ms += Date.now() - turnStart;
         }
         return ms;
       }
 
       function currentTurnMs() {
-        if (
-          appState !== "running" ||
-          currentSpeaker === null ||
-          turnStart === null
-        )
-          return 0;
+        if (appState !== "running" || currentSpeaker === null || turnStart === null) return 0;
         return Date.now() - turnStart;
       }
 
@@ -544,9 +502,7 @@
           const candidate = prefix + e.key;
           const matches = participants
             .map((p, i) => ({ p, i }))
-            .filter(({ p }) =>
-              p.name.toLowerCase().startsWith(candidate.toLowerCase()),
-            );
+            .filter(({ p }) => p.name.toLowerCase().startsWith(candidate.toLowerCase()));
 
           if (matches.length === 0) return; // no-op — don't update prefix
 
@@ -569,10 +525,7 @@
 
         if (appState === "paused") {
           banner.classList.add("paused");
-          nameEl.textContent =
-            currentSpeaker !== null
-              ? `⏸ ${participants[currentSpeaker].name}`
-              : "⏸ Paused";
+          nameEl.textContent = currentSpeaker !== null ? `⏸ ${participants[currentSpeaker].name}` : "⏸ Paused";
           timerEl.textContent = "";
         } else if (currentSpeaker !== null) {
           banner.classList.add("active");
@@ -626,8 +579,7 @@
       }
 
       function renderSummary() {
-        $("summary-total").textContent =
-          `Total meeting time: ${fmt(totalElapsed())}`;
+        $("summary-total").textContent = `Total meeting time: ${fmt(totalElapsed())}`;
         renderLeaderboard("summary-leaderboard", true);
       }
 
@@ -656,9 +608,7 @@
         }
 
         const lower = names.map((n) => n.toLowerCase());
-        const dupes = names.filter(
-          (n, i) => lower.indexOf(n.toLowerCase()) !== i,
-        );
+        const dupes = names.filter((n, i) => lower.indexOf(n.toLowerCase()) !== i);
         if (dupes.length > 0) {
           errEl.textContent = `Duplicate names: ${[...new Set(dupes)].join(", ")}. Please disambiguate (e.g. add a last initial).`;
           errEl.style.display = "block";

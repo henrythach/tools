@@ -3,6 +3,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
 const ROOT = __dirname;
 const EXCLUDED_MD = new Set(['README.md', 'CLAUDE.md']);
@@ -62,30 +63,32 @@ const tools = fs.readdirSync(ROOT)
     };
   });
 
-// README.md
-const readmeTools = tools.map(t => `- [${t.title}](${t.base}.html) — ${t.description}`).join('\n');
-fs.writeFileSync(path.join(ROOT, 'README.md'), [
-  '# HTML Tools',
-  '',
-  'A collection of single-file HTML tools. Each tool is a standalone `.html` file with inline CSS and JavaScript — no build step, no frameworks.',
-  '',
-  "Inspired by [Simon Willison's HTML tools](https://simonwillison.net/2025/Dec/10/html-tools/).",
-  '',
-  '## Tools',
-  '',
-  readmeTools,
-  '',
-].join('\n'));
+function main() {
+  // README.md
+  const readmeTools = tools.map(t => `- [${t.title}](${t.base}.html) — ${t.description}`).join('\n');
+  const readmeRaw = [
+    '# HTML Tools',
+    '',
+    'A collection of single-file HTML tools. Each tool is a standalone `.html` file with inline CSS and JavaScript — no build step, no frameworks.',
+    '',
+    "Inspired by [Simon Willison's HTML tools](https://simonwillison.net/2025/Dec/10/html-tools/).",
+    '',
+    '## Tools',
+    '',
+    readmeTools,
+    '',
+  ].join('\n');
+  fs.writeFileSync(path.join(ROOT, 'README.md'), readmeRaw);
 
-// index.html
-const toolCards = tools.map(t =>
-  `      <a class="tool-card" href="${t.base}.html">
-        <div class="name">${escapeHtml(t.title)}</div>
-        <div class="desc">${escapeHtml(t.description)}</div>
-      </a>`
-).join('\n');
+  // index.html
+  const toolCards = tools
+    .map(
+      t =>
+        `<a class="tool-card" href="${t.base}.html"><div class="name">${escapeHtml(t.title)}</div><div class="desc">${escapeHtml(t.description)}</div></a>`,
+    )
+    .join('\n');
 
-fs.writeFileSync(path.join(ROOT, 'index.html'), `<!doctype html>
+  const indexRaw = `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -217,12 +220,7 @@ fs.writeFileSync(path.join(ROOT, 'index.html'), `<!doctype html>
     <h1>HTML Tools</h1>
     <p class="subtitle">
       Single-file tools — no build step, no frameworks. Inspired by
-      <a
-        href="https://simonwillison.net/2025/Dec/10/html-tools/"
-        target="_blank"
-        rel="noopener"
-        >Simon Willison's HTML tools</a
-      >.
+      <a href="https://simonwillison.net/2025/Dec/10/html-tools/" target="_blank" rel="noopener">Simon Willison's HTML tools</a>.
     </p>
 
     <div class="tools">
@@ -230,16 +228,17 @@ ${toolCards}
     </div>
 
     <footer>
-      <a
-        href="https://github.com/henrythach/tools"
-        target="_blank"
-        rel="noopener"
-        >github.com/henrythach/tools</a
-      >
+      <a href="https://github.com/henrythach/tools" target="_blank" rel="noopener">github.com/henrythach/tools</a>
     </footer>
   </body>
 </html>
-`);
+`;
+  fs.writeFileSync(path.join(ROOT, 'index.html'), indexRaw);
 
-console.log(`Generated README.md and index.html with ${tools.length} tools:`);
-tools.forEach(t => console.log(`  [${t.base}] ${t.title}`));
+  execSync('npx prettier --write README.md index.html', { cwd: ROOT, stdio: 'inherit' });
+
+  console.log(`Generated README.md and index.html with ${tools.length} tools:`);
+  tools.forEach(t => console.log(`  [${t.base}] ${t.title}`));
+}
+
+main();

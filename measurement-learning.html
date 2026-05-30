@@ -1,512 +1,910 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Measurement Sense</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Measurement Sense</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-    :root {
-      --bg: #fff;
-      --text: #1a1a1a;
-      --text-muted: #666;
-      --border: #ccc;
-      --border-subtle: #e0e0e0;
-      --border-footer: #eee;
-      --input-bg: #fff;
-      --btn-bg: #fff;
-      --btn-hover: #f5f5f5;
-      --accent: #4a90d9;
-      --accent-hover: #3a7bc8;
-      --card-bg: #f8f9fa;
-      --muted-bg: #f0f0f0;
-      --success: #27ae60;
-      --success-bg: #d4edda;
-      --error: #c0392b;
-      --error-bg: #f8d7da;
-      --warning-bg: #fff3cd;
-      --warning-text: #856404;
-    }
-
-    @media (prefers-color-scheme: dark) {
       :root {
-        --bg: #1a1a1a;
-        --text: #e8e8e8;
-        --text-muted: #999;
-        --border: #444;
-        --border-subtle: #333;
-        --border-footer: #2e2e2e;
-        --input-bg: #252525;
-        --btn-bg: #2a2a2a;
-        --btn-hover: #333;
-        --accent: #5a9fd4;
-        --accent-hover: #4a8fc4;
-        --card-bg: #252525;
-        --muted-bg: #222;
-        --success: #2ecc71;
-        --success-bg: #1a3a2a;
-        --error: #e05c4b;
-        --error-bg: #3a1a1a;
-        --warning-bg: #3a3520;
-        --warning-text: #f0d060;
+        --bg: #fff;
+        --text: #1a1a1a;
+        --text-muted: #666;
+        --border: #ccc;
+        --border-subtle: #e0e0e0;
+        --border-footer: #eee;
+        --input-bg: #fff;
+        --btn-bg: #fff;
+        --btn-hover: #f5f5f5;
+        --accent: #4a90d9;
+        --accent-hover: #3a7bc8;
+        --card-bg: #f8f9fa;
+        --muted-bg: #f0f0f0;
+        --success: #27ae60;
+        --success-bg: #d4edda;
+        --error: #c0392b;
+        --error-bg: #f8d7da;
+        --warning-bg: #fff3cd;
+        --warning-text: #856404;
       }
-    }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      padding: 1.5rem;
-      color: var(--text);
-      background: var(--bg);
-      line-height: 1.5;
-      max-width: 700px;
-      margin: 0 auto;
-    }
-
-    h1 { font-size: 1.4rem; margin-bottom: 0.25rem; }
-    .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.25rem; }
-
-    /* Mode toggle */
-    .mode-toggle { display: flex; gap: 0; margin-bottom: 1rem; }
-    .mode-toggle button {
-      flex: 1;
-      font-family: inherit;
-      font-size: 0.9rem;
-      padding: 0.55rem 1rem;
-      border: 1px solid var(--border);
-      background: var(--btn-bg);
-      color: var(--text);
-      cursor: pointer;
-    }
-    .mode-toggle button:first-child { border-radius: 6px 0 0 6px; border-right: none; }
-    .mode-toggle button:last-child  { border-radius: 0 6px 6px 0; }
-    .mode-toggle button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-    .mode-toggle button:not(.active):hover { background: var(--btn-hover); }
-
-    /* Category pills */
-    .cat-pills {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-      margin-bottom: 1.25rem;
-    }
-    .cat-pill {
-      font-family: inherit;
-      font-size: 0.78rem;
-      padding: 0.3rem 0.75rem;
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      background: var(--btn-bg);
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: background 0.1s, color 0.1s, border-color 0.1s;
-    }
-    .cat-pill:hover { background: var(--btn-hover); color: var(--text); }
-    .cat-pill.active {
-      background: var(--accent);
-      color: #fff;
-      border-color: var(--accent);
-    }
-
-    /* Browse grid */
-    .browse-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 0.75rem;
-    }
-
-    .anchor-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-subtle);
-      border-radius: 8px;
-      padding: 0.9rem 1rem;
-      position: relative;
-    }
-
-    .anchor-card .metric-val {
-      font-size: 1.6rem;
-      font-weight: 700;
-      line-height: 1.1;
-      color: var(--text);
-    }
-
-    .anchor-card .imperial-val {
-      font-size: 0.95rem;
-      color: var(--text-muted);
-      margin-bottom: 0.5rem;
-    }
-
-    .anchor-card .card-bottom {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 0.5rem;
-    }
-
-    .anchor-card .desc {
-      font-size: 0.82rem;
-      color: var(--text);
-      line-height: 1.4;
-      flex: 1;
-    }
-
-    .anchor-card .context-tag {
-      font-size: 0.7rem;
-      padding: 0.15rem 0.5rem;
-      background: var(--muted-bg);
-      color: var(--text-muted);
-      border-radius: 12px;
-      white-space: nowrap;
-      flex-shrink: 0;
-      margin-top: 0.1rem;
-    }
-
-    .anchor-card .miss-badge {
-      font-size: 0.7rem;
-      color: var(--warning-text);
-      margin-top: 0.35rem;
-      display: none;
-    }
-    .anchor-card .miss-badge.visible { display: block; }
-
-    /* Quiz area */
-    .quiz-area { max-width: 520px; margin: 0 auto; }
-
-    .quiz-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.25rem;
-    }
-
-    .streak-display {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      font-weight: 500;
-    }
-    .streak-display.hot { color: var(--accent); }
-
-    .quiz-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-subtle);
-      border-radius: 10px;
-      padding: 1.5rem;
-    }
-
-    .quiz-prompt {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-bottom: 0.4rem;
-    }
-
-    .quiz-metric {
-      font-size: 2.8rem;
-      font-weight: 800;
-      color: var(--accent);
-      line-height: 1;
-      margin-bottom: 0.25rem;
-    }
-
-    .quiz-question-text {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      margin-bottom: 1.5rem;
-    }
-
-    .slider-wrapper {
-      margin-bottom: 1.25rem;
-    }
-
-    .slider-labels {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      margin-bottom: 0.3rem;
-    }
-
-    input[type="range"] {
-      width: 100%;
-      accent-color: var(--accent);
-      cursor: pointer;
-      height: 6px;
-    }
-
-    .slider-readout {
-      text-align: center;
-      font-size: 1.3rem;
-      font-weight: 600;
-      margin-top: 0.6rem;
-      min-height: 1.8rem;
-      color: var(--text);
-    }
-    .slider-readout.placeholder { color: var(--text-muted); font-weight: 400; font-size: 0.9rem; }
-
-    .quiz-actions {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    button {
-      font-family: inherit;
-      font-size: 0.85rem;
-      padding: 0.5rem 1rem;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      background: var(--btn-bg);
-      color: var(--text);
-      cursor: pointer;
-    }
-    button:hover { background: var(--btn-hover); }
-    button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-    button.primary:hover { background: var(--accent-hover); }
-    button:disabled { opacity: 0.4; cursor: not-allowed; }
-    button:disabled:hover { background: var(--btn-bg); }
-    button.primary:disabled:hover { background: var(--accent); }
-
-    /* Feedback */
-    .feedback {
-      margin-top: 1rem;
-      padding: 0.9rem 1rem;
-      border-radius: 8px;
-      font-size: 0.88rem;
-      display: none;
-    }
-    .feedback.show { display: block; }
-    .feedback.spot-on  { background: var(--success-bg); border: 1px solid var(--success); }
-    .feedback.close    { background: var(--warning-bg); border: 1px solid var(--warning-text); }
-    .feedback.miss     { background: var(--error-bg);   border: 1px solid var(--error); }
-
-    .feedback-headline {
-      font-weight: 700;
-      font-size: 1rem;
-      margin-bottom: 0.25rem;
-    }
-    .feedback.spot-on .feedback-headline { color: var(--success); }
-    .feedback.close   .feedback-headline { color: var(--warning-text); }
-    .feedback.miss    .feedback-headline { color: var(--error); }
-
-    .feedback-answer { margin-bottom: 0.35rem; color: var(--text); }
-    .feedback-answer strong { color: var(--accent); }
-    .feedback-context { color: var(--text-muted); font-style: italic; }
-    .feedback-srs { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem; }
-
-    footer {
-      margin-top: 2rem;
-      padding-top: 1rem;
-      border-top: 1px solid var(--border-footer);
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-    footer a { color: var(--text-muted); text-decoration: none; }
-    footer a:hover { color: var(--text); }
-    footer .sep { margin: 0 0.4rem; }
-  </style>
-</head>
-<body>
-  <h1>Measurement Sense</h1>
-  <p class="subtitle">Build intuition for metric — no math required.</p>
-
-  <div class="mode-toggle">
-    <button id="btn-browse" class="active" onclick="setMode('browse')">Browse</button>
-    <button id="btn-quiz" onclick="setMode('quiz')">Quiz</button>
-  </div>
-
-  <div class="cat-pills" id="cat-pills"></div>
-
-  <div id="browse-view"></div>
-  <div id="quiz-view" style="display:none"></div>
-
-  <footer>
-    <a href="./">← All tools</a>
-    <span class="sep">·</span>
-    <a href="https://github.com/henrythach/tools/blob/main/measurement-learning.html" target="_blank" rel="noopener">Source</a>
-  </footer>
-
-  <script>
-    // ─── Data ────────────────────────────────────────────────────────────────
-
-    const CATEGORIES = [
-      { id: 'temperature', label: 'Temperature', sliderMin: -5,  sliderMax: 550, sliderStep: 1,   spotOn: 5,   close: 15  },
-      { id: 'weight',      label: 'Weight',      sliderMin: 1,   sliderMax: 500, sliderStep: 1,   spotOn: 5,   close: 15  },
-      { id: 'speed',       label: 'Speed',        sliderMin: 5,   sliderMax: 100, sliderStep: 1,   spotOn: 3,   close: 8   },
-      { id: 'distance',    label: 'Distance',     sliderMin: 0.5, sliderMax: 400, sliderStep: 0.5, spotOn: 5,   close: 20  },
-      { id: 'height',      label: 'Height',       sliderMin: 0.5, sliderMax: 80,  sliderStep: 0.5, spotOn: 2,   close: 5   },
-      { id: 'volume',      label: 'Volume',       sliderMin: 1,   sliderMax: 150, sliderStep: 1,   spotOn: 5,   close: 15  },
-    ];
-
-    const ANCHORS = [
-      // Temperature
-      { id: 'temp--18', cat: 'temperature', metric: -18, metricUnit: '°C', imperial: 0,   imperialUnit: '°F', context: 'Weather',
-        desc: 'Dead of winter. Your breath is visible. Your car might not start.' },
-      { id: 'temp-0',  cat: 'temperature', metric: 0,   metricUnit: '°C', imperial: 32,  imperialUnit: '°F', context: 'Weather',
-        desc: 'Freezing point. Roads get icy. Water turns to ice.' },
-      { id: 'temp-10', cat: 'temperature', metric: 10,  metricUnit: '°C', imperial: 50,  imperialUnit: '°F', context: 'Weather',
-        desc: 'Chilly. Light jacket territory. Great running weather.' },
-      { id: 'temp-20', cat: 'temperature', metric: 20,  metricUnit: '°C', imperial: 68,  imperialUnit: '°F', context: 'Weather',
-        desc: 'Practically perfect. Open the windows. T-shirt weather.' },
-      { id: 'temp-30', cat: 'temperature', metric: 30,  metricUnit: '°C', imperial: 86,  imperialUnit: '°F', context: 'Weather',
-        desc: 'Hot summer day. Sunscreen required. You\'ll sweat waiting for the bus.' },
-      { id: 'temp-37', cat: 'temperature', metric: 37,  metricUnit: '°C', imperial: 98.6, imperialUnit: '°F', context: 'Body',
-        desc: 'Normal human body temperature. If the air outside is this hot, stay inside.' },
-      { id: 'temp-100', cat: 'temperature', metric: 100, metricUnit: '°C', imperial: 212, imperialUnit: '°F', context: 'Cooking',
-        desc: 'Boiling water. Pasta goes in here. Also how tea should be made.' },
-      { id: 'temp-175', cat: 'temperature', metric: 175, metricUnit: '°C', imperial: 350, imperialUnit: '°F', context: 'Cooking',
-        desc: 'Standard cookie oven. Most baking happens around here.' },
-      { id: 'temp-220', cat: 'temperature', metric: 220, metricUnit: '°C', imperial: 425, imperialUnit: '°F', context: 'Cooking',
-        desc: 'Pizza oven. High enough for a crispy crust.' },
-
-      // Weight
-      { id: 'weight-1',   cat: 'weight', metric: 1,   metricUnit: 'kg', imperial: 2.2,  imperialUnit: 'lbs', context: 'Everyday',
-        desc: 'A liter of water. A small pineapple. Very manageable.' },
-      { id: 'weight-5',   cat: 'weight', metric: 5,   metricUnit: 'kg', imperial: 11,   imperialUnit: 'lbs', context: 'Everyday',
-        desc: 'A bag of potatoes. Heavier than it looks when you\'re carrying it home.' },
-      { id: 'weight-23',  cat: 'weight', metric: 23,  metricUnit: 'kg', imperial: 50,   imperialUnit: 'lbs', context: 'Travel',
-        desc: 'The max checked-bag limit on most US airlines. Pack light.' },
-      { id: 'weight-60',  cat: 'weight', metric: 60,  metricUnit: 'kg', imperial: 132,  imperialUnit: 'lbs', context: 'Body',
-        desc: 'Close to the global average for adult women (WHO data).' },
-      { id: 'weight-70',  cat: 'weight', metric: 70,  metricUnit: 'kg', imperial: 154,  imperialUnit: 'lbs', context: 'Body',
-        desc: 'Close to the global average for adult men (WHO data).' },
-      { id: 'weight-80',  cat: 'weight', metric: 80,  metricUnit: 'kg', imperial: 176,  imperialUnit: 'lbs', context: 'Body',
-        desc: 'A heavier adult. About the weight of a fully loaded long-distance hiker.' },
-      { id: 'weight-100', cat: 'weight', metric: 100, metricUnit: 'kg', imperial: 220,  imperialUnit: 'lbs', context: 'Body',
-        desc: 'A notably heavy adult — or a large motorcycle engine.' },
-
-      // Speed
-      { id: 'speed-30',  cat: 'speed', metric: 30,  metricUnit: 'km/h', imperial: 19, imperialUnit: 'mph', context: 'Driving',
-        desc: 'School zone speed. Agonizingly slow when you\'re in a hurry.' },
-      { id: 'speed-50',  cat: 'speed', metric: 50,  metricUnit: 'km/h', imperial: 31, imperialUnit: 'mph', context: 'Driving',
-        desc: 'City speed limit in most countries. Feels like crawling on US roads.' },
-      { id: 'speed-100', cat: 'speed', metric: 100, metricUnit: 'km/h', imperial: 62, imperialUnit: 'mph', context: 'Driving',
-        desc: 'Highway cruising in Europe and Canada. Just under 65 mph.' },
-      { id: 'speed-120', cat: 'speed', metric: 120, metricUnit: 'km/h', imperial: 75, imperialUnit: 'mph', context: 'Driving',
-        desc: 'Fast highway. Common limit in Germany and parts of Australia.' },
-
-      // Long Distance
-      { id: 'dist-1',   cat: 'distance', metric: 1,   metricUnit: 'km', imperial: 0.6,  imperialUnit: 'miles', context: 'Walking',
-        desc: 'About 10 minutes of walking. Roughly 3 city blocks.' },
-      { id: 'dist-5',   cat: 'distance', metric: 5,   metricUnit: 'km', imperial: 3.1,  imperialUnit: 'miles', context: 'Running',
-        desc: 'A 5K race. About 30 minutes for a casual runner.' },
-      { id: 'dist-42',  cat: 'distance', metric: 42,  metricUnit: 'km', imperial: 26.2, imperialUnit: 'miles', context: 'Running',
-        desc: 'A marathon. One of those things people add to their LinkedIn bio.' },
-      { id: 'dist-100', cat: 'distance', metric: 100, metricUnit: 'km', imperial: 62,   imperialUnit: 'miles', context: 'Driving',
-        desc: 'About an hour on the highway. The distance from NYC to Philadelphia.' },
-      { id: 'dist-500', cat: 'distance', metric: 500, metricUnit: 'km', imperial: 311,  imperialUnit: 'miles', context: 'Driving',
-        desc: 'Half a day of driving. NYC to Boston and back.' },
-
-      // Height / Short Distance
-      { id: 'height-2.5', cat: 'height', metric: 2.5, metricUnit: 'cm', imperial: 1,    imperialUnit: 'in', context: 'Everyday',
-        desc: 'Your thumb width. One inch, exactly.' },
-      { id: 'height-15',  cat: 'height', metric: 15,  metricUnit: 'cm', imperial: 6,    imperialUnit: 'in', context: 'Everyday',
-        desc: 'A standard pen length. Half a ruler.' },
-      { id: 'height-30',  cat: 'height', metric: 30,  metricUnit: 'cm', imperial: 12,   imperialUnit: 'in', context: 'Everyday',
-        desc: 'One foot. The full length of a standard ruler.' },
-      { id: 'height-163', cat: 'height', metric: 163, metricUnit: 'cm', imperial: 64,   imperialUnit: 'in (5\'4")', context: 'Height',
-        desc: 'Close to the global average height for adult women (WHO data).' },
-      { id: 'height-170', cat: 'height', metric: 170, metricUnit: 'cm', imperial: 67,   imperialUnit: 'in (5\'7")', context: 'Height',
-        desc: 'Midpoint between the global averages for men and women.' },
-      { id: 'height-175', cat: 'height', metric: 175, metricUnit: 'cm', imperial: 69,   imperialUnit: 'in (5\'9")', context: 'Height',
-        desc: 'Close to the global average height for adult men (WHO data).' },
-      { id: 'height-183', cat: 'height', metric: 183, metricUnit: 'cm', imperial: 72,   imperialUnit: 'in (6\'0")', context: 'Height',
-        desc: 'Notably tall. About the minimum height to play in the NBA.' },
-
-      // Volume
-      { id: 'vol-0.25', cat: 'volume', metric: 0.25, metricUnit: 'L', imperial: 8.5,  imperialUnit: 'fl oz', context: 'Drinks',
-        desc: 'A standard glass of water. What your doctor says to drink 8 of per day.' },
-      { id: 'vol-0.5',  cat: 'volume', metric: 0.5,  metricUnit: 'L', imperial: 17,   imperialUnit: 'fl oz', context: 'Drinks',
-        desc: 'A small water bottle. Fits in most cup holders.' },
-      { id: 'vol-1',    cat: 'volume', metric: 1,    metricUnit: 'L', imperial: 34,   imperialUnit: 'fl oz', context: 'Drinks',
-        desc: 'A big bottle. A little more than a quart. Great for long hikes.' },
-      { id: 'vol-2',    cat: 'volume', metric: 2,    metricUnit: 'L', imperial: 67.6, imperialUnit: 'fl oz', context: 'Drinks',
-        desc: 'The classic soda bottle. About half a gallon.' },
-      { id: 'vol-3.8',  cat: 'volume', metric: 3.8,  metricUnit: 'L', imperial: 128,  imperialUnit: 'fl oz', context: 'Drinks',
-        desc: 'A gallon of milk. Four of those big bottles.' },
-    ];
-
-    // ─── State ───────────────────────────────────────────────────────────────
-
-    let mode = 'browse';
-    let activeCat = 'temperature';
-    let quizStreak = 0;
-    let quizHistory = [];
-    let currentAnchor = null;
-    let revealed = false;
-    const missCount = {}; // { anchorId: n } — session only
-
-    // ─── Init ────────────────────────────────────────────────────────────────
-
-    function init() {
-      const hash = location.hash.replace('#', '');
-      if (hash) {
-        const [m, c] = hash.split('-');
-        if (m === 'browse' || m === 'quiz') mode = m;
-        if (c && CATEGORIES.find(x => x.id === c)) activeCat = c;
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #1a1a1a;
+          --text: #e8e8e8;
+          --text-muted: #999;
+          --border: #444;
+          --border-subtle: #333;
+          --border-footer: #2e2e2e;
+          --input-bg: #252525;
+          --btn-bg: #2a2a2a;
+          --btn-hover: #333;
+          --accent: #5a9fd4;
+          --accent-hover: #4a8fc4;
+          --card-bg: #252525;
+          --muted-bg: #222;
+          --success: #2ecc71;
+          --success-bg: #1a3a2a;
+          --error: #e05c4b;
+          --error-bg: #3a1a1a;
+          --warning-bg: #3a3520;
+          --warning-text: #f0d060;
+        }
       }
-      renderPills();
-      renderMode();
-    }
 
-    function saveHash() {
-      location.hash = `${mode}-${activeCat}`;
-    }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        padding: 1.5rem;
+        color: var(--text);
+        background: var(--bg);
+        line-height: 1.5;
+        max-width: 700px;
+        margin: 0 auto;
+      }
 
-    // ─── Mode toggle ─────────────────────────────────────────────────────────
+      h1 {
+        font-size: 1.4rem;
+        margin-bottom: 0.25rem;
+      }
+      .subtitle {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        margin-bottom: 1.25rem;
+      }
 
-    function setMode(m) {
-      mode = m;
-      document.getElementById('btn-browse').classList.toggle('active', m === 'browse');
-      document.getElementById('btn-quiz').classList.toggle('active', m === 'quiz');
-      document.getElementById('browse-view').style.display = m === 'browse' ? '' : 'none';
-      document.getElementById('quiz-view').style.display   = m === 'quiz'   ? '' : 'none';
-      saveHash();
-      if (m === 'browse') renderBrowse();
-      if (m === 'quiz')   { quizHistory = []; renderQuiz(); }
-    }
+      /* Mode toggle */
+      .mode-toggle {
+        display: flex;
+        gap: 0;
+        margin-bottom: 1rem;
+      }
+      .mode-toggle button {
+        flex: 1;
+        font-family: inherit;
+        font-size: 0.9rem;
+        padding: 0.55rem 1rem;
+        border: 1px solid var(--border);
+        background: var(--btn-bg);
+        color: var(--text);
+        cursor: pointer;
+      }
+      .mode-toggle button:first-child {
+        border-radius: 6px 0 0 6px;
+        border-right: none;
+      }
+      .mode-toggle button:last-child {
+        border-radius: 0 6px 6px 0;
+      }
+      .mode-toggle button.active {
+        background: var(--accent);
+        color: #fff;
+        border-color: var(--accent);
+      }
+      .mode-toggle button:not(.active):hover {
+        background: var(--btn-hover);
+      }
 
-    function renderMode() {
-      document.getElementById('browse-view').style.display = mode === 'browse' ? '' : 'none';
-      document.getElementById('quiz-view').style.display   = mode === 'quiz'   ? '' : 'none';
-      document.getElementById('btn-browse').classList.toggle('active', mode === 'browse');
-      document.getElementById('btn-quiz').classList.toggle('active', mode === 'quiz');
-      if (mode === 'browse') renderBrowse();
-      if (mode === 'quiz')   renderQuiz();
-    }
+      /* Category pills */
+      .cat-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        margin-bottom: 1.25rem;
+      }
+      .cat-pill {
+        font-family: inherit;
+        font-size: 0.78rem;
+        padding: 0.3rem 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        background: var(--btn-bg);
+        color: var(--text-muted);
+        cursor: pointer;
+        transition:
+          background 0.1s,
+          color 0.1s,
+          border-color 0.1s;
+      }
+      .cat-pill:hover {
+        background: var(--btn-hover);
+        color: var(--text);
+      }
+      .cat-pill.active {
+        background: var(--accent);
+        color: #fff;
+        border-color: var(--accent);
+      }
 
-    // ─── Category pills ──────────────────────────────────────────────────────
+      /* Browse grid */
+      .browse-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 0.75rem;
+      }
 
-    function renderPills() {
-      const wrap = document.getElementById('cat-pills');
-      wrap.innerHTML = '';
-      CATEGORIES.forEach(cat => {
-        const btn = document.createElement('button');
-        btn.className = 'cat-pill' + (cat.id === activeCat ? ' active' : '');
-        btn.textContent = cat.label;
-        btn.onclick = () => selectCat(cat.id);
-        wrap.appendChild(btn);
-      });
-    }
+      .anchor-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-subtle);
+        border-radius: 8px;
+        padding: 0.9rem 1rem;
+        position: relative;
+      }
 
-    function selectCat(catId) {
-      activeCat = catId;
-      renderPills();
-      saveHash();
-      if (mode === 'browse') renderBrowse();
-      if (mode === 'quiz')   { quizHistory = []; renderQuiz(); }
-    }
+      .anchor-card .metric-val {
+        font-size: 1.6rem;
+        font-weight: 700;
+        line-height: 1.1;
+        color: var(--text);
+      }
 
-    // ─── Browse ──────────────────────────────────────────────────────────────
+      .anchor-card .imperial-val {
+        font-size: 0.95rem;
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+      }
 
-    function renderBrowse() {
-      const anchors = ANCHORS.filter(a => a.cat === activeCat);
-      const grid = document.getElementById('browse-view');
-      grid.innerHTML = '';
-      const wrap = document.createElement('div');
-      wrap.className = 'browse-grid';
-      anchors.forEach(a => {
-        const card = document.createElement('div');
-        card.className = 'anchor-card';
-        card.id = `browse-${a.id}`;
-        card.innerHTML = `
+      .anchor-card .card-bottom {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.5rem;
+      }
+
+      .anchor-card .desc {
+        font-size: 0.82rem;
+        color: var(--text);
+        line-height: 1.4;
+        flex: 1;
+      }
+
+      .anchor-card .context-tag {
+        font-size: 0.7rem;
+        padding: 0.15rem 0.5rem;
+        background: var(--muted-bg);
+        color: var(--text-muted);
+        border-radius: 12px;
+        white-space: nowrap;
+        flex-shrink: 0;
+        margin-top: 0.1rem;
+      }
+
+      .anchor-card .miss-badge {
+        font-size: 0.7rem;
+        color: var(--warning-text);
+        margin-top: 0.35rem;
+        display: none;
+      }
+      .anchor-card .miss-badge.visible {
+        display: block;
+      }
+
+      /* Quiz area */
+      .quiz-area {
+        max-width: 520px;
+        margin: 0 auto;
+      }
+
+      .quiz-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.25rem;
+      }
+
+      .streak-display {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        font-weight: 500;
+      }
+      .streak-display.hot {
+        color: var(--accent);
+      }
+
+      .quiz-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-subtle);
+        border-radius: 10px;
+        padding: 1.5rem;
+      }
+
+      .quiz-prompt {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-bottom: 0.4rem;
+      }
+
+      .quiz-metric {
+        font-size: 2.8rem;
+        font-weight: 800;
+        color: var(--accent);
+        line-height: 1;
+        margin-bottom: 0.25rem;
+      }
+
+      .quiz-question-text {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        margin-bottom: 1.5rem;
+      }
+
+      .slider-wrapper {
+        margin-bottom: 1.25rem;
+      }
+
+      .slider-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-bottom: 0.3rem;
+      }
+
+      input[type="range"] {
+        width: 100%;
+        accent-color: var(--accent);
+        cursor: pointer;
+        height: 6px;
+      }
+
+      .slider-readout {
+        text-align: center;
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-top: 0.6rem;
+        min-height: 1.8rem;
+        color: var(--text);
+      }
+      .slider-readout.placeholder {
+        color: var(--text-muted);
+        font-weight: 400;
+        font-size: 0.9rem;
+      }
+
+      .quiz-actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      button {
+        font-family: inherit;
+        font-size: 0.85rem;
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--btn-bg);
+        color: var(--text);
+        cursor: pointer;
+      }
+      button:hover {
+        background: var(--btn-hover);
+      }
+      button.primary {
+        background: var(--accent);
+        color: #fff;
+        border-color: var(--accent);
+      }
+      button.primary:hover {
+        background: var(--accent-hover);
+      }
+      button:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+      button:disabled:hover {
+        background: var(--btn-bg);
+      }
+      button.primary:disabled:hover {
+        background: var(--accent);
+      }
+
+      /* Feedback */
+      .feedback {
+        margin-top: 1rem;
+        padding: 0.9rem 1rem;
+        border-radius: 8px;
+        font-size: 0.88rem;
+        display: none;
+      }
+      .feedback.show {
+        display: block;
+      }
+      .feedback.spot-on {
+        background: var(--success-bg);
+        border: 1px solid var(--success);
+      }
+      .feedback.close {
+        background: var(--warning-bg);
+        border: 1px solid var(--warning-text);
+      }
+      .feedback.miss {
+        background: var(--error-bg);
+        border: 1px solid var(--error);
+      }
+
+      .feedback-headline {
+        font-weight: 700;
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+      }
+      .feedback.spot-on .feedback-headline {
+        color: var(--success);
+      }
+      .feedback.close .feedback-headline {
+        color: var(--warning-text);
+      }
+      .feedback.miss .feedback-headline {
+        color: var(--error);
+      }
+
+      .feedback-answer {
+        margin-bottom: 0.35rem;
+        color: var(--text);
+      }
+      .feedback-answer strong {
+        color: var(--accent);
+      }
+      .feedback-context {
+        color: var(--text-muted);
+        font-style: italic;
+      }
+      .feedback-srs {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-top: 0.4rem;
+      }
+
+      footer {
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-footer);
+        font-size: 0.8rem;
+        color: var(--text-muted);
+      }
+      footer a {
+        color: var(--text-muted);
+        text-decoration: none;
+      }
+      footer a:hover {
+        color: var(--text);
+      }
+      footer .sep {
+        margin: 0 0.4rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Measurement Sense</h1>
+    <p class="subtitle">Build intuition for metric — no math required.</p>
+
+    <div class="mode-toggle">
+      <button id="btn-browse" class="active" onclick="setMode('browse')">Browse</button>
+      <button id="btn-quiz" onclick="setMode('quiz')">Quiz</button>
+    </div>
+
+    <div class="cat-pills" id="cat-pills"></div>
+
+    <div id="browse-view"></div>
+    <div id="quiz-view" style="display: none"></div>
+
+    <footer>
+      <a href="./">← All tools</a>
+      <span class="sep">·</span>
+      <a href="https://github.com/henrythach/tools/blob/main/measurement-learning.html" target="_blank" rel="noopener"
+        >Source</a
+      >
+    </footer>
+
+    <script>
+      // ─── Data ────────────────────────────────────────────────────────────────
+
+      const CATEGORIES = [
+        { id: "temperature", label: "Temperature", sliderMin: -5, sliderMax: 550, sliderStep: 1, spotOn: 5, close: 15 },
+        { id: "weight", label: "Weight", sliderMin: 1, sliderMax: 500, sliderStep: 1, spotOn: 5, close: 15 },
+        { id: "speed", label: "Speed", sliderMin: 5, sliderMax: 100, sliderStep: 1, spotOn: 3, close: 8 },
+        { id: "distance", label: "Distance", sliderMin: 0.5, sliderMax: 400, sliderStep: 0.5, spotOn: 5, close: 20 },
+        { id: "height", label: "Height", sliderMin: 0.5, sliderMax: 80, sliderStep: 0.5, spotOn: 2, close: 5 },
+        { id: "volume", label: "Volume", sliderMin: 1, sliderMax: 150, sliderStep: 1, spotOn: 5, close: 15 },
+      ];
+
+      const ANCHORS = [
+        // Temperature
+        {
+          id: "temp--18",
+          cat: "temperature",
+          metric: -18,
+          metricUnit: "°C",
+          imperial: 0,
+          imperialUnit: "°F",
+          context: "Weather",
+          desc: "Dead of winter. Your breath is visible. Your car might not start.",
+        },
+        {
+          id: "temp-0",
+          cat: "temperature",
+          metric: 0,
+          metricUnit: "°C",
+          imperial: 32,
+          imperialUnit: "°F",
+          context: "Weather",
+          desc: "Freezing point. Roads get icy. Water turns to ice.",
+        },
+        {
+          id: "temp-10",
+          cat: "temperature",
+          metric: 10,
+          metricUnit: "°C",
+          imperial: 50,
+          imperialUnit: "°F",
+          context: "Weather",
+          desc: "Chilly. Light jacket territory. Great running weather.",
+        },
+        {
+          id: "temp-20",
+          cat: "temperature",
+          metric: 20,
+          metricUnit: "°C",
+          imperial: 68,
+          imperialUnit: "°F",
+          context: "Weather",
+          desc: "Practically perfect. Open the windows. T-shirt weather.",
+        },
+        {
+          id: "temp-30",
+          cat: "temperature",
+          metric: 30,
+          metricUnit: "°C",
+          imperial: 86,
+          imperialUnit: "°F",
+          context: "Weather",
+          desc: "Hot summer day. Sunscreen required. You'll sweat waiting for the bus.",
+        },
+        {
+          id: "temp-37",
+          cat: "temperature",
+          metric: 37,
+          metricUnit: "°C",
+          imperial: 98.6,
+          imperialUnit: "°F",
+          context: "Body",
+          desc: "Normal human body temperature. If the air outside is this hot, stay inside.",
+        },
+        {
+          id: "temp-100",
+          cat: "temperature",
+          metric: 100,
+          metricUnit: "°C",
+          imperial: 212,
+          imperialUnit: "°F",
+          context: "Cooking",
+          desc: "Boiling water. Pasta goes in here. Also how tea should be made.",
+        },
+        {
+          id: "temp-175",
+          cat: "temperature",
+          metric: 175,
+          metricUnit: "°C",
+          imperial: 350,
+          imperialUnit: "°F",
+          context: "Cooking",
+          desc: "Standard cookie oven. Most baking happens around here.",
+        },
+        {
+          id: "temp-220",
+          cat: "temperature",
+          metric: 220,
+          metricUnit: "°C",
+          imperial: 425,
+          imperialUnit: "°F",
+          context: "Cooking",
+          desc: "Pizza oven. High enough for a crispy crust.",
+        },
+
+        // Weight
+        {
+          id: "weight-1",
+          cat: "weight",
+          metric: 1,
+          metricUnit: "kg",
+          imperial: 2.2,
+          imperialUnit: "lbs",
+          context: "Everyday",
+          desc: "A liter of water. A small pineapple. Very manageable.",
+        },
+        {
+          id: "weight-5",
+          cat: "weight",
+          metric: 5,
+          metricUnit: "kg",
+          imperial: 11,
+          imperialUnit: "lbs",
+          context: "Everyday",
+          desc: "A bag of potatoes. Heavier than it looks when you're carrying it home.",
+        },
+        {
+          id: "weight-23",
+          cat: "weight",
+          metric: 23,
+          metricUnit: "kg",
+          imperial: 50,
+          imperialUnit: "lbs",
+          context: "Travel",
+          desc: "The max checked-bag limit on most US airlines. Pack light.",
+        },
+        {
+          id: "weight-60",
+          cat: "weight",
+          metric: 60,
+          metricUnit: "kg",
+          imperial: 132,
+          imperialUnit: "lbs",
+          context: "Body",
+          desc: "Close to the global average for adult women (WHO data).",
+        },
+        {
+          id: "weight-70",
+          cat: "weight",
+          metric: 70,
+          metricUnit: "kg",
+          imperial: 154,
+          imperialUnit: "lbs",
+          context: "Body",
+          desc: "Close to the global average for adult men (WHO data).",
+        },
+        {
+          id: "weight-80",
+          cat: "weight",
+          metric: 80,
+          metricUnit: "kg",
+          imperial: 176,
+          imperialUnit: "lbs",
+          context: "Body",
+          desc: "A heavier adult. About the weight of a fully loaded long-distance hiker.",
+        },
+        {
+          id: "weight-100",
+          cat: "weight",
+          metric: 100,
+          metricUnit: "kg",
+          imperial: 220,
+          imperialUnit: "lbs",
+          context: "Body",
+          desc: "A notably heavy adult — or a large motorcycle engine.",
+        },
+
+        // Speed
+        {
+          id: "speed-30",
+          cat: "speed",
+          metric: 30,
+          metricUnit: "km/h",
+          imperial: 19,
+          imperialUnit: "mph",
+          context: "Driving",
+          desc: "School zone speed. Agonizingly slow when you're in a hurry.",
+        },
+        {
+          id: "speed-50",
+          cat: "speed",
+          metric: 50,
+          metricUnit: "km/h",
+          imperial: 31,
+          imperialUnit: "mph",
+          context: "Driving",
+          desc: "City speed limit in most countries. Feels like crawling on US roads.",
+        },
+        {
+          id: "speed-100",
+          cat: "speed",
+          metric: 100,
+          metricUnit: "km/h",
+          imperial: 62,
+          imperialUnit: "mph",
+          context: "Driving",
+          desc: "Highway cruising in Europe and Canada. Just under 65 mph.",
+        },
+        {
+          id: "speed-120",
+          cat: "speed",
+          metric: 120,
+          metricUnit: "km/h",
+          imperial: 75,
+          imperialUnit: "mph",
+          context: "Driving",
+          desc: "Fast highway. Common limit in Germany and parts of Australia.",
+        },
+
+        // Long Distance
+        {
+          id: "dist-1",
+          cat: "distance",
+          metric: 1,
+          metricUnit: "km",
+          imperial: 0.6,
+          imperialUnit: "miles",
+          context: "Walking",
+          desc: "About 10 minutes of walking. Roughly 3 city blocks.",
+        },
+        {
+          id: "dist-5",
+          cat: "distance",
+          metric: 5,
+          metricUnit: "km",
+          imperial: 3.1,
+          imperialUnit: "miles",
+          context: "Running",
+          desc: "A 5K race. About 30 minutes for a casual runner.",
+        },
+        {
+          id: "dist-42",
+          cat: "distance",
+          metric: 42,
+          metricUnit: "km",
+          imperial: 26.2,
+          imperialUnit: "miles",
+          context: "Running",
+          desc: "A marathon. One of those things people add to their LinkedIn bio.",
+        },
+        {
+          id: "dist-100",
+          cat: "distance",
+          metric: 100,
+          metricUnit: "km",
+          imperial: 62,
+          imperialUnit: "miles",
+          context: "Driving",
+          desc: "About an hour on the highway. The distance from NYC to Philadelphia.",
+        },
+        {
+          id: "dist-500",
+          cat: "distance",
+          metric: 500,
+          metricUnit: "km",
+          imperial: 311,
+          imperialUnit: "miles",
+          context: "Driving",
+          desc: "Half a day of driving. NYC to Boston and back.",
+        },
+
+        // Height / Short Distance
+        {
+          id: "height-2.5",
+          cat: "height",
+          metric: 2.5,
+          metricUnit: "cm",
+          imperial: 1,
+          imperialUnit: "in",
+          context: "Everyday",
+          desc: "Your thumb width. One inch, exactly.",
+        },
+        {
+          id: "height-15",
+          cat: "height",
+          metric: 15,
+          metricUnit: "cm",
+          imperial: 6,
+          imperialUnit: "in",
+          context: "Everyday",
+          desc: "A standard pen length. Half a ruler.",
+        },
+        {
+          id: "height-30",
+          cat: "height",
+          metric: 30,
+          metricUnit: "cm",
+          imperial: 12,
+          imperialUnit: "in",
+          context: "Everyday",
+          desc: "One foot. The full length of a standard ruler.",
+        },
+        {
+          id: "height-163",
+          cat: "height",
+          metric: 163,
+          metricUnit: "cm",
+          imperial: 64,
+          imperialUnit: "in (5'4\")",
+          context: "Height",
+          desc: "Close to the global average height for adult women (WHO data).",
+        },
+        {
+          id: "height-170",
+          cat: "height",
+          metric: 170,
+          metricUnit: "cm",
+          imperial: 67,
+          imperialUnit: "in (5'7\")",
+          context: "Height",
+          desc: "Midpoint between the global averages for men and women.",
+        },
+        {
+          id: "height-175",
+          cat: "height",
+          metric: 175,
+          metricUnit: "cm",
+          imperial: 69,
+          imperialUnit: "in (5'9\")",
+          context: "Height",
+          desc: "Close to the global average height for adult men (WHO data).",
+        },
+        {
+          id: "height-183",
+          cat: "height",
+          metric: 183,
+          metricUnit: "cm",
+          imperial: 72,
+          imperialUnit: "in (6'0\")",
+          context: "Height",
+          desc: "Notably tall. About the minimum height to play in the NBA.",
+        },
+
+        // Volume
+        {
+          id: "vol-0.25",
+          cat: "volume",
+          metric: 0.25,
+          metricUnit: "L",
+          imperial: 8.5,
+          imperialUnit: "fl oz",
+          context: "Drinks",
+          desc: "A standard glass of water. What your doctor says to drink 8 of per day.",
+        },
+        {
+          id: "vol-0.5",
+          cat: "volume",
+          metric: 0.5,
+          metricUnit: "L",
+          imperial: 17,
+          imperialUnit: "fl oz",
+          context: "Drinks",
+          desc: "A small water bottle. Fits in most cup holders.",
+        },
+        {
+          id: "vol-1",
+          cat: "volume",
+          metric: 1,
+          metricUnit: "L",
+          imperial: 34,
+          imperialUnit: "fl oz",
+          context: "Drinks",
+          desc: "A big bottle. A little more than a quart. Great for long hikes.",
+        },
+        {
+          id: "vol-2",
+          cat: "volume",
+          metric: 2,
+          metricUnit: "L",
+          imperial: 67.6,
+          imperialUnit: "fl oz",
+          context: "Drinks",
+          desc: "The classic soda bottle. About half a gallon.",
+        },
+        {
+          id: "vol-3.8",
+          cat: "volume",
+          metric: 3.8,
+          metricUnit: "L",
+          imperial: 128,
+          imperialUnit: "fl oz",
+          context: "Drinks",
+          desc: "A gallon of milk. Four of those big bottles.",
+        },
+      ];
+
+      // ─── State ───────────────────────────────────────────────────────────────
+
+      let mode = "browse";
+      let activeCat = "temperature";
+      let quizStreak = 0;
+      let quizHistory = [];
+      let currentAnchor = null;
+      let revealed = false;
+      const missCount = {}; // { anchorId: n } — session only
+
+      // ─── Init ────────────────────────────────────────────────────────────────
+
+      function init() {
+        const hash = location.hash.replace("#", "");
+        if (hash) {
+          const [m, c] = hash.split("-");
+          if (m === "browse" || m === "quiz") mode = m;
+          if (c && CATEGORIES.find((x) => x.id === c)) activeCat = c;
+        }
+        renderPills();
+        renderMode();
+      }
+
+      function saveHash() {
+        location.hash = `${mode}-${activeCat}`;
+      }
+
+      // ─── Mode toggle ─────────────────────────────────────────────────────────
+
+      function setMode(m) {
+        mode = m;
+        document.getElementById("btn-browse").classList.toggle("active", m === "browse");
+        document.getElementById("btn-quiz").classList.toggle("active", m === "quiz");
+        document.getElementById("browse-view").style.display = m === "browse" ? "" : "none";
+        document.getElementById("quiz-view").style.display = m === "quiz" ? "" : "none";
+        saveHash();
+        if (m === "browse") renderBrowse();
+        if (m === "quiz") {
+          quizHistory = [];
+          renderQuiz();
+        }
+      }
+
+      function renderMode() {
+        document.getElementById("browse-view").style.display = mode === "browse" ? "" : "none";
+        document.getElementById("quiz-view").style.display = mode === "quiz" ? "" : "none";
+        document.getElementById("btn-browse").classList.toggle("active", mode === "browse");
+        document.getElementById("btn-quiz").classList.toggle("active", mode === "quiz");
+        if (mode === "browse") renderBrowse();
+        if (mode === "quiz") renderQuiz();
+      }
+
+      // ─── Category pills ──────────────────────────────────────────────────────
+
+      function renderPills() {
+        const wrap = document.getElementById("cat-pills");
+        wrap.innerHTML = "";
+        CATEGORIES.forEach((cat) => {
+          const btn = document.createElement("button");
+          btn.className = "cat-pill" + (cat.id === activeCat ? " active" : "");
+          btn.textContent = cat.label;
+          btn.onclick = () => selectCat(cat.id);
+          wrap.appendChild(btn);
+        });
+      }
+
+      function selectCat(catId) {
+        activeCat = catId;
+        renderPills();
+        saveHash();
+        if (mode === "browse") renderBrowse();
+        if (mode === "quiz") {
+          quizHistory = [];
+          renderQuiz();
+        }
+      }
+
+      // ─── Browse ──────────────────────────────────────────────────────────────
+
+      function renderBrowse() {
+        const anchors = ANCHORS.filter((a) => a.cat === activeCat);
+        const grid = document.getElementById("browse-view");
+        grid.innerHTML = "";
+        const wrap = document.createElement("div");
+        wrap.className = "browse-grid";
+        anchors.forEach((a) => {
+          const card = document.createElement("div");
+          card.className = "anchor-card";
+          card.id = `browse-${a.id}`;
+          card.innerHTML = `
           <div class="metric-val">${a.metric} <span style="font-size:1rem;font-weight:500">${a.metricUnit}</span></div>
           <div class="imperial-val">${a.imperial} ${a.imperialUnit}</div>
           <div class="card-bottom">
@@ -517,86 +915,85 @@
             <span class="context-tag">${a.context}</span>
           </div>
         `;
-        wrap.appendChild(card);
-      });
-      grid.appendChild(wrap);
-      refreshMissBadges();
-    }
+          wrap.appendChild(card);
+        });
+        grid.appendChild(wrap);
+        refreshMissBadges();
+      }
 
-    function refreshMissBadges() {
-      ANCHORS.forEach(a => {
-        const el = document.getElementById(`miss-${a.id}`);
-        if (!el) return;
-        const n = missCount[a.id] || 0;
-        if (n > 0) {
-          el.textContent = `· missed ${n} time${n === 1 ? '' : 's'} this session`;
-          el.classList.add('visible');
-        } else {
-          el.classList.remove('visible');
+      function refreshMissBadges() {
+        ANCHORS.forEach((a) => {
+          const el = document.getElementById(`miss-${a.id}`);
+          if (!el) return;
+          const n = missCount[a.id] || 0;
+          if (n > 0) {
+            el.textContent = `· missed ${n} time${n === 1 ? "" : "s"} this session`;
+            el.classList.add("visible");
+          } else {
+            el.classList.remove("visible");
+          }
+        });
+      }
+
+      // ─── Quiz ────────────────────────────────────────────────────────────────
+
+      function getPool() {
+        return ANCHORS.filter((a) => a.cat === activeCat);
+      }
+
+      function pickAnchor() {
+        const pool = getPool();
+        if (pool.length === 0) return null;
+        // Exclude the last shown anchor if possible to avoid immediate repeats
+        const last = quizHistory[quizHistory.length - 1];
+        const available = pool.length > 1 ? pool.filter((a) => a.id !== last) : pool;
+        // Weighted by missCount
+        const weights = available.map((a) => 1 + (missCount[a.id] || 0));
+        const total = weights.reduce((s, w) => s + w, 0);
+        let r = Math.random() * total;
+        for (let i = 0; i < available.length; i++) {
+          r -= weights[i];
+          if (r <= 0) return available[i];
         }
-      });
-    }
-
-    // ─── Quiz ────────────────────────────────────────────────────────────────
-
-    function getPool() {
-      return ANCHORS.filter(a => a.cat === activeCat);
-    }
-
-    function pickAnchor() {
-      const pool = getPool();
-      if (pool.length === 0) return null;
-      // Exclude the last shown anchor if possible to avoid immediate repeats
-      const last = quizHistory[quizHistory.length - 1];
-      const available = pool.length > 1 ? pool.filter(a => a.id !== last) : pool;
-      // Weighted by missCount
-      const weights = available.map(a => 1 + (missCount[a.id] || 0));
-      const total = weights.reduce((s, w) => s + w, 0);
-      let r = Math.random() * total;
-      for (let i = 0; i < available.length; i++) {
-        r -= weights[i];
-        if (r <= 0) return available[i];
-      }
-      return available[available.length - 1];
-    }
-
-    function renderQuiz() {
-      const qv = document.getElementById('quiz-view');
-      qv.innerHTML = '';
-
-      const cat = CATEGORIES.find(c => c.id === activeCat);
-      currentAnchor = pickAnchor();
-      revealed = false;
-
-      if (!currentAnchor) {
-        qv.innerHTML = '<p style="color:var(--text-muted)">No anchors in this category yet.</p>';
-        return;
+        return available[available.length - 1];
       }
 
-      quizHistory.push(currentAnchor.id);
-      if (quizHistory.length > 10) quizHistory.shift();
-      sliderMoved = false;
+      function renderQuiz() {
+        const qv = document.getElementById("quiz-view");
+        qv.innerHTML = "";
 
-      const streakLabel = quizStreak >= 2
-        ? `🔥 ${quizStreak} in a row`
-        : quizStreak === 1 ? '✓ 1 correct' : 'Start guessing';
+        const cat = CATEGORIES.find((c) => c.id === activeCat);
+        currentAnchor = pickAnchor();
+        revealed = false;
 
-      qv.innerHTML = `
+        if (!currentAnchor) {
+          qv.innerHTML = '<p style="color:var(--text-muted)">No anchors in this category yet.</p>';
+          return;
+        }
+
+        quizHistory.push(currentAnchor.id);
+        if (quizHistory.length > 10) quizHistory.shift();
+        sliderMoved = false;
+
+        const streakLabel =
+          quizStreak >= 2 ? `🔥 ${quizStreak} in a row` : quizStreak === 1 ? "✓ 1 correct" : "Start guessing";
+
+        qv.innerHTML = `
         <div class="quiz-area">
           <div class="quiz-header">
             <div></div>
-            <div class="streak-display ${quizStreak >= 2 ? 'hot' : ''}" id="streak-display">${streakLabel}</div>
+            <div class="streak-display ${quizStreak >= 2 ? "hot" : ""}" id="streak-display">${streakLabel}</div>
           </div>
 
           <div class="quiz-card">
-            <div class="quiz-prompt">What is this in ${currentAnchor.imperialUnit.replace(/\(.*\)/, '').trim()}?</div>
+            <div class="quiz-prompt">What is this in ${currentAnchor.imperialUnit.replace(/\(.*\)/, "").trim()}?</div>
             <div class="quiz-metric">${currentAnchor.metric} ${currentAnchor.metricUnit}</div>
             <div class="quiz-question-text">Drag the slider to your best guess, then hit Reveal.</div>
 
             <div class="slider-wrapper">
               <div class="slider-labels">
-                <span>${cat.sliderMin} ${currentAnchor.imperialUnit.replace(/\(.*\)/, '').trim()}</span>
-                <span>${cat.sliderMax} ${currentAnchor.imperialUnit.replace(/\(.*\)/, '').trim()}</span>
+                <span>${cat.sliderMin} ${currentAnchor.imperialUnit.replace(/\(.*\)/, "").trim()}</span>
+                <span>${cat.sliderMax} ${currentAnchor.imperialUnit.replace(/\(.*\)/, "").trim()}</span>
               </div>
               <input type="range" id="quiz-slider"
                 min="${cat.sliderMin}" max="${cat.sliderMax}" step="${cat.sliderStep}"
@@ -615,90 +1012,93 @@
           </div>
         </div>
       `;
-    }
-
-    let sliderMoved = false;
-
-    function renderQuizReset() { sliderMoved = false; }
-
-    function onSliderMove() {
-      const slider = document.getElementById('quiz-slider');
-      const readout = document.getElementById('slider-readout');
-      const cat = CATEGORIES.find(c => c.id === activeCat);
-      const val = parseFloat(slider.value);
-      const unit = currentAnchor.imperialUnit.replace(/\(.*\)/, '').trim();
-      readout.textContent = `${val} ${unit}`;
-      readout.classList.remove('placeholder');
-      if (!sliderMoved) {
-        sliderMoved = true;
-        document.getElementById('reveal-btn').disabled = false;
-      }
-    }
-
-    function reveal() {
-      if (revealed) return;
-      revealed = true;
-      sliderMoved = false;
-
-      const slider = document.getElementById('quiz-slider');
-      const guess = parseFloat(slider.value);
-      const correct = currentAnchor.imperial;
-      const cat = CATEGORIES.find(c => c.id === activeCat);
-      const diff = Math.abs(guess - correct);
-
-      let level, headline;
-      if (diff <= cat.spotOn) {
-        level = 'spot-on';
-        headline = 'Spot on!';
-        quizStreak++;
-      } else if (diff <= cat.close) {
-        level = 'close';
-        headline = 'Pretty close!';
-        quizStreak++;
-      } else {
-        level = 'miss';
-        headline = 'Not quite.';
-        quizStreak = 0;
-        missCount[currentAnchor.id] = (missCount[currentAnchor.id] || 0) + 1;
       }
 
-      const unit = currentAnchor.imperialUnit.replace(/\(.*\)/, '').trim();
-      const missNote = level === 'miss'
-        ? `<div class="feedback-srs">Missed ${missCount[currentAnchor.id]} time${missCount[currentAnchor.id] === 1 ? '' : 's'} — you'll see this one more often.</div>`
-        : '';
+      let sliderMoved = false;
 
-      const fb = document.getElementById('feedback');
-      fb.className = `feedback show ${level}`;
-      fb.innerHTML = `
+      function renderQuizReset() {
+        sliderMoved = false;
+      }
+
+      function onSliderMove() {
+        const slider = document.getElementById("quiz-slider");
+        const readout = document.getElementById("slider-readout");
+        const cat = CATEGORIES.find((c) => c.id === activeCat);
+        const val = parseFloat(slider.value);
+        const unit = currentAnchor.imperialUnit.replace(/\(.*\)/, "").trim();
+        readout.textContent = `${val} ${unit}`;
+        readout.classList.remove("placeholder");
+        if (!sliderMoved) {
+          sliderMoved = true;
+          document.getElementById("reveal-btn").disabled = false;
+        }
+      }
+
+      function reveal() {
+        if (revealed) return;
+        revealed = true;
+        sliderMoved = false;
+
+        const slider = document.getElementById("quiz-slider");
+        const guess = parseFloat(slider.value);
+        const correct = currentAnchor.imperial;
+        const cat = CATEGORIES.find((c) => c.id === activeCat);
+        const diff = Math.abs(guess - correct);
+
+        let level, headline;
+        if (diff <= cat.spotOn) {
+          level = "spot-on";
+          headline = "Spot on!";
+          quizStreak++;
+        } else if (diff <= cat.close) {
+          level = "close";
+          headline = "Pretty close!";
+          quizStreak++;
+        } else {
+          level = "miss";
+          headline = "Not quite.";
+          quizStreak = 0;
+          missCount[currentAnchor.id] = (missCount[currentAnchor.id] || 0) + 1;
+        }
+
+        const unit = currentAnchor.imperialUnit.replace(/\(.*\)/, "").trim();
+        const missNote =
+          level === "miss"
+            ? `<div class="feedback-srs">Missed ${missCount[currentAnchor.id]} time${missCount[currentAnchor.id] === 1 ? "" : "s"} — you'll see this one more often.</div>`
+            : "";
+
+        const fb = document.getElementById("feedback");
+        fb.className = `feedback show ${level}`;
+        fb.innerHTML = `
         <div class="feedback-headline">${headline}</div>
         <div class="feedback-answer">The answer is <strong>${correct} ${currentAnchor.imperialUnit}</strong>. You guessed ${guess} ${unit}.</div>
         <div class="feedback-context">${currentAnchor.desc}</div>
         ${missNote}
       `;
 
-      document.getElementById('reveal-btn').style.display = 'none';
-      document.getElementById('next-btn').style.display = '';
+        document.getElementById("reveal-btn").style.display = "none";
+        document.getElementById("next-btn").style.display = "";
 
-      // Update streak display
-      const sd = document.getElementById('streak-display');
-      if (quizStreak >= 2) {
-        sd.textContent = `🔥 ${quizStreak} in a row`;
-        sd.className = 'streak-display hot';
-      } else if (quizStreak === 1) {
-        sd.textContent = '✓ 1 correct';
-        sd.className = 'streak-display';
-      } else {
-        sd.textContent = 'Keep going!';
-        sd.className = 'streak-display';
+        // Update streak display
+        const sd = document.getElementById("streak-display");
+        if (quizStreak >= 2) {
+          sd.textContent = `🔥 ${quizStreak} in a row`;
+          sd.className = "streak-display hot";
+        } else if (quizStreak === 1) {
+          sd.textContent = "✓ 1 correct";
+          sd.className = "streak-display";
+        } else {
+          sd.textContent = "Keep going!";
+          sd.className = "streak-display";
+        }
       }
-    }
 
-    function nextQuestion() {
-      renderQuiz();
-    }
+      function nextQuestion() {
+        renderQuiz();
+      }
 
-    // ─── Boot ─────────────────────────────────────────────────────────────────
-    init();
-  </script>
-</body>
+      // ─── Boot ─────────────────────────────────────────────────────────────────
+      init();
+    </script>
+  </body>
 </html>

@@ -1,948 +1,1097 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Retirement Calculator</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3/dist/chartjs-plugin-annotation.min.js"></script>
-  <script src="https://unpkg.com/@popperjs/core@2"></script>
-  <script src="https://unpkg.com/tippy.js@6"></script>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Retirement Calculator</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3/dist/chartjs-plugin-annotation.min.js"></script>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-    :root {
-      --bg: #fff;
-      --text: #1a1a1a;
-      --text-muted: #666;
-      --border: #ccc;
-      --border-strong: #ccc;
-      --border-subtle: #e0e0e0;
-      --border-footer: #eee;
-      --input-bg: #fff;
-      --btn-bg: #fff;
-      --btn-hover: #f5f5f5;
-      --accent: #4a90d9;
-      --accent-hover: #3a7bc8;
-      --card-bg: #f8f9fa;
-      --muted-bg: #f0f0f0;
-      --success: #27ae60;
-      --success-bg: #d4edda;
-      --error: #c0392b;
-      --error-bg: #f8d7da;
-      --chart-savings: rgba(74, 144, 217, 0.25);
-      --chart-savings-line: #4a90d9;
-      --chart-target: #e67e22;
-      --chart-milestone: rgba(0, 0, 0, 0.15);
-      --chart-milestone-text: #999;
-      --chart-grid: rgba(0, 0, 0, 0.06);
-      --chart-text: #666;
-      --slider-track: #ddd;
-      --slider-thumb: var(--accent);
-    }
-
-    @media (prefers-color-scheme: dark) {
       :root {
-        --bg: #1a1a1a;
-        --text: #e8e8e8;
-        --text-muted: #999;
-        --border: #444;
-        --border-strong: #555;
-        --border-subtle: #333;
-        --border-footer: #2e2e2e;
-        --input-bg: #252525;
-        --btn-bg: #2a2a2a;
-        --btn-hover: #333;
-        --accent: #5a9fd4;
-        --accent-hover: #4a8fc4;
-        --card-bg: #252525;
-        --muted-bg: #222;
-        --success: #2ecc71;
-        --success-bg: #1a3a2a;
-        --error: #e05c4b;
-        --error-bg: #3a1a1a;
-        --chart-savings: rgba(90, 159, 212, 0.2);
-        --chart-savings-line: #5a9fd4;
-        --chart-target: #f0a050;
-        --chart-milestone: rgba(255, 255, 255, 0.1);
-        --chart-milestone-text: #666;
-        --chart-grid: rgba(255, 255, 255, 0.06);
-        --chart-text: #999;
-        --slider-track: #444;
+        --bg: #fff;
+        --text: #1a1a1a;
+        --text-muted: #666;
+        --border: #ccc;
+        --border-strong: #ccc;
+        --border-subtle: #e0e0e0;
+        --border-footer: #eee;
+        --input-bg: #fff;
+        --btn-bg: #fff;
+        --btn-hover: #f5f5f5;
+        --accent: #4a90d9;
+        --accent-hover: #3a7bc8;
+        --card-bg: #f8f9fa;
+        --muted-bg: #f0f0f0;
+        --success: #27ae60;
+        --success-bg: #d4edda;
+        --error: #c0392b;
+        --error-bg: #f8d7da;
+        --chart-savings: rgba(74, 144, 217, 0.25);
+        --chart-savings-line: #4a90d9;
+        --chart-target: #e67e22;
+        --chart-milestone: rgba(0, 0, 0, 0.15);
+        --chart-milestone-text: #999;
+        --chart-grid: rgba(0, 0, 0, 0.06);
+        --chart-text: #666;
+        --slider-track: #ddd;
+        --slider-thumb: var(--accent);
       }
-    }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      padding: 1.5rem;
-      color: var(--text);
-      background: var(--bg);
-      line-height: 1.5;
-      max-width: 700px;
-      margin: 0 auto;
-    }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #1a1a1a;
+          --text: #e8e8e8;
+          --text-muted: #999;
+          --border: #444;
+          --border-strong: #555;
+          --border-subtle: #333;
+          --border-footer: #2e2e2e;
+          --input-bg: #252525;
+          --btn-bg: #2a2a2a;
+          --btn-hover: #333;
+          --accent: #5a9fd4;
+          --accent-hover: #4a8fc4;
+          --card-bg: #252525;
+          --muted-bg: #222;
+          --success: #2ecc71;
+          --success-bg: #1a3a2a;
+          --error: #e05c4b;
+          --error-bg: #3a1a1a;
+          --chart-savings: rgba(90, 159, 212, 0.2);
+          --chart-savings-line: #5a9fd4;
+          --chart-target: #f0a050;
+          --chart-milestone: rgba(255, 255, 255, 0.1);
+          --chart-milestone-text: #666;
+          --chart-grid: rgba(255, 255, 255, 0.06);
+          --chart-text: #999;
+          --slider-track: #444;
+        }
+      }
 
-    h1 { font-size: 1.4rem; margin-bottom: 0.25rem; }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        padding: 1.5rem;
+        color: var(--text);
+        background: var(--bg);
+        line-height: 1.5;
+        max-width: 700px;
+        margin: 0 auto;
+      }
 
-    .subtitle {
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      margin-bottom: 1.25rem;
-    }
+      h1 {
+        font-size: 1.4rem;
+        margin-bottom: 0.25rem;
+      }
 
-    .layout { display: flex; flex-direction: column; }
+      .subtitle {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        margin-bottom: 1.25rem;
+      }
 
-    .input-group { margin-bottom: 1rem; }
-
-    .input-group > label,
-    .label-row label {
-      display: inline;
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-bottom: 0;
-    }
-
-    .label-wrap {
-      display: block;
-      margin-bottom: 0.4rem;
-    }
-
-    .input-row {
-      display: flex;
-      gap: 0;
-      align-items: stretch;
-    }
-
-    .input-prefix, .input-suffix {
-      display: flex;
-      align-items: center;
-      padding: 0 0.6rem;
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      background: var(--muted-bg);
-      border: 1px solid var(--border);
-      white-space: nowrap;
-    }
-
-    .input-prefix { border-radius: 6px 0 0 6px; border-right: none; }
-    .input-suffix { border-radius: 0 6px 6px 0; border-left: none; }
-
-    .input-row input[type="text"],
-    .input-row input[type="number"] {
-      font-family: inherit;
-      font-size: 1rem;
-      padding: 0.5rem 0.75rem;
-      border: 1px solid var(--border);
-      background: var(--input-bg);
-      color: var(--text);
-      flex: 1;
-      min-width: 0;
-    }
-
-    .input-row input[type="text"]:focus,
-    .input-row input[type="number"]:focus {
-      outline: 2px solid var(--accent);
-      outline-offset: -1px;
-      z-index: 1;
-    }
-
-    .input-row input:only-child { border-radius: 6px; }
-    .has-prefix input { border-radius: 0 6px 6px 0; }
-    .has-suffix input { border-radius: 6px 0 0 6px; }
-    .has-prefix.has-suffix input { border-radius: 0; }
-
-    .input-row.has-error input { border-color: var(--error); }
-    .input-row.has-error input:focus { outline-color: var(--error); }
-    .input-row.has-error .input-prefix,
-    .input-row.has-error .input-suffix { border-color: var(--error); }
-
-    .helper-text {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      margin-top: 0.2rem;
-      min-height: 1.1em;
-    }
-
-    .helper-text.error { color: var(--error); }
-
-    .info-icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      font-size: 0.55rem;
-      font-style: italic;
-      font-weight: 700;
-      font-family: Georgia, serif;
-      cursor: help;
-      margin-left: 0.3rem;
-      vertical-align: middle;
-      flex-shrink: 0;
-    }
-
-    .label-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.4rem;
-    }
-
-    .label-row label { margin-bottom: 0; }
-
-    .toggle-sm {
-      display: flex;
-      gap: 0;
-      flex-shrink: 0;
-    }
-
-    .toggle-sm button {
-      font-family: inherit;
-      font-size: 0.7rem;
-      padding: 0.2rem 0.5rem;
-      cursor: pointer;
-      border: 1px solid var(--border);
-      background: var(--btn-bg);
-      color: var(--text-muted);
-      transition: background 0.15s, color 0.15s;
-    }
-
-    .toggle-sm button:first-child { border-radius: 4px 0 0 4px; border-right: none; }
-    .toggle-sm button:last-child { border-radius: 0 4px 4px 0; }
-
-    .toggle-sm button.active {
-      background: var(--accent);
-      color: #fff;
-      border-color: var(--accent);
-    }
-
-    .toggle-sm button:not(.active):hover { background: var(--btn-hover); }
-
-    /* --- Sliders --- */
-
-    .slider-row {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-top: 0.35rem;
-    }
-
-    input[type="range"] {
-      -webkit-appearance: none;
-      appearance: none;
-      flex: 1;
-      height: 4px;
-      border-radius: 2px;
-      background: var(--slider-track);
-      outline: none;
-      cursor: pointer;
-    }
-
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: var(--slider-thumb);
-      border: none;
-      cursor: pointer;
-    }
-
-    input[type="range"]::-moz-range-thumb {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: var(--slider-thumb);
-      border: none;
-      cursor: pointer;
-    }
-
-    .slider-value {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      min-width: 3.5em;
-      text-align: right;
-      white-space: nowrap;
-    }
-
-    /* --- Summary --- */
-
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0.75rem;
-      margin-bottom: 1.25rem;
-    }
-
-    .summary-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-subtle);
-      border-radius: 6px;
-      padding: 0.75rem;
-      text-align: center;
-    }
-
-    .summary-card-label {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-      margin-bottom: 0.25rem;
-    }
-
-    .summary-card-value {
-      font-size: 1.15rem;
-      font-weight: 700;
-    }
-
-    .summary-card.surplus { border-bottom: 3px solid var(--success); }
-    .summary-card.surplus .summary-card-value { color: var(--success); }
-    .summary-card.shortfall { border-bottom: 3px solid var(--error); }
-    .summary-card.shortfall .summary-card-value { color: var(--error); }
-
-    .warning {
-      font-size: 0.8rem;
-      color: var(--error);
-      margin-bottom: 1rem;
-    }
-
-    .chart-wrap {
-      position: relative;
-      height: 350px;
-      margin-bottom: 1.5rem;
-    }
-
-    /* --- Advanced settings --- */
-
-    details.settings { margin-bottom: 1rem; }
-
-    details.settings summary {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      cursor: pointer;
-      user-select: none;
-    }
-
-    details.settings summary:hover { color: var(--text); }
-
-    .settings-body {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-      margin-top: 0.75rem;
-    }
-
-    .settings-body .input-group { margin-bottom: 0.5rem; width: 100%; }
-
-    .settings-body label {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-
-    .settings-body .input-row {
-      width: 100%;
-    }
-
-    .settings-body .input-row input[type="number"] {
-      font-size: 0.85rem;
-      padding: 0.3rem 0.5rem;
-    }
-
-    .settings-body .input-prefix, .settings-body .input-suffix {
-      font-size: 0.8rem;
-      padding: 0 0.4rem;
-    }
-
-    .checkbox-row {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      margin-top: 0.25rem;
-    }
-
-    .checkbox-row input[type="checkbox"] { margin: 0; }
-
-    @media (max-width: 500px) {
-      .summary-grid { grid-template-columns: 1fr; }
-    }
-
-    @media (min-width: 900px) {
-      body { max-width: 1100px; }
       .layout {
-        flex-direction: row;
-        gap: 2rem;
-        align-items: flex-start;
+        display: flex;
+        flex-direction: column;
       }
-      .panel-inputs {
-        flex: 0 0 340px;
-        position: sticky;
-        top: 1.5rem;
-        max-height: calc(100vh - 3rem);
-        overflow-y: auto;
+
+      .input-group {
+        margin-bottom: 1rem;
       }
-      .panel-output { flex: 1; min-width: 0; }
-      .chart-wrap { height: 400px; }
-    }
 
-    footer {
-      padding-top: 1rem;
-      border-top: 1px solid var(--border-footer);
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-
-    footer a { color: var(--text-muted); text-decoration: none; }
-    footer a:hover { color: var(--text); }
-  </style>
-</head>
-<body>
-  <h1>Retirement Calculator</h1>
-  <p class="subtitle">See if you're on track for retirement with instant visual feedback.</p>
-
-  <div class="layout">
-    <div class="panel-inputs">
-      <div class="input-group">
-        <div class="label-wrap">
-          <label for="currentAge">Current Age</label>
-          <span class="info-icon" data-tippy-content="Your current age. The calculator projects from this age to your life expectancy.">i</span>
-        </div>
-        <div class="input-row">
-          <input type="number" id="currentAge" min="18" max="99" step="1">
-        </div>
-      </div>
-
-      <div class="input-group">
-        <div class="label-wrap">
-          <label for="annualIncome">Annual Pre-Tax Income</label>
-          <span class="info-icon" data-tippy-content="Your total annual income before taxes. Used to calculate contribution percentages and retirement budget when set as a percentage.">i</span>
-        </div>
-        <div class="input-row has-prefix">
-          <span class="input-prefix">$</span>
-          <input type="text" inputmode="numeric" id="annualIncome">
-        </div>
-      </div>
-
-      <div class="input-group">
-        <div class="label-wrap">
-          <label for="currentSavings">Current Retirement Savings</label>
-          <span class="info-icon" data-tippy-content="Total balance across all retirement accounts (401k, IRA, Roth IRA, etc.) as of today.">i</span>
-        </div>
-        <div class="input-row has-prefix">
-          <span class="input-prefix">$</span>
-          <input type="text" inputmode="numeric" id="currentSavings">
-        </div>
-      </div>
-
-      <div class="input-group">
-        <div class="label-row">
-          <div>
-            <label for="contribution">Contribution</label>
-            <span class="info-icon" data-tippy-content="How much you contribute to retirement accounts each period. Financial advisors generally recommend saving 10&ndash;15% of your pre-tax income, including any employer match.">i</span>
-          </div>
-          <div class="toggle-sm">
-            <button id="contrib-monthly">Monthly</button>
-            <button id="contrib-annual">Annual</button>
-          </div>
-        </div>
-        <div class="input-row has-prefix" id="contrib-row">
-          <span class="input-prefix">$</span>
-          <input type="text" inputmode="numeric" id="contribution">
-        </div>
-        <div class="slider-row">
-          <input type="range" id="contrib-slider" min="0" max="100" step="1">
-        </div>
-        <div class="helper-text" id="contrib-helper"></div>
-      </div>
-
-      <div class="input-group">
-        <div class="label-row">
-          <div>
-            <label for="retirementBudget">Monthly Budget in Retirement</label>
-            <span class="info-icon" data-tippy-content="How much you plan to spend monthly in retirement. A common guideline is 70&ndash;80% of your pre-retirement income, but this varies based on lifestyle, location, and whether your home is paid off.">i</span>
-          </div>
-          <div class="toggle-sm">
-            <button id="budget-percent">% of Income</button>
-            <button id="budget-dollar">$ Amount</button>
-          </div>
-        </div>
-        <div class="input-row" id="budget-row">
-          <input type="number" id="retirementBudget" min="0" step="1">
-        </div>
-        <div id="budget-slider-wrap"></div>
-        <div class="helper-text" id="budget-helper"></div>
-      </div>
-
-      <div class="input-group">
-        <div class="label-wrap">
-          <label for="otherIncome">Other Monthly Retirement Income</label>
-          <span class="info-icon" data-tippy-content="Expected monthly income from Social Security, pensions, rental income, or part-time work during retirement. The average Social Security benefit is ~$1,900/month (2024).">i</span>
-        </div>
-        <div class="input-row has-prefix">
-          <span class="input-prefix">$</span>
-          <input type="text" inputmode="numeric" id="otherIncome">
-        </div>
-      </div>
-
-      <details class="settings">
-        <summary>Advanced Settings</summary>
-        <div class="settings-body">
-          <div class="input-group">
-            <div class="label-wrap">
-              <label for="retirementAge">Retirement Age</label>
-              <span class="info-icon" data-tippy-content="The age you plan to stop working. 67 is the full Social Security retirement age for most people. Early retirement is possible at 62 with reduced benefits.">i</span>
-            </div>
-            <div class="input-row">
-              <input type="number" id="retirementAge" min="30" max="99" step="1">
-            </div>
-          </div>
-          <div class="input-group">
-            <div class="label-wrap">
-              <label for="lifeExpectancy">Life Expectancy</label>
-              <span class="info-icon" data-tippy-content="How long you expect to live. Planning to 95 provides a buffer against longevity risk. Average US life expectancy is ~78, but healthy 65-year-olds often live into their mid-80s or beyond.">i</span>
-            </div>
-            <div class="input-row">
-              <input type="number" id="lifeExpectancy" min="50" max="120" step="1">
-            </div>
-          </div>
-          <div class="input-group">
-            <div class="label-wrap">
-              <label for="preReturnRate">Pre-Retirement Return</label>
-              <span class="info-icon" data-tippy-content="Expected annual investment return before retirement. The S&amp;P 500 has historically returned ~10%/year. A stock/bond mix may return 7&ndash;8%.">i</span>
-            </div>
-            <div class="slider-row">
-              <input type="range" id="preReturnRate-slider" min="0" max="30" step="0.5">
-              <span class="slider-value" id="preReturnRate-val"></span>
-            </div>
-          </div>
-          <div class="input-group">
-            <div class="label-wrap">
-              <label for="postReturnRate">Post-Retirement Return</label>
-              <span class="info-icon" data-tippy-content="Expected annual return during retirement. Typically lower as retirees shift to conservative investments (bonds, dividend stocks). 4&ndash;6% is common.">i</span>
-            </div>
-            <div class="slider-row">
-              <input type="range" id="postReturnRate-slider" min="0" max="25" step="0.5">
-              <span class="slider-value" id="postReturnRate-val"></span>
-            </div>
-          </div>
-          <div class="input-group">
-            <div class="label-wrap">
-              <label for="inflationRate">Inflation Rate</label>
-              <span class="info-icon" data-tippy-content="Expected annual inflation rate. The historical US average is ~3%. Higher inflation erodes purchasing power, meaning you'll need more money in retirement.">i</span>
-            </div>
-            <div class="slider-row">
-              <input type="range" id="inflationRate-slider" min="0" max="20" step="0.5">
-              <span class="slider-value" id="inflationRate-val"></span>
-            </div>
-          </div>
-          <div class="input-group">
-            <div class="label-wrap">
-              <label for="incomeIncrease">Annual Income Increase</label>
-              <span class="info-icon" data-tippy-content="Expected annual raise or salary growth. US average is roughly 2&ndash;3%. Used to project future income for percentage-based calculations.">i</span>
-            </div>
-            <div class="slider-row">
-              <input type="range" id="incomeIncrease-slider" min="0" max="20" step="0.5">
-              <span class="slider-value" id="incomeIncrease-val"></span>
-            </div>
-          </div>
-          <div class="checkbox-row">
-            <input type="checkbox" id="scaleContributions">
-            <label for="scaleContributions">Scale contributions with income increase</label>
-            <span class="info-icon" data-tippy-content="When enabled, your contribution grows each year by the income increase rate, matching typical behavior as raises increase take-home pay.">i</span>
-          </div>
-        </div>
-      </details>
-    </div>
-
-    <div class="panel-output">
-      <div id="warning"></div>
-      <div id="summary" class="summary-grid"></div>
-      <div class="chart-wrap">
-        <canvas id="chart"></canvas>
-      </div>
-    </div>
-  </div>
-
-  <footer>
-    <a href="./">Tools</a> &middot; <a href="https://github.com/henrythach/tools/blob/main/retirement-calculator.html">Source</a>
-  </footer>
-
-  <script>
-    const STORAGE_KEY = 'retirement-calc';
-
-    const defaults = {
-      currentAge: 30,
-      annualIncome: 75000,
-      currentSavings: 50000,
-      contribution: 500,
-      contributionMode: 'monthly',
-      retirementBudget: 80,
-      budgetMode: 'percent',
-      otherIncome: 0,
-      retirementAge: 67,
-      lifeExpectancy: 95,
-      preReturnRate: 10,
-      postReturnRate: 5,
-      inflationRate: 5,
-      incomeIncrease: 2,
-      scaleContributions: true,
-    };
-
-    const loadState = () => {
-      try {
-        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-        return { ...defaults, ...saved };
-      } catch {
-        return { ...defaults };
+      .input-group > label,
+      .label-row label {
+        display: inline;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 0;
       }
-    };
 
-    const saveState = (s) => {
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
-      catch { /* quota exceeded */ }
-    };
+      .label-wrap {
+        display: block;
+        margin-bottom: 0.4rem;
+      }
 
-    let state = loadState();
-    let chart = null;
-    let hasContribError = false;
+      .input-row {
+        display: flex;
+        gap: 0;
+        align-items: stretch;
+      }
 
-    // --- DOM helpers ---
+      .input-prefix,
+      .input-suffix {
+        display: flex;
+        align-items: center;
+        padding: 0 0.6rem;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        background: var(--muted-bg);
+        border: 1px solid var(--border);
+        white-space: nowrap;
+      }
 
-    const $ = (id) => document.getElementById(id);
+      .input-prefix {
+        border-radius: 6px 0 0 6px;
+        border-right: none;
+      }
+      .input-suffix {
+        border-radius: 0 6px 6px 0;
+        border-left: none;
+      }
 
-    const addCommas = (n) => {
-      if (n == null || isNaN(n)) return '';
-      return Math.round(Number(n)).toLocaleString('en-US');
-    };
+      .input-row input[type="text"],
+      .input-row input[type="number"] {
+        font-family: inherit;
+        font-size: 1rem;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid var(--border);
+        background: var(--input-bg);
+        color: var(--text);
+        flex: 1;
+        min-width: 0;
+      }
 
-    const stripCommas = (s) => s.replace(/[^0-9.\-]/g, '');
+      .input-row input[type="text"]:focus,
+      .input-row input[type="number"]:focus {
+        outline: 2px solid var(--accent);
+        outline-offset: -1px;
+        z-index: 1;
+      }
 
-    const bindFormattedInput = (id, key) => {
-      const el = $(id);
-      el.value = addCommas(state[key]);
+      .input-row input:only-child {
+        border-radius: 6px;
+      }
+      .has-prefix input {
+        border-radius: 0 6px 6px 0;
+      }
+      .has-suffix input {
+        border-radius: 6px 0 0 6px;
+      }
+      .has-prefix.has-suffix input {
+        border-radius: 0;
+      }
 
-      el.addEventListener('input', () => {
-        const raw = stripCommas(el.value);
-        const val = parseFloat(raw);
-        if (!isNaN(val) && val >= 0) {
-          state[key] = val;
-          saveState(state);
-          recalculate();
+      .input-row.has-error input {
+        border-color: var(--error);
+      }
+      .input-row.has-error input:focus {
+        outline-color: var(--error);
+      }
+      .input-row.has-error .input-prefix,
+      .input-row.has-error .input-suffix {
+        border-color: var(--error);
+      }
+
+      .helper-text {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-top: 0.2rem;
+        min-height: 1.1em;
+      }
+
+      .helper-text.error {
+        color: var(--error);
+      }
+
+      .info-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        font-size: 0.55rem;
+        font-style: italic;
+        font-weight: 700;
+        font-family: Georgia, serif;
+        cursor: help;
+        margin-left: 0.3rem;
+        vertical-align: middle;
+        flex-shrink: 0;
+      }
+
+      .label-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.4rem;
+      }
+
+      .label-row label {
+        margin-bottom: 0;
+      }
+
+      .toggle-sm {
+        display: flex;
+        gap: 0;
+        flex-shrink: 0;
+      }
+
+      .toggle-sm button {
+        font-family: inherit;
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+        cursor: pointer;
+        border: 1px solid var(--border);
+        background: var(--btn-bg);
+        color: var(--text-muted);
+        transition:
+          background 0.15s,
+          color 0.15s;
+      }
+
+      .toggle-sm button:first-child {
+        border-radius: 4px 0 0 4px;
+        border-right: none;
+      }
+      .toggle-sm button:last-child {
+        border-radius: 0 4px 4px 0;
+      }
+
+      .toggle-sm button.active {
+        background: var(--accent);
+        color: #fff;
+        border-color: var(--accent);
+      }
+
+      .toggle-sm button:not(.active):hover {
+        background: var(--btn-hover);
+      }
+
+      /* --- Sliders --- */
+
+      .slider-row {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.35rem;
+      }
+
+      input[type="range"] {
+        -webkit-appearance: none;
+        appearance: none;
+        flex: 1;
+        height: 4px;
+        border-radius: 2px;
+        background: var(--slider-track);
+        outline: none;
+        cursor: pointer;
+      }
+
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--slider-thumb);
+        border: none;
+        cursor: pointer;
+      }
+
+      input[type="range"]::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--slider-thumb);
+        border: none;
+        cursor: pointer;
+      }
+
+      .slider-value {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        min-width: 3.5em;
+        text-align: right;
+        white-space: nowrap;
+      }
+
+      /* --- Summary --- */
+
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+      }
+
+      .summary-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-subtle);
+        border-radius: 6px;
+        padding: 0.75rem;
+        text-align: center;
+      }
+
+      .summary-card-label {
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        margin-bottom: 0.25rem;
+      }
+
+      .summary-card-value {
+        font-size: 1.15rem;
+        font-weight: 700;
+      }
+
+      .summary-card.surplus {
+        border-bottom: 3px solid var(--success);
+      }
+      .summary-card.surplus .summary-card-value {
+        color: var(--success);
+      }
+      .summary-card.shortfall {
+        border-bottom: 3px solid var(--error);
+      }
+      .summary-card.shortfall .summary-card-value {
+        color: var(--error);
+      }
+
+      .warning {
+        font-size: 0.8rem;
+        color: var(--error);
+        margin-bottom: 1rem;
+      }
+
+      .chart-wrap {
+        position: relative;
+        height: 350px;
+        margin-bottom: 1.5rem;
+      }
+
+      /* --- Advanced settings --- */
+
+      details.settings {
+        margin-bottom: 1rem;
+      }
+
+      details.settings summary {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        cursor: pointer;
+        user-select: none;
+      }
+
+      details.settings summary:hover {
+        color: var(--text);
+      }
+
+      .settings-body {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        margin-top: 0.75rem;
+      }
+
+      .settings-body .input-group {
+        margin-bottom: 0.5rem;
+        width: 100%;
+      }
+
+      .settings-body label {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+      }
+
+      .settings-body .input-row {
+        width: 100%;
+      }
+
+      .settings-body .input-row input[type="number"] {
+        font-size: 0.85rem;
+        padding: 0.3rem 0.5rem;
+      }
+
+      .settings-body .input-prefix,
+      .settings-body .input-suffix {
+        font-size: 0.8rem;
+        padding: 0 0.4rem;
+      }
+
+      .checkbox-row {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+      }
+
+      .checkbox-row input[type="checkbox"] {
+        margin: 0;
+      }
+
+      @media (max-width: 500px) {
+        .summary-grid {
+          grid-template-columns: 1fr;
         }
-      });
+      }
 
-      el.addEventListener('blur', () => {
+      @media (min-width: 900px) {
+        body {
+          max-width: 1100px;
+        }
+        .layout {
+          flex-direction: row;
+          gap: 2rem;
+          align-items: flex-start;
+        }
+        .panel-inputs {
+          flex: 0 0 340px;
+          position: sticky;
+          top: 1.5rem;
+          max-height: calc(100vh - 3rem);
+          overflow-y: auto;
+        }
+        .panel-output {
+          flex: 1;
+          min-width: 0;
+        }
+        .chart-wrap {
+          height: 400px;
+        }
+      }
+
+      footer {
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-footer);
+        font-size: 0.8rem;
+        color: var(--text-muted);
+      }
+
+      footer a {
+        color: var(--text-muted);
+        text-decoration: none;
+      }
+      footer a:hover {
+        color: var(--text);
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Retirement Calculator</h1>
+    <p class="subtitle">See if you're on track for retirement with instant visual feedback.</p>
+
+    <div class="layout">
+      <div class="panel-inputs">
+        <div class="input-group">
+          <div class="label-wrap">
+            <label for="currentAge">Current Age</label>
+            <span
+              class="info-icon"
+              data-tippy-content="Your current age. The calculator projects from this age to your life expectancy."
+              >i</span
+            >
+          </div>
+          <div class="input-row">
+            <input type="number" id="currentAge" min="18" max="99" step="1" />
+          </div>
+        </div>
+
+        <div class="input-group">
+          <div class="label-wrap">
+            <label for="annualIncome">Annual Pre-Tax Income</label>
+            <span
+              class="info-icon"
+              data-tippy-content="Your total annual income before taxes. Used to calculate contribution percentages and retirement budget when set as a percentage."
+              >i</span
+            >
+          </div>
+          <div class="input-row has-prefix">
+            <span class="input-prefix">$</span>
+            <input type="text" inputmode="numeric" id="annualIncome" />
+          </div>
+        </div>
+
+        <div class="input-group">
+          <div class="label-wrap">
+            <label for="currentSavings">Current Retirement Savings</label>
+            <span
+              class="info-icon"
+              data-tippy-content="Total balance across all retirement accounts (401k, IRA, Roth IRA, etc.) as of today."
+              >i</span
+            >
+          </div>
+          <div class="input-row has-prefix">
+            <span class="input-prefix">$</span>
+            <input type="text" inputmode="numeric" id="currentSavings" />
+          </div>
+        </div>
+
+        <div class="input-group">
+          <div class="label-row">
+            <div>
+              <label for="contribution">Contribution</label>
+              <span
+                class="info-icon"
+                data-tippy-content="How much you contribute to retirement accounts each period. Financial advisors generally recommend saving 10&ndash;15% of your pre-tax income, including any employer match."
+                >i</span
+              >
+            </div>
+            <div class="toggle-sm">
+              <button id="contrib-monthly">Monthly</button>
+              <button id="contrib-annual">Annual</button>
+            </div>
+          </div>
+          <div class="input-row has-prefix" id="contrib-row">
+            <span class="input-prefix">$</span>
+            <input type="text" inputmode="numeric" id="contribution" />
+          </div>
+          <div class="slider-row">
+            <input type="range" id="contrib-slider" min="0" max="100" step="1" />
+          </div>
+          <div class="helper-text" id="contrib-helper"></div>
+        </div>
+
+        <div class="input-group">
+          <div class="label-row">
+            <div>
+              <label for="retirementBudget">Monthly Budget in Retirement</label>
+              <span
+                class="info-icon"
+                data-tippy-content="How much you plan to spend monthly in retirement. A common guideline is 70&ndash;80% of your pre-retirement income, but this varies based on lifestyle, location, and whether your home is paid off."
+                >i</span
+              >
+            </div>
+            <div class="toggle-sm">
+              <button id="budget-percent">% of Income</button>
+              <button id="budget-dollar">$ Amount</button>
+            </div>
+          </div>
+          <div class="input-row" id="budget-row">
+            <input type="number" id="retirementBudget" min="0" step="1" />
+          </div>
+          <div id="budget-slider-wrap"></div>
+          <div class="helper-text" id="budget-helper"></div>
+        </div>
+
+        <div class="input-group">
+          <div class="label-wrap">
+            <label for="otherIncome">Other Monthly Retirement Income</label>
+            <span
+              class="info-icon"
+              data-tippy-content="Expected monthly income from Social Security, pensions, rental income, or part-time work during retirement. The average Social Security benefit is ~$1,900/month (2024)."
+              >i</span
+            >
+          </div>
+          <div class="input-row has-prefix">
+            <span class="input-prefix">$</span>
+            <input type="text" inputmode="numeric" id="otherIncome" />
+          </div>
+        </div>
+
+        <details class="settings">
+          <summary>Advanced Settings</summary>
+          <div class="settings-body">
+            <div class="input-group">
+              <div class="label-wrap">
+                <label for="retirementAge">Retirement Age</label>
+                <span
+                  class="info-icon"
+                  data-tippy-content="The age you plan to stop working. 67 is the full Social Security retirement age for most people. Early retirement is possible at 62 with reduced benefits."
+                  >i</span
+                >
+              </div>
+              <div class="input-row">
+                <input type="number" id="retirementAge" min="30" max="99" step="1" />
+              </div>
+            </div>
+            <div class="input-group">
+              <div class="label-wrap">
+                <label for="lifeExpectancy">Life Expectancy</label>
+                <span
+                  class="info-icon"
+                  data-tippy-content="How long you expect to live. Planning to 95 provides a buffer against longevity risk. Average US life expectancy is ~78, but healthy 65-year-olds often live into their mid-80s or beyond."
+                  >i</span
+                >
+              </div>
+              <div class="input-row">
+                <input type="number" id="lifeExpectancy" min="50" max="120" step="1" />
+              </div>
+            </div>
+            <div class="input-group">
+              <div class="label-wrap">
+                <label for="preReturnRate">Pre-Retirement Return</label>
+                <span
+                  class="info-icon"
+                  data-tippy-content="Expected annual investment return before retirement. The S&amp;P 500 has historically returned ~10%/year. A stock/bond mix may return 7&ndash;8%."
+                  >i</span
+                >
+              </div>
+              <div class="slider-row">
+                <input type="range" id="preReturnRate-slider" min="0" max="30" step="0.5" />
+                <span class="slider-value" id="preReturnRate-val"></span>
+              </div>
+            </div>
+            <div class="input-group">
+              <div class="label-wrap">
+                <label for="postReturnRate">Post-Retirement Return</label>
+                <span
+                  class="info-icon"
+                  data-tippy-content="Expected annual return during retirement. Typically lower as retirees shift to conservative investments (bonds, dividend stocks). 4&ndash;6% is common."
+                  >i</span
+                >
+              </div>
+              <div class="slider-row">
+                <input type="range" id="postReturnRate-slider" min="0" max="25" step="0.5" />
+                <span class="slider-value" id="postReturnRate-val"></span>
+              </div>
+            </div>
+            <div class="input-group">
+              <div class="label-wrap">
+                <label for="inflationRate">Inflation Rate</label>
+                <span
+                  class="info-icon"
+                  data-tippy-content="Expected annual inflation rate. The historical US average is ~3%. Higher inflation erodes purchasing power, meaning you'll need more money in retirement."
+                  >i</span
+                >
+              </div>
+              <div class="slider-row">
+                <input type="range" id="inflationRate-slider" min="0" max="20" step="0.5" />
+                <span class="slider-value" id="inflationRate-val"></span>
+              </div>
+            </div>
+            <div class="input-group">
+              <div class="label-wrap">
+                <label for="incomeIncrease">Annual Income Increase</label>
+                <span
+                  class="info-icon"
+                  data-tippy-content="Expected annual raise or salary growth. US average is roughly 2&ndash;3%. Used to project future income for percentage-based calculations."
+                  >i</span
+                >
+              </div>
+              <div class="slider-row">
+                <input type="range" id="incomeIncrease-slider" min="0" max="20" step="0.5" />
+                <span class="slider-value" id="incomeIncrease-val"></span>
+              </div>
+            </div>
+            <div class="checkbox-row">
+              <input type="checkbox" id="scaleContributions" />
+              <label for="scaleContributions">Scale contributions with income increase</label>
+              <span
+                class="info-icon"
+                data-tippy-content="When enabled, your contribution grows each year by the income increase rate, matching typical behavior as raises increase take-home pay."
+                >i</span
+              >
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <div class="panel-output">
+        <div id="warning"></div>
+        <div id="summary" class="summary-grid"></div>
+        <div class="chart-wrap">
+          <canvas id="chart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <a href="./">Tools</a> &middot;
+      <a href="https://github.com/henrythach/tools/blob/main/retirement-calculator.html">Source</a>
+    </footer>
+
+    <script>
+      const STORAGE_KEY = "retirement-calc";
+
+      const defaults = {
+        currentAge: 30,
+        annualIncome: 75000,
+        currentSavings: 50000,
+        contribution: 500,
+        contributionMode: "monthly",
+        retirementBudget: 80,
+        budgetMode: "percent",
+        otherIncome: 0,
+        retirementAge: 67,
+        lifeExpectancy: 95,
+        preReturnRate: 10,
+        postReturnRate: 5,
+        inflationRate: 5,
+        incomeIncrease: 2,
+        scaleContributions: true,
+      };
+
+      const loadState = () => {
+        try {
+          const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+          return { ...defaults, ...saved };
+        } catch {
+          return { ...defaults };
+        }
+      };
+
+      const saveState = (s) => {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+        } catch {
+          /* quota exceeded */
+        }
+      };
+
+      let state = loadState();
+      let chart = null;
+      let hasContribError = false;
+
+      // --- DOM helpers ---
+
+      const $ = (id) => document.getElementById(id);
+
+      const addCommas = (n) => {
+        if (n == null || isNaN(n)) return "";
+        return Math.round(Number(n)).toLocaleString("en-US");
+      };
+
+      const stripCommas = (s) => s.replace(/[^0-9.\-]/g, "");
+
+      const bindFormattedInput = (id, key) => {
+        const el = $(id);
         el.value = addCommas(state[key]);
-      });
 
-      el.addEventListener('focus', () => {
-        el.value = state[key] === 0 ? '' : String(state[key]);
-      });
-    };
+        el.addEventListener("input", () => {
+          const raw = stripCommas(el.value);
+          const val = parseFloat(raw);
+          if (!isNaN(val) && val >= 0) {
+            state[key] = val;
+            saveState(state);
+            recalculate();
+          }
+        });
 
-    const bindInput = (id, key, parser = parseFloat) => {
-      const el = $(id);
-      el.value = state[key];
-      el.addEventListener('input', () => {
-        const val = parser(el.value);
-        if (!isNaN(val)) {
-          state[key] = val;
-          saveState(state);
-          recalculate();
-        }
-      });
-    };
+        el.addEventListener("blur", () => {
+          el.value = addCommas(state[key]);
+        });
 
-    const bindSlider = (sliderId, key, valId) => {
-      const slider = $(sliderId);
-      const valEl = valId ? $(valId) : null;
-      slider.value = state[key];
-      if (valEl) valEl.textContent = state[key] + '%';
+        el.addEventListener("focus", () => {
+          el.value = state[key] === 0 ? "" : String(state[key]);
+        });
+      };
 
-      slider.addEventListener('input', () => {
-        const val = parseFloat(slider.value);
-        state[key] = val;
-        if (valEl) valEl.textContent = val + '%';
-        saveState(state);
-        recalculate();
-      });
+      const bindInput = (id, key, parser = parseFloat) => {
+        const el = $(id);
+        el.value = state[key];
+        el.addEventListener("input", () => {
+          const val = parser(el.value);
+          if (!isNaN(val)) {
+            state[key] = val;
+            saveState(state);
+            recalculate();
+          }
+        });
+      };
 
-      return () => {
+      const bindSlider = (sliderId, key, valId) => {
+        const slider = $(sliderId);
+        const valEl = valId ? $(valId) : null;
         slider.value = state[key];
-        if (valEl) valEl.textContent = state[key] + '%';
-      };
-    };
+        if (valEl) valEl.textContent = state[key] + "%";
 
-    const bindToggle = (btnAId, btnBId, key, valA, valB, onSwitch) => {
-      const btnA = $(btnAId);
-      const btnB = $(btnBId);
-      const update = () => {
-        btnA.classList.toggle('active', state[key] === valA);
-        btnB.classList.toggle('active', state[key] === valB);
-      };
-      btnA.addEventListener('click', () => {
-        if (state[key] === valA) return;
-        state[key] = valA;
-        if (onSwitch) onSwitch(valA);
-        saveState(state);
-        update();
-        recalculate();
-      });
-      btnB.addEventListener('click', () => {
-        if (state[key] === valB) return;
-        state[key] = valB;
-        if (onSwitch) onSwitch(valB);
-        saveState(state);
-        update();
-        recalculate();
-      });
-      update();
-    };
-
-    const bindCheckbox = (id, key) => {
-      const el = $(id);
-      el.checked = state[key];
-      el.addEventListener('change', () => {
-        state[key] = el.checked;
-        saveState(state);
-        recalculate();
-      });
-    };
-
-    // --- Formatting ---
-
-    const formatCurrency = (n) => {
-      if (!isFinite(n)) return '$--';
-      const sign = n < 0 ? '-' : '';
-      const abs = Math.abs(Math.round(n));
-      return sign + '$' + abs.toLocaleString('en-US');
-    };
-
-    const formatCurrencyShort = (n) => {
-      const abs = Math.abs(n);
-      if (abs >= 1e6) return (n < 0 ? '-' : '') + '$' + (abs / 1e6).toFixed(1) + 'M';
-      if (abs >= 1e3) return (n < 0 ? '-' : '') + '$' + (abs / 1e3).toFixed(0) + 'K';
-      return '$' + Math.round(n).toLocaleString('en-US');
-    };
-
-    // --- Contribution validation + helper ---
-
-    const updateContribHelper = () => {
-      const helperEl = $('contrib-helper');
-      const contribRow = $('contrib-row');
-      const contribSlider = $('contrib-slider');
-      const annualContrib = state.contributionMode === 'monthly'
-        ? state.contribution * 12
-        : state.contribution;
-      const pct = state.annualIncome > 0
-        ? Math.round((annualContrib / state.annualIncome) * 100)
-        : 0;
-
-      // Sync slider position
-      contribSlider.value = Math.min(pct, 100);
-
-      if (state.annualIncome > 0 && annualContrib > state.annualIncome) {
-        helperEl.textContent = `${pct}% of income \u2014 exceeds annual income`;
-        helperEl.className = 'helper-text error';
-        contribRow.classList.add('has-error');
-        hasContribError = true;
-      } else {
-        helperEl.textContent = state.annualIncome > 0 ? `${pct}% of income` : '';
-        helperEl.className = 'helper-text';
-        contribRow.classList.remove('has-error');
-        hasContribError = false;
-      }
-    };
-
-    // Contribution slider drives dollar amount
-    $('contrib-slider').addEventListener('input', () => {
-      const pct = parseInt($('contrib-slider').value);
-      const annualAmount = state.annualIncome * pct / 100;
-      state.contribution = state.contributionMode === 'monthly'
-        ? Math.round(annualAmount / 12)
-        : Math.round(annualAmount);
-      $('contribution').value = addCommas(state.contribution);
-      saveState(state);
-      recalculate();
-    });
-
-    // --- Budget helper + slider ---
-
-    const updateBudgetHelper = () => {
-      const helperEl = $('budget-helper');
-      let annualBudget;
-      if (state.budgetMode === 'percent') {
-        annualBudget = state.annualIncome * state.retirementBudget / 100;
-      } else {
-        annualBudget = Math.max(0, state.retirementBudget) * 12;
-      }
-      helperEl.textContent = formatCurrency(annualBudget) + '/year';
-    };
-
-    const updateBudgetRow = () => {
-      const row = $('budget-row');
-      const sliderWrap = $('budget-slider-wrap');
-      if (state.budgetMode === 'percent') {
-        row.className = 'input-row has-suffix';
-        row.innerHTML = '';
-        const inp = document.createElement('input');
-        inp.type = 'number'; inp.id = 'retirementBudget'; inp.min = '0'; inp.max = '100'; inp.step = '1';
-        inp.value = state.retirementBudget;
-        const suf = document.createElement('span');
-        suf.className = 'input-suffix';
-        suf.textContent = '%';
-        row.append(inp, suf);
-        bindInput('retirementBudget', 'retirementBudget');
-
-        // Add slider for percent mode
-        sliderWrap.innerHTML = '';
-        const sliderRow = document.createElement('div');
-        sliderRow.className = 'slider-row';
-        const slider = document.createElement('input');
-        slider.type = 'range'; slider.id = 'budget-slider';
-        slider.min = '0'; slider.max = '100'; slider.step = '1';
-        slider.value = state.retirementBudget;
-        sliderRow.append(slider);
-        sliderWrap.append(sliderRow);
-
-        // Sync slider ↔ input
-        slider.addEventListener('input', () => {
-          state.retirementBudget = parseInt(slider.value);
-          inp.value = state.retirementBudget;
+        slider.addEventListener("input", () => {
+          const val = parseFloat(slider.value);
+          state[key] = val;
+          if (valEl) valEl.textContent = val + "%";
           saveState(state);
           recalculate();
         });
-        inp.addEventListener('input', () => {
-          slider.value = state.retirementBudget;
-        });
-      } else {
-        row.className = 'input-row has-prefix';
-        row.innerHTML = '';
-        const pre = document.createElement('span');
-        pre.className = 'input-prefix';
-        pre.textContent = '$';
-        const inp = document.createElement('input');
-        inp.type = 'text'; inp.inputMode = 'numeric'; inp.id = 'retirementBudget';
-        inp.value = addCommas(state.retirementBudget);
-        row.append(pre, inp);
-        bindFormattedInput('retirementBudget', 'retirementBudget');
-        sliderWrap.innerHTML = '';
-      }
-    };
 
-    // --- Calculation engine ---
-
-    const computeProjection = (s) => {
-      const {
-        currentAge, annualIncome, currentSavings, contribution,
-        contributionMode, retirementBudget, budgetMode, otherIncome,
-        retirementAge, lifeExpectancy, preReturnRate, postReturnRate,
-        inflationRate, incomeIncrease, scaleContributions
-      } = s;
-
-      const rPre = preReturnRate / 100;
-      const rPost = postReturnRate / 100;
-      const inf = inflationRate / 100;
-      const g = incomeIncrease / 100;
-      const yearsToRetirement = Math.max(0, retirementAge - currentAge);
-      const retirementYears = Math.max(0, lifeExpectancy - retirementAge);
-
-      let annualContrib = contributionMode === 'monthly' ? contribution * 12 : contribution;
-
-      const budgetMonthlyToday = budgetMode === 'percent'
-        ? (annualIncome * retirementBudget / 100) / 12
-        : Math.max(0, retirementBudget);
-      const netWithdrawalToday = Math.max(0, budgetMonthlyToday * 12 - otherIncome * 12);
-
-      const inflatedBase = netWithdrawalToday * Math.pow(1 + inf, yearsToRetirement);
-      const k = (1 + inf) / (1 + rPost);
-      let annuitySum;
-      if (Math.abs(k - 1) < 1e-10) {
-        annuitySum = retirementYears;
-      } else {
-        annuitySum = (1 - Math.pow(k, retirementYears)) / (1 - k);
-      }
-      const requiredAtRetirement = inflatedBase * annuitySum;
-
-      const ages = [];
-      const savingsBalance = [];
-      const targetBalance = [];
-
-      let savings = currentSavings;
-      let currentContrib = annualContrib;
-
-      for (let i = 0; i <= yearsToRetirement; i++) {
-        const age = currentAge + i;
-        ages.push(age);
-        savingsBalance.push(Math.round(savings));
-
-        const yearsUntilRetirement = retirementAge - age;
-        const target = yearsUntilRetirement > 0
-          ? requiredAtRetirement / Math.pow(1 + rPre, yearsUntilRetirement)
-          : requiredAtRetirement;
-        targetBalance.push(Math.round(target));
-
-        if (i < yearsToRetirement) {
-          if (scaleContributions && i > 0) {
-            currentContrib *= (1 + g);
-          }
-          savings = savings * (1 + rPre) + currentContrib;
-        }
-      }
-
-      const savingsAtRetirement = Math.round(savings);
-
-      for (let j = 1; j <= retirementYears; j++) {
-        const age = retirementAge + j;
-        const yearsFromNow = yearsToRetirement + j;
-        const withdrawal = netWithdrawalToday * Math.pow(1 + inf, yearsFromNow);
-
-        savings = savings * (1 + rPost) - withdrawal;
-        if (savings < 0) savings = 0;
-
-        ages.push(age);
-        savingsBalance.push(Math.round(savings));
-
-        const remainingYears = lifeExpectancy - age;
-        if (remainingYears <= 0) {
-          targetBalance.push(0);
-        } else {
-          const inflBase = netWithdrawalToday * Math.pow(1 + inf, yearsFromNow);
-          let sum;
-          if (Math.abs(k - 1) < 1e-10) {
-            sum = remainingYears;
-          } else {
-            sum = (1 - Math.pow(k, remainingYears)) / (1 - k);
-          }
-          targetBalance.push(Math.round(inflBase * sum));
-        }
-      }
-
-      return {
-        ages,
-        savingsBalance,
-        targetBalance,
-        savingsAtRetirement,
-        requiredAtRetirement: Math.round(requiredAtRetirement),
-        surplus: Math.round(savingsAtRetirement - requiredAtRetirement),
+        return () => {
+          slider.value = state[key];
+          if (valEl) valEl.textContent = state[key] + "%";
+        };
       };
-    };
 
-    // --- Rendering ---
+      const bindToggle = (btnAId, btnBId, key, valA, valB, onSwitch) => {
+        const btnA = $(btnAId);
+        const btnB = $(btnBId);
+        const update = () => {
+          btnA.classList.toggle("active", state[key] === valA);
+          btnB.classList.toggle("active", state[key] === valB);
+        };
+        btnA.addEventListener("click", () => {
+          if (state[key] === valA) return;
+          state[key] = valA;
+          if (onSwitch) onSwitch(valA);
+          saveState(state);
+          update();
+          recalculate();
+        });
+        btnB.addEventListener("click", () => {
+          if (state[key] === valB) return;
+          state[key] = valB;
+          if (onSwitch) onSwitch(valB);
+          saveState(state);
+          update();
+          recalculate();
+        });
+        update();
+      };
 
-    const renderSummary = (result) => {
-      const summaryEl = $('summary');
-      const isOnTrack = result.surplus >= 0;
-      const label = isOnTrack ? 'Surplus' : 'Shortfall';
-      const cls = isOnTrack ? 'surplus' : 'shortfall';
-      const sign = isOnTrack ? '+' : '';
+      const bindCheckbox = (id, key) => {
+        const el = $(id);
+        el.checked = state[key];
+        el.addEventListener("change", () => {
+          state[key] = el.checked;
+          saveState(state);
+          recalculate();
+        });
+      };
 
-      summaryEl.innerHTML = `
+      // --- Formatting ---
+
+      const formatCurrency = (n) => {
+        if (!isFinite(n)) return "$--";
+        const sign = n < 0 ? "-" : "";
+        const abs = Math.abs(Math.round(n));
+        return sign + "$" + abs.toLocaleString("en-US");
+      };
+
+      const formatCurrencyShort = (n) => {
+        const abs = Math.abs(n);
+        if (abs >= 1e6) return (n < 0 ? "-" : "") + "$" + (abs / 1e6).toFixed(1) + "M";
+        if (abs >= 1e3) return (n < 0 ? "-" : "") + "$" + (abs / 1e3).toFixed(0) + "K";
+        return "$" + Math.round(n).toLocaleString("en-US");
+      };
+
+      // --- Contribution validation + helper ---
+
+      const updateContribHelper = () => {
+        const helperEl = $("contrib-helper");
+        const contribRow = $("contrib-row");
+        const contribSlider = $("contrib-slider");
+        const annualContrib = state.contributionMode === "monthly" ? state.contribution * 12 : state.contribution;
+        const pct = state.annualIncome > 0 ? Math.round((annualContrib / state.annualIncome) * 100) : 0;
+
+        // Sync slider position
+        contribSlider.value = Math.min(pct, 100);
+
+        if (state.annualIncome > 0 && annualContrib > state.annualIncome) {
+          helperEl.textContent = `${pct}% of income \u2014 exceeds annual income`;
+          helperEl.className = "helper-text error";
+          contribRow.classList.add("has-error");
+          hasContribError = true;
+        } else {
+          helperEl.textContent = state.annualIncome > 0 ? `${pct}% of income` : "";
+          helperEl.className = "helper-text";
+          contribRow.classList.remove("has-error");
+          hasContribError = false;
+        }
+      };
+
+      // Contribution slider drives dollar amount
+      $("contrib-slider").addEventListener("input", () => {
+        const pct = parseInt($("contrib-slider").value);
+        const annualAmount = (state.annualIncome * pct) / 100;
+        state.contribution =
+          state.contributionMode === "monthly" ? Math.round(annualAmount / 12) : Math.round(annualAmount);
+        $("contribution").value = addCommas(state.contribution);
+        saveState(state);
+        recalculate();
+      });
+
+      // --- Budget helper + slider ---
+
+      const updateBudgetHelper = () => {
+        const helperEl = $("budget-helper");
+        let annualBudget;
+        if (state.budgetMode === "percent") {
+          annualBudget = (state.annualIncome * state.retirementBudget) / 100;
+        } else {
+          annualBudget = Math.max(0, state.retirementBudget) * 12;
+        }
+        helperEl.textContent = formatCurrency(annualBudget) + "/year";
+      };
+
+      const updateBudgetRow = () => {
+        const row = $("budget-row");
+        const sliderWrap = $("budget-slider-wrap");
+        if (state.budgetMode === "percent") {
+          row.className = "input-row has-suffix";
+          row.innerHTML = "";
+          const inp = document.createElement("input");
+          inp.type = "number";
+          inp.id = "retirementBudget";
+          inp.min = "0";
+          inp.max = "100";
+          inp.step = "1";
+          inp.value = state.retirementBudget;
+          const suf = document.createElement("span");
+          suf.className = "input-suffix";
+          suf.textContent = "%";
+          row.append(inp, suf);
+          bindInput("retirementBudget", "retirementBudget");
+
+          // Add slider for percent mode
+          sliderWrap.innerHTML = "";
+          const sliderRow = document.createElement("div");
+          sliderRow.className = "slider-row";
+          const slider = document.createElement("input");
+          slider.type = "range";
+          slider.id = "budget-slider";
+          slider.min = "0";
+          slider.max = "100";
+          slider.step = "1";
+          slider.value = state.retirementBudget;
+          sliderRow.append(slider);
+          sliderWrap.append(sliderRow);
+
+          // Sync slider ↔ input
+          slider.addEventListener("input", () => {
+            state.retirementBudget = parseInt(slider.value);
+            inp.value = state.retirementBudget;
+            saveState(state);
+            recalculate();
+          });
+          inp.addEventListener("input", () => {
+            slider.value = state.retirementBudget;
+          });
+        } else {
+          row.className = "input-row has-prefix";
+          row.innerHTML = "";
+          const pre = document.createElement("span");
+          pre.className = "input-prefix";
+          pre.textContent = "$";
+          const inp = document.createElement("input");
+          inp.type = "text";
+          inp.inputMode = "numeric";
+          inp.id = "retirementBudget";
+          inp.value = addCommas(state.retirementBudget);
+          row.append(pre, inp);
+          bindFormattedInput("retirementBudget", "retirementBudget");
+          sliderWrap.innerHTML = "";
+        }
+      };
+
+      // --- Calculation engine ---
+
+      const computeProjection = (s) => {
+        const {
+          currentAge,
+          annualIncome,
+          currentSavings,
+          contribution,
+          contributionMode,
+          retirementBudget,
+          budgetMode,
+          otherIncome,
+          retirementAge,
+          lifeExpectancy,
+          preReturnRate,
+          postReturnRate,
+          inflationRate,
+          incomeIncrease,
+          scaleContributions,
+        } = s;
+
+        const rPre = preReturnRate / 100;
+        const rPost = postReturnRate / 100;
+        const inf = inflationRate / 100;
+        const g = incomeIncrease / 100;
+        const yearsToRetirement = Math.max(0, retirementAge - currentAge);
+        const retirementYears = Math.max(0, lifeExpectancy - retirementAge);
+
+        let annualContrib = contributionMode === "monthly" ? contribution * 12 : contribution;
+
+        const budgetMonthlyToday =
+          budgetMode === "percent" ? (annualIncome * retirementBudget) / 100 / 12 : Math.max(0, retirementBudget);
+        const netWithdrawalToday = Math.max(0, budgetMonthlyToday * 12 - otherIncome * 12);
+
+        const inflatedBase = netWithdrawalToday * Math.pow(1 + inf, yearsToRetirement);
+        const k = (1 + inf) / (1 + rPost);
+        let annuitySum;
+        if (Math.abs(k - 1) < 1e-10) {
+          annuitySum = retirementYears;
+        } else {
+          annuitySum = (1 - Math.pow(k, retirementYears)) / (1 - k);
+        }
+        const requiredAtRetirement = inflatedBase * annuitySum;
+
+        const ages = [];
+        const savingsBalance = [];
+        const targetBalance = [];
+
+        let savings = currentSavings;
+        let currentContrib = annualContrib;
+
+        for (let i = 0; i <= yearsToRetirement; i++) {
+          const age = currentAge + i;
+          ages.push(age);
+          savingsBalance.push(Math.round(savings));
+
+          const yearsUntilRetirement = retirementAge - age;
+          const target =
+            yearsUntilRetirement > 0
+              ? requiredAtRetirement / Math.pow(1 + rPre, yearsUntilRetirement)
+              : requiredAtRetirement;
+          targetBalance.push(Math.round(target));
+
+          if (i < yearsToRetirement) {
+            if (scaleContributions && i > 0) {
+              currentContrib *= 1 + g;
+            }
+            savings = savings * (1 + rPre) + currentContrib;
+          }
+        }
+
+        const savingsAtRetirement = Math.round(savings);
+
+        for (let j = 1; j <= retirementYears; j++) {
+          const age = retirementAge + j;
+          const yearsFromNow = yearsToRetirement + j;
+          const withdrawal = netWithdrawalToday * Math.pow(1 + inf, yearsFromNow);
+
+          savings = savings * (1 + rPost) - withdrawal;
+          if (savings < 0) savings = 0;
+
+          ages.push(age);
+          savingsBalance.push(Math.round(savings));
+
+          const remainingYears = lifeExpectancy - age;
+          if (remainingYears <= 0) {
+            targetBalance.push(0);
+          } else {
+            const inflBase = netWithdrawalToday * Math.pow(1 + inf, yearsFromNow);
+            let sum;
+            if (Math.abs(k - 1) < 1e-10) {
+              sum = remainingYears;
+            } else {
+              sum = (1 - Math.pow(k, remainingYears)) / (1 - k);
+            }
+            targetBalance.push(Math.round(inflBase * sum));
+          }
+        }
+
+        return {
+          ages,
+          savingsBalance,
+          targetBalance,
+          savingsAtRetirement,
+          requiredAtRetirement: Math.round(requiredAtRetirement),
+          surplus: Math.round(savingsAtRetirement - requiredAtRetirement),
+        };
+      };
+
+      // --- Rendering ---
+
+      const renderSummary = (result) => {
+        const summaryEl = $("summary");
+        const isOnTrack = result.surplus >= 0;
+        const label = isOnTrack ? "Surplus" : "Shortfall";
+        const cls = isOnTrack ? "surplus" : "shortfall";
+        const sign = isOnTrack ? "+" : "";
+
+        summaryEl.innerHTML = `
         <div class="summary-card">
           <div class="summary-card-label">Projected at ${state.retirementAge}</div>
           <div class="summary-card-value">${formatCurrency(result.savingsAtRetirement)}</div>
@@ -956,218 +1105,226 @@
           <div class="summary-card-value">${sign}${formatCurrency(result.surplus)}</div>
         </div>
       `;
-    };
+      };
 
-    const getCSSVar = (name) =>
-      getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      const getCSSVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 
-    const renderChart = (result) => {
-      const ctx = $('chart');
+      const renderChart = (result) => {
+        const ctx = $("chart");
 
-      const milestones = [
-        { age: 62, label: 'SS Eligible (62)' },
-        { age: 65, label: 'Medicare (65)' },
-        { age: 67, label: 'Full Retirement (67)' },
-      ];
+        const milestones = [
+          { age: 62, label: "SS Eligible (62)" },
+          { age: 65, label: "Medicare (65)" },
+          { age: 67, label: "Full Retirement (67)" },
+        ];
 
-      const annotations = {};
-      const milestoneColor = getCSSVar('--chart-milestone');
-      const milestoneTextColor = getCSSVar('--chart-milestone-text');
+        const annotations = {};
+        const milestoneColor = getCSSVar("--chart-milestone");
+        const milestoneTextColor = getCSSVar("--chart-milestone-text");
 
-      milestones.forEach((m, i) => {
-        if (m.age > state.currentAge && m.age < state.lifeExpectancy) {
-          annotations[`ms${i}`] = {
-            type: 'line',
-            xMin: m.age,
-            xMax: m.age,
-            borderColor: milestoneColor,
-            borderDash: [4, 4],
-            borderWidth: 1,
-            label: {
-              content: m.label,
-              display: true,
-              position: 'start',
-              font: { size: 9, weight: 'normal' },
-              color: milestoneTextColor,
-              backgroundColor: 'transparent',
-              padding: 2,
+        milestones.forEach((m, i) => {
+          if (m.age > state.currentAge && m.age < state.lifeExpectancy) {
+            annotations[`ms${i}`] = {
+              type: "line",
+              xMin: m.age,
+              xMax: m.age,
+              borderColor: milestoneColor,
+              borderDash: [4, 4],
+              borderWidth: 1,
+              label: {
+                content: m.label,
+                display: true,
+                position: "start",
+                font: { size: 9, weight: "normal" },
+                color: milestoneTextColor,
+                backgroundColor: "transparent",
+                padding: 2,
+              },
+            };
+          }
+        });
+
+        const data = {
+          labels: result.ages,
+          datasets: [
+            {
+              label: "Projected Savings",
+              data: result.savingsBalance,
+              fill: true,
+              backgroundColor: getCSSVar("--chart-savings"),
+              borderColor: getCSSVar("--chart-savings-line"),
+              borderWidth: 2,
+              pointRadius: 0,
+              pointHitRadius: 8,
+              tension: 0.2,
             },
-          };
+            {
+              label: "Target Balance",
+              data: result.targetBalance,
+              fill: false,
+              borderColor: getCSSVar("--chart-target"),
+              borderWidth: 2,
+              borderDash: [6, 4],
+              pointRadius: 0,
+              pointHitRadius: 8,
+              tension: 0.2,
+            },
+          ],
+        };
+
+        const options = {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: "index", intersect: false },
+          plugins: {
+            legend: {
+              position: "top",
+              labels: {
+                usePointStyle: true,
+                font: { size: 11 },
+                color: getCSSVar("--chart-text"),
+                padding: 16,
+              },
+            },
+            tooltip: {
+              callbacks: {
+                title: (items) => `Age ${items[0].label}`,
+                label: (item) => `${item.dataset.label}: ${formatCurrency(item.parsed.y)}`,
+              },
+            },
+            annotation: { annotations },
+          },
+          scales: {
+            x: {
+              title: { display: true, text: "Age", color: getCSSVar("--chart-text"), font: { size: 11 } },
+              ticks: { color: getCSSVar("--chart-text"), font: { size: 10 }, maxTicksLimit: 15 },
+              grid: { display: false },
+            },
+            y: {
+              title: { display: true, text: "Balance", color: getCSSVar("--chart-text"), font: { size: 11 } },
+              ticks: {
+                color: getCSSVar("--chart-text"),
+                font: { size: 10 },
+                callback: (v) => formatCurrencyShort(v),
+              },
+              grid: { color: getCSSVar("--chart-grid") },
+            },
+          },
+        };
+
+        if (chart) {
+          chart.data = data;
+          chart.options = options;
+          chart.update();
+        } else {
+          chart = new Chart(ctx, { type: "line", data, options });
         }
+      };
+
+      // --- Validation & recalculate ---
+
+      const recalculate = () => {
+        const warningEl = $("warning");
+        updateContribHelper();
+        updateBudgetHelper();
+
+        if (hasContribError) {
+          warningEl.innerHTML =
+            '<p class="warning">Contribution exceeds annual income. Adjust your contribution to continue.</p>';
+          $("summary").innerHTML = "";
+          if (chart) {
+            chart.destroy();
+            chart = null;
+          }
+          return;
+        }
+
+        if (state.retirementAge >= state.lifeExpectancy) {
+          warningEl.innerHTML = '<p class="warning">Life expectancy must be greater than retirement age.</p>';
+          $("summary").innerHTML = "";
+          if (chart) {
+            chart.destroy();
+            chart = null;
+          }
+          return;
+        }
+
+        if (state.currentAge > state.retirementAge) {
+          warningEl.innerHTML =
+            '<p class="warning">You are past your selected retirement age. Showing depletion only.</p>';
+        } else {
+          warningEl.innerHTML = "";
+        }
+
+        const result = computeProjection(state);
+
+        if (!isFinite(result.savingsAtRetirement) || !isFinite(result.requiredAtRetirement)) {
+          warningEl.innerHTML = '<p class="warning">Calculation produced invalid results. Check your inputs.</p>';
+          return;
+        }
+
+        renderSummary(result);
+        renderChart(result);
+      };
+
+      // --- Initialization ---
+
+      bindInput("currentAge", "currentAge", parseInt);
+      bindFormattedInput("annualIncome", "annualIncome");
+      bindFormattedInput("currentSavings", "currentSavings");
+      bindFormattedInput("contribution", "contribution");
+      bindFormattedInput("otherIncome", "otherIncome");
+      bindInput("retirementAge", "retirementAge", parseInt);
+      bindInput("lifeExpectancy", "lifeExpectancy", parseInt);
+      bindCheckbox("scaleContributions", "scaleContributions");
+
+      // Advanced settings: sliders synced with state
+      const syncPreReturn = bindSlider("preReturnRate-slider", "preReturnRate", "preReturnRate-val");
+      const syncPostReturn = bindSlider("postReturnRate-slider", "postReturnRate", "postReturnRate-val");
+      const syncInflation = bindSlider("inflationRate-slider", "inflationRate", "inflationRate-val");
+      const syncIncomeInc = bindSlider("incomeIncrease-slider", "incomeIncrease", "incomeIncrease-val");
+
+      // Contribution toggle
+      bindToggle("contrib-monthly", "contrib-annual", "contributionMode", "monthly", "annual", (newMode) => {
+        const el = $("contribution");
+        if (newMode === "annual") {
+          state.contribution = Math.round(state.contribution * 12);
+        } else {
+          state.contribution = Math.round(state.contribution / 12);
+        }
+        el.value = addCommas(state.contribution);
       });
 
-      const data = {
-        labels: result.ages,
-        datasets: [
-          {
-            label: 'Projected Savings',
-            data: result.savingsBalance,
-            fill: true,
-            backgroundColor: getCSSVar('--chart-savings'),
-            borderColor: getCSSVar('--chart-savings-line'),
-            borderWidth: 2,
-            pointRadius: 0,
-            pointHitRadius: 8,
-            tension: 0.2,
-          },
-          {
-            label: 'Target Balance',
-            data: result.targetBalance,
-            fill: false,
-            borderColor: getCSSVar('--chart-target'),
-            borderWidth: 2,
-            borderDash: [6, 4],
-            pointRadius: 0,
-            pointHitRadius: 8,
-            tension: 0.2,
-          },
-        ],
-      };
+      // Budget toggle
+      bindToggle("budget-percent", "budget-dollar", "budgetMode", "percent", "dollar", (newMode) => {
+        if (newMode === "dollar") {
+          state.retirementBudget = Math.round((state.annualIncome * state.retirementBudget) / 100 / 12);
+        } else {
+          const monthlyIncome = state.annualIncome / 12;
+          state.retirementBudget = monthlyIncome > 0 ? Math.round((state.retirementBudget / monthlyIncome) * 100) : 80;
+        }
+        updateBudgetRow();
+      });
 
-      const options = {
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: { mode: 'index', intersect: false },
-        plugins: {
-          legend: {
-            position: 'top',
-            labels: {
-              usePointStyle: true,
-              font: { size: 11 },
-              color: getCSSVar('--chart-text'),
-              padding: 16,
-            },
-          },
-          tooltip: {
-            callbacks: {
-              title: (items) => `Age ${items[0].label}`,
-              label: (item) => `${item.dataset.label}: ${formatCurrency(item.parsed.y)}`,
-            },
-          },
-          annotation: { annotations },
-        },
-        scales: {
-          x: {
-            title: { display: true, text: 'Age', color: getCSSVar('--chart-text'), font: { size: 11 } },
-            ticks: { color: getCSSVar('--chart-text'), font: { size: 10 }, maxTicksLimit: 15 },
-            grid: { display: false },
-          },
-          y: {
-            title: { display: true, text: 'Balance', color: getCSSVar('--chart-text'), font: { size: 11 } },
-            ticks: {
-              color: getCSSVar('--chart-text'),
-              font: { size: 10 },
-              callback: (v) => formatCurrencyShort(v),
-            },
-            grid: { color: getCSSVar('--chart-grid') },
-          },
-        },
-      };
-
-      if (chart) {
-        chart.data = data;
-        chart.options = options;
-        chart.update();
-      } else {
-        chart = new Chart(ctx, { type: 'line', data, options });
-      }
-    };
-
-    // --- Validation & recalculate ---
-
-    const recalculate = () => {
-      const warningEl = $('warning');
-      updateContribHelper();
-      updateBudgetHelper();
-
-      if (hasContribError) {
-        warningEl.innerHTML = '<p class="warning">Contribution exceeds annual income. Adjust your contribution to continue.</p>';
-        $('summary').innerHTML = '';
-        if (chart) { chart.destroy(); chart = null; }
-        return;
-      }
-
-      if (state.retirementAge >= state.lifeExpectancy) {
-        warningEl.innerHTML = '<p class="warning">Life expectancy must be greater than retirement age.</p>';
-        $('summary').innerHTML = '';
-        if (chart) { chart.destroy(); chart = null; }
-        return;
-      }
-
-      if (state.currentAge > state.retirementAge) {
-        warningEl.innerHTML = '<p class="warning">You are past your selected retirement age. Showing depletion only.</p>';
-      } else {
-        warningEl.innerHTML = '';
-      }
-
-      const result = computeProjection(state);
-
-      if (!isFinite(result.savingsAtRetirement) || !isFinite(result.requiredAtRetirement)) {
-        warningEl.innerHTML = '<p class="warning">Calculation produced invalid results. Check your inputs.</p>';
-        return;
-      }
-
-      renderSummary(result);
-      renderChart(result);
-    };
-
-    // --- Initialization ---
-
-    bindInput('currentAge', 'currentAge', parseInt);
-    bindFormattedInput('annualIncome', 'annualIncome');
-    bindFormattedInput('currentSavings', 'currentSavings');
-    bindFormattedInput('contribution', 'contribution');
-    bindFormattedInput('otherIncome', 'otherIncome');
-    bindInput('retirementAge', 'retirementAge', parseInt);
-    bindInput('lifeExpectancy', 'lifeExpectancy', parseInt);
-    bindCheckbox('scaleContributions', 'scaleContributions');
-
-    // Advanced settings: sliders synced with state
-    const syncPreReturn = bindSlider('preReturnRate-slider', 'preReturnRate', 'preReturnRate-val');
-    const syncPostReturn = bindSlider('postReturnRate-slider', 'postReturnRate', 'postReturnRate-val');
-    const syncInflation = bindSlider('inflationRate-slider', 'inflationRate', 'inflationRate-val');
-    const syncIncomeInc = bindSlider('incomeIncrease-slider', 'incomeIncrease', 'incomeIncrease-val');
-
-    // Contribution toggle
-    bindToggle('contrib-monthly', 'contrib-annual', 'contributionMode', 'monthly', 'annual', (newMode) => {
-      const el = $('contribution');
-      if (newMode === 'annual') {
-        state.contribution = Math.round(state.contribution * 12);
-      } else {
-        state.contribution = Math.round(state.contribution / 12);
-      }
-      el.value = addCommas(state.contribution);
-    });
-
-    // Budget toggle
-    bindToggle('budget-percent', 'budget-dollar', 'budgetMode', 'percent', 'dollar', (newMode) => {
-      if (newMode === 'dollar') {
-        state.retirementBudget = Math.round((state.annualIncome * state.retirementBudget / 100) / 12);
-      } else {
-        const monthlyIncome = state.annualIncome / 12;
-        state.retirementBudget = monthlyIncome > 0
-          ? Math.round((state.retirementBudget / monthlyIncome) * 100)
-          : 80;
-      }
       updateBudgetRow();
-    });
-
-    updateBudgetRow();
-    recalculate();
-
-    // Initialize tooltips
-    tippy('[data-tippy-content]', {
-      placement: 'top',
-      arrow: true,
-      delay: [200, 0],
-      maxWidth: 280,
-    });
-
-    // Re-render chart on dark mode change
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-      if (chart) { chart.destroy(); chart = null; }
       recalculate();
-    });
-  </script>
-</body>
+
+      // Initialize tooltips
+      tippy("[data-tippy-content]", {
+        placement: "top",
+        arrow: true,
+        delay: [200, 0],
+        maxWidth: 280,
+      });
+
+      // Re-render chart on dark mode change
+      window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+        if (chart) {
+          chart.destroy();
+          chart = null;
+        }
+        recalculate();
+      });
+    </script>
+  </body>
 </html>
