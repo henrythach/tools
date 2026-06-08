@@ -6,6 +6,7 @@ Inspired by [Simon Willison's HTML tools](https://simonwillison.net/2025/Dec/10/
 
 ## Tools
 
+- [BMI Calculator](bmi-calculator.html) — Calculate your Body Mass Index with metric or imperial units. Shows your BMI, category (Underweight / Normal / Overweight / Obese) on a color-coded bar with a position marker, and the healthy weight range for your height.
 - [CSV to JSON](csv-to-json.html) — Paste CSV and get a JSON array of objects. Auto-detects comma, tab, and semicolon delimiters. First row is used as keys.
 - [Interval Timer](interval-timer.html) — A full-screen interval timer for EMOM, Tabata, AMRAP, and HIIT workouts. Build a sequence of named intervals with custom durations and colors. The entire background changes color with each interval so you can read it from across the room. Includes presets, drag-and-drop reordering, audio cues, screen wake lock, and a shareable URL.
 - [JSON to Table](json-to-table.html) — Paste a JSON array and get a minimal, scrollable table.
