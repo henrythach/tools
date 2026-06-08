@@ -6,6 +6,7 @@ Inspired by [Simon Willison's HTML tools](https://simonwillison.net/2025/Dec/10/
 
 ## Tools
 
+- [CSV to JSON](csv-to-json.html) — Paste CSV and get a JSON array of objects. Auto-detects comma, tab, and semicolon delimiters. First row is used as keys.
 - [Interval Timer](interval-timer.html) — A full-screen interval timer for EMOM, Tabata, AMRAP, and HIIT workouts. Build a sequence of named intervals with custom durations and colors. The entire background changes color with each interval so you can read it from across the room. Includes presets, drag-and-drop reordering, audio cues, screen wake lock, and a shareable URL.
 - [JSON to Table](json-to-table.html) — Paste a JSON array and get a minimal, scrollable table.
 - [JWT Decoder](jwt-decoder.html) — Decode, encode, edit, and verify JSON Web Tokens. Paste a JWT to see the decoded header, payload, and claims table with human-readable timestamps. Edit any claim inline — timestamps get datetime pickers with quick offsets, other fields edit in place. Tokens are automatically re-signed with your secret after edits. Switch to Encode mode to create new JWTs from a JSON payload. Supports HS256, HS384, and HS512 algorithms. All decoded and encoded tokens are saved to a history log with auto-generated labels.
