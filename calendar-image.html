@@ -95,7 +95,7 @@
         background: var(--accent-hover);
       }
 
-      input[type="month"] {
+      select {
         font-family: inherit;
         font-size: 0.85rem;
         padding: 0.45rem 0.75rem;
@@ -105,6 +105,7 @@
         color: var(--text);
         color-scheme: light dark;
       }
+      select:focus,
       input:focus {
         outline: 2px solid var(--accent);
         outline-offset: -1px;
@@ -184,14 +185,13 @@
 
     <div class="row">
       <button id="prev" aria-label="Previous month">&larr;</button>
-      <input type="month" id="month" />
+      <select id="month" aria-label="Month"></select>
       <button id="next" aria-label="Next month">&rarr;</button>
       <button id="today">This month</button>
     </div>
 
     <div class="row">
       <label class="check"><input type="checkbox" id="showMonth" checked /> Show month</label>
-      <label class="check"><input type="checkbox" id="showYear" checked /> Show year</label>
     </div>
 
     <div class="preview" id="preview"></div>
@@ -233,26 +233,21 @@
       const $ = (id) => document.getElementById(id);
       const monthInput = $("month");
       const showMonth = $("showMonth");
-      const showYear = $("showYear");
       const preview = $("preview");
       const status = $("status");
 
       const now = new Date();
-      const state = { year: now.getFullYear(), month: now.getMonth(), days: new Set() };
+      const state = { month: now.getMonth(), days: new Set() };
+      // February gets 29 so every possible date (including Feb 29) can be shown.
+      const DAYS_IN_MONTH = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
       const color = (name) => getComputedStyle(document.documentElement).getPropertyValue(`--img-${name}`).trim();
 
-      const titleText = () => {
-        const parts = [];
-        if (showMonth.checked) parts.push(MONTHS[state.month]);
-        if (showYear.checked) parts.push(state.year);
-        return parts.join(" ");
-      };
+      const titleText = () => (showMonth.checked ? MONTHS[state.month] : "");
 
       const buildSvg = () => {
-        const first = new Date(state.year, state.month, 1).getDay(); // 0 = Sunday
-        const total = new Date(state.year, state.month + 1, 0).getDate();
-        const weeks = Math.ceil((first + total) / 7);
+        const total = DAYS_IN_MONTH[state.month];
+        const weeks = Math.ceil(total / 7); // Day 1 always sits in the Sunday column
         const title = titleText();
         const top = PAD + (title ? TITLE_H : 0);
         const w = PAD * 2 + CELL * 7;
@@ -280,7 +275,7 @@
         );
 
         for (let day = 1; day <= total; day++) {
-          const idx = first + day - 1;
+          const idx = day - 1;
           const cx = PAD + CELL * (idx % 7) + CELL / 2;
           const cy = gridTop + CELL * Math.floor(idx / 7) + CELL / 2;
           const on = state.days.has(day);
@@ -299,36 +294,35 @@
       };
 
       const saveHash = () => {
-        const m = `${state.year}-${String(state.month + 1).padStart(2, "0")}`;
-        const p = new URLSearchParams({ m });
+        const p = new URLSearchParams({ m: state.month + 1 });
         if (state.days.size) p.set("d", [...state.days].sort((a, b) => a - b).join(","));
         if (!showMonth.checked) p.set("nomonth", "1");
-        if (!showYear.checked) p.set("noyear", "1");
         history.replaceState(null, "", `#${p}`);
       };
 
       const loadHash = () => {
         const p = new URLSearchParams(location.hash.slice(1));
-        const match = /^(\d{4})-(\d{2})$/.exec(p.get("m") || "");
-        if (match) {
-          state.year = +match[1];
-          state.month = +match[2] - 1;
-        }
-        state.days = new Set((p.get("d") || "").split(",").map(Number).filter(Boolean));
+        // Accepts "11" or the old "2026-11" format; only the month is used.
+        const m = Number((p.get("m") || "").split("-").pop());
+        if (m >= 1 && m <= 12) state.month = m - 1;
+        const max = DAYS_IN_MONTH[state.month];
+        state.days = new Set(
+          (p.get("d") || "")
+            .split(",")
+            .map(Number)
+            .filter((d) => d >= 1 && d <= max),
+        );
         showMonth.checked = !p.has("nomonth");
-        showYear.checked = !p.has("noyear");
       };
 
       const render = () => {
-        monthInput.value = `${state.year}-${String(state.month + 1).padStart(2, "0")}`;
+        monthInput.value = state.month;
         preview.innerHTML = buildSvg();
         saveHash();
       };
 
-      const setMonth = (year, month) => {
-        const d = new Date(year, month, 1);
-        state.year = d.getFullYear();
-        state.month = d.getMonth();
+      const setMonth = (month) => {
+        state.month = (month + 12) % 12;
         state.days.clear();
         render();
       };
@@ -373,19 +367,16 @@
         render();
       });
 
-      monthInput.addEventListener("change", () => {
-        const [y, m] = monthInput.value.split("-").map(Number);
-        if (y && m) setMonth(y, m - 1);
-      });
-      $("prev").addEventListener("click", () => setMonth(state.year, state.month - 1));
-      $("next").addEventListener("click", () => setMonth(state.year, state.month + 1));
-      $("today").addEventListener("click", () => setMonth(now.getFullYear(), now.getMonth()));
+      monthInput.innerHTML = MONTHS.map((name, i) => `<option value="${i}">${name}</option>`).join("");
+      monthInput.addEventListener("change", () => setMonth(+monthInput.value));
+      $("prev").addEventListener("click", () => setMonth(state.month - 1));
+      $("next").addEventListener("click", () => setMonth(state.month + 1));
+      $("today").addEventListener("click", () => setMonth(now.getMonth()));
       $("clear").addEventListener("click", () => {
         state.days.clear();
         render();
       });
       showMonth.addEventListener("change", render);
-      showYear.addEventListener("change", render);
       $("copy").addEventListener("click", copyPng);
 
       window.addEventListener("hashchange", () => {
