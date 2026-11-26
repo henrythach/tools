@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calendar Image</title>
+    <style>
+      :root {
+        --bg: #fff;
+        --text: #1a1a1a;
+        --text-muted: #666;
+        --border: #ccc;
+        --border-subtle: #e0e0e0;
+        --border-footer: #eee;
+        --input-bg: #fff;
+        --btn-bg: #fff;
+        --btn-hover: #f5f5f5;
+        --accent: #4a90d9;
+        --accent-hover: #3a7bc8;
+        --success: #27ae60;
+        --error: #c0392b;
+
+        /* Colors baked into the exported image. Not themed, so cards look the same everywhere. */
+        --img-bg: #ffffff;
+        --img-text: #1a1a1a;
+        --img-muted: #888888;
+        --img-grid: #e0e0e0;
+        --img-highlight: #e74c3c;
+        --img-highlight-text: #ffffff;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #1a1a1a;
+          --text: #e8e8e8;
+          --text-muted: #999;
+          --border: #444;
+          --border-subtle: #333;
+          --border-footer: #2e2e2e;
+          --input-bg: #252525;
+          --btn-bg: #2a2a2a;
+          --btn-hover: #333;
+          --accent: #5a9fd4;
+          --accent-hover: #4a8fc4;
+          --success: #2ecc71;
+          --error: #e05c4b;
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        padding: 1.5rem;
+        color: var(--text);
+        background: var(--bg);
+        line-height: 1.5;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        font-size: 1.4rem;
+        margin-bottom: 0.25rem;
+      }
+      .subtitle {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        margin-bottom: 1.25rem;
+      }
+
+      button {
+        font-family: inherit;
+        font-size: 0.85rem;
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--btn-bg);
+        color: var(--text);
+        cursor: pointer;
+      }
+      button:hover {
+        background: var(--btn-hover);
+      }
+      button.primary {
+        background: var(--accent);
+        color: #fff;
+        border-color: var(--accent);
+      }
+      button.primary:hover {
+        background: var(--accent-hover);
+      }
+
+      input[type="month"] {
+        font-family: inherit;
+        font-size: 0.85rem;
+        padding: 0.45rem 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--input-bg);
+        color: var(--text);
+        color-scheme: light dark;
+      }
+      input:focus {
+        outline: 2px solid var(--accent);
+        outline-offset: -1px;
+      }
+
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+      }
+      label.check {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.9rem;
+        cursor: pointer;
+      }
+
+      .preview {
+        display: flex;
+        justify-content: center;
+        margin: 1rem 0;
+      }
+      .preview svg {
+        max-width: 100%;
+        height: auto;
+        border: 1px solid var(--border-subtle);
+        border-radius: 6px;
+      }
+      .preview svg .day {
+        cursor: pointer;
+      }
+
+      .hint {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        text-align: center;
+        margin-bottom: 1rem;
+      }
+      .actions {
+        justify-content: center;
+      }
+      #status {
+        font-size: 0.85rem;
+        min-height: 1.3em;
+        text-align: center;
+        margin-top: 0.5rem;
+      }
+      #status.ok {
+        color: var(--success);
+      }
+      #status.err {
+        color: var(--error);
+      }
+
+      footer {
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-footer);
+        font-size: 0.8rem;
+        color: var(--text-muted);
+      }
+      footer a {
+        color: var(--text-muted);
+        text-decoration: none;
+      }
+      footer a:hover {
+        color: var(--text);
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Calendar Image</h1>
+    <p class="subtitle">Make a month calendar image with highlighted days, then paste it into an Anki card.</p>
+
+    <div class="row">
+      <button id="prev" aria-label="Previous month">&larr;</button>
+      <input type="month" id="month" />
+      <button id="next" aria-label="Next month">&rarr;</button>
+      <button id="today">This month</button>
+    </div>
+
+    <div class="row">
+      <label class="check"><input type="checkbox" id="showMonth" checked /> Show month</label>
+      <label class="check"><input type="checkbox" id="showYear" checked /> Show year</label>
+    </div>
+
+    <div class="preview" id="preview"></div>
+    <p class="hint">Click a day to highlight it. Click again to remove.</p>
+
+    <div class="row actions">
+      <button class="primary" id="copy">Copy PNG</button>
+      <button id="clear">Clear highlights</button>
+    </div>
+    <div id="status"></div>
+
+    <footer>
+      <a href="./">Tools</a> &middot;
+      <a href="https://github.com/henrythach/tools/blob/main/calendar-image.html">Source</a>
+    </footer>
+
+    <script>
+      const MONTHS = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ];
+      const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      const CELL = 48;
+      const PAD = 16;
+      const TITLE_H = 44;
+      const HEAD_H = 28;
+      const PNG_SCALE = 2;
+
+      const $ = (id) => document.getElementById(id);
+      const monthInput = $("month");
+      const showMonth = $("showMonth");
+      const showYear = $("showYear");
+      const preview = $("preview");
+      const status = $("status");
+
+      const now = new Date();
+      const state = { year: now.getFullYear(), month: now.getMonth(), days: new Set() };
+
+      const color = (name) => getComputedStyle(document.documentElement).getPropertyValue(`--img-${name}`).trim();
+
+      const titleText = () => {
+        const parts = [];
+        if (showMonth.checked) parts.push(MONTHS[state.month]);
+        if (showYear.checked) parts.push(state.year);
+        return parts.join(" ");
+      };
+
+      const buildSvg = () => {
+        const first = new Date(state.year, state.month, 1).getDay(); // 0 = Sunday
+        const total = new Date(state.year, state.month + 1, 0).getDate();
+        const weeks = Math.ceil((first + total) / 7);
+        const title = titleText();
+        const top = PAD + (title ? TITLE_H : 0);
+        const w = PAD * 2 + CELL * 7;
+        const h = top + HEAD_H + CELL * weeks + PAD;
+        const font = `-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif`;
+
+        const out = [
+          `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" font-family="${font}">`,
+          `<rect width="${w}" height="${h}" fill="${color("bg")}"/>`,
+        ];
+        if (title) {
+          out.push(
+            `<text x="${w / 2}" y="${PAD + 26}" text-anchor="middle" font-size="22" font-weight="600" fill="${color("text")}">${title}</text>`,
+          );
+        }
+        WEEKDAYS.forEach((d, i) => {
+          const x = PAD + CELL * i + CELL / 2;
+          out.push(
+            `<text x="${x}" y="${top + 18}" text-anchor="middle" font-size="13" font-weight="600" fill="${color("muted")}">${d}</text>`,
+          );
+        });
+        const gridTop = top + HEAD_H;
+        out.push(
+          `<line x1="${PAD}" y1="${gridTop}" x2="${w - PAD}" y2="${gridTop}" stroke="${color("grid")}" stroke-width="1"/>`,
+        );
+
+        for (let day = 1; day <= total; day++) {
+          const idx = first + day - 1;
+          const cx = PAD + CELL * (idx % 7) + CELL / 2;
+          const cy = gridTop + CELL * Math.floor(idx / 7) + CELL / 2;
+          const on = state.days.has(day);
+          out.push(`<g class="day" data-day="${day}">`);
+          out.push(
+            `<rect x="${cx - CELL / 2}" y="${cy - CELL / 2}" width="${CELL}" height="${CELL}" fill="${color("bg")}"/>`,
+          );
+          if (on) out.push(`<circle cx="${cx}" cy="${cy}" r="${CELL / 2 - 5}" fill="${color("highlight")}"/>`);
+          out.push(
+            `<text x="${cx}" y="${cy + 6}" text-anchor="middle" font-size="17" font-weight="${on ? 700 : 400}" fill="${color(on ? "highlight-text" : "text")}">${day}</text>`,
+          );
+          out.push(`</g>`);
+        }
+        out.push(`</svg>`);
+        return out.join("");
+      };
+
+      const saveHash = () => {
+        const m = `${state.year}-${String(state.month + 1).padStart(2, "0")}`;
+        const p = new URLSearchParams({ m });
+        if (state.days.size) p.set("d", [...state.days].sort((a, b) => a - b).join(","));
+        if (!showMonth.checked) p.set("nomonth", "1");
+        if (!showYear.checked) p.set("noyear", "1");
+        history.replaceState(null, "", `#${p}`);
+      };
+
+      const loadHash = () => {
+        const p = new URLSearchParams(location.hash.slice(1));
+        const match = /^(\d{4})-(\d{2})$/.exec(p.get("m") || "");
+        if (match) {
+          state.year = +match[1];
+          state.month = +match[2] - 1;
+        }
+        state.days = new Set((p.get("d") || "").split(",").map(Number).filter(Boolean));
+        showMonth.checked = !p.has("nomonth");
+        showYear.checked = !p.has("noyear");
+      };
+
+      const render = () => {
+        monthInput.value = `${state.year}-${String(state.month + 1).padStart(2, "0")}`;
+        preview.innerHTML = buildSvg();
+        saveHash();
+      };
+
+      const setMonth = (year, month) => {
+        const d = new Date(year, month, 1);
+        state.year = d.getFullYear();
+        state.month = d.getMonth();
+        state.days.clear();
+        render();
+      };
+
+      const setStatus = (msg, cls) => {
+        status.textContent = msg;
+        status.className = cls;
+      };
+
+      const pngBlob = () =>
+        new Promise((resolve, reject) => {
+          const svg = buildSvg();
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            canvas.width = img.width * PNG_SCALE;
+            canvas.height = img.height * PNG_SCALE;
+            const ctx = canvas.getContext("2d");
+            ctx.scale(PNG_SCALE, PNG_SCALE);
+            ctx.drawImage(img, 0, 0);
+            canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("PNG render failed"))), "image/png");
+          };
+          img.onerror = () => reject(new Error("SVG load failed"));
+          img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+        });
+
+      const copyPng = async () => {
+        try {
+          // Pass the promise directly so Safari keeps the click's permission.
+          await navigator.clipboard.write([new ClipboardItem({ "image/png": pngBlob() })]);
+          setStatus("Copied. Paste into your Anki card.", "ok");
+        } catch (e) {
+          setStatus(`Copy failed: ${e.message}`, "err");
+        }
+      };
+
+      preview.addEventListener("click", (e) => {
+        const g = e.target.closest(".day");
+        if (!g) return;
+        const day = +g.dataset.day;
+        state.days.has(day) ? state.days.delete(day) : state.days.add(day);
+        render();
+      });
+
+      monthInput.addEventListener("change", () => {
+        const [y, m] = monthInput.value.split("-").map(Number);
+        if (y && m) setMonth(y, m - 1);
+      });
+      $("prev").addEventListener("click", () => setMonth(state.year, state.month - 1));
+      $("next").addEventListener("click", () => setMonth(state.year, state.month + 1));
+      $("today").addEventListener("click", () => setMonth(now.getFullYear(), now.getMonth()));
+      $("clear").addEventListener("click", () => {
+        state.days.clear();
+        render();
+      });
+      showMonth.addEventListener("change", render);
+      showYear.addEventListener("change", render);
+      $("copy").addEventListener("click", copyPng);
+
+      window.addEventListener("hashchange", () => {
+        loadHash();
+        render();
+      });
+
+      loadHash();
+      render();
+    </script>
+  </body>
+</html>
